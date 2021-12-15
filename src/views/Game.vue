@@ -9,6 +9,7 @@
         :plane="plane"
         @centerPlaneBackground="centerPlaneBackground"
       />
+      <bridge v-for="bridge in bridgeList" :key="bridge._id" :bridge="bridge" />
     </div>
     <div class="gui">
       <div class="gui" :style="{
@@ -111,7 +112,7 @@ export default {
       return this.game.planeList;
     },
     bridgeList() {
-      return this.game.__bridge?.data || [];
+      return this.game.bridgeList;
     },
   },
   watch: {
