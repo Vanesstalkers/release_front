@@ -1,12 +1,13 @@
 <template>
   <div
-	:_id="zone._id"
-    :code="zone.storageCode"
-    :style="{ left: zone.left + 'px', top: zone.top + 'px' }"
-    :class="['zone', zone.vertical ? 'vertical' : '']"
-	v-on:click="putDice"
+    :_id="zoneData._id"
+    :code="zoneData.storageCode"
+    :style="{ left: zoneData.left + 'px', top: zoneData.top + 'px', color: 'white', fontSize: '10px' }"
+    :class="['zone', zoneData.vertical ? 'vertical' : '', zoneData.available ? 'available' : '']"
+    v-on:click="putDice"
   >
-    <dice v-for="dice in zone.itemList" :key="dice._id" :dice="dice" />
+  	{{ zoneData._id }}
+	<dice v-for="dice in zoneData.itemList" :key="dice._id" :dice="dice" />
   </div>
 </template>
 
@@ -22,22 +23,30 @@ export default {
     zone: Object,
   },
   computed: {
+    zoneData() {
+      return {...this.getSimple(this.zone._id, 'zone'), ...this.zone};
+    },
     ...mapGetters({
-      pickedDice: "pickedDice",
+		getSimple: "getSimple",
+      	pickedDice: "pickedDice",
     }),
   },
   methods: {
-    putDice (event) {
-      if(this.pickedDice){
+    putDice(event) {
+      if (this.pickedDice) {
         const code = event.target.attributes._id.value;
-      	console.log('putDice', this.pickedDice, 'to', code);
-		api.game.replaceDice({gameId: this.$route.params.id, diceCode: this.pickedDice, zoneCode: code });
+        console.log("putDice", this.pickedDice, "to", code);
+        api.game.replaceDice({
+          gameId: this.$route.params.id,
+          diceCode: this.pickedDice,
+          zoneCode: code,
+        });
       }
     },
   },
   mounted() {
-    console.log("planeZone mounted", this.plane);
-    this.$store.dispatch("setSimple", { [this.zone._id]: this.zone });
+    console.log("planeZone mounted", this.zone);
+    //this.$store.dispatch("setData", { zone: { [this.zone._id]: this.zone } });
   },
 };
 </script>
@@ -55,6 +64,12 @@ export default {
   height: 142px;
   width: 73px;
 }
+.zone.available {
+	box-shadow: inset 0 0 20px 8px lightgreen;
+}
+.zone.available.hard {
+	box-shadow: inset 0 0 20px 8px yellow;
+}
 /* 					.*css*[data-vertical="1"], .*css*[data-vertical="1"] .domino-dice {
 						height: 142px;
 						width: 73px;
@@ -71,12 +86,6 @@ export default {
 					}
 					.*css* > .item-controls {
 						margin-right: -24px;
-					}
-					.*css*.available {
-						box-shadow: inset 0 0 20px 8px lightgreen;
-					}
-					.*css*.available.hard {
-						box-shadow: inset 0 0 20px 8px yellow;
 					}
 					.*css* > .g-token {
 						position: absolute;

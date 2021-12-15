@@ -52,22 +52,23 @@ export default new Vuex.Store({
       });
     },
     setDeep: (state, value) => {
+      //console.log("mutations setDeep", value);
       Object.entries(value).forEach(([key, val]) => {
+        //console.log("key", key);
         if (!state[key]) Vue.set(state, key, {});
         Object.keys(val).forEach(id => {
-
+          //console.log("id", id);
           Object.entries(val[id]).forEach(([k,v]) => {
+            //console.log("k", k);
             const props = k.split('.');
+            if (!state[key][id]) Vue.set(state[key], id, {});
             let itemPart = state[key][id];
             for(let i = 0; i < props.length - 1; i++){
               if(!itemPart[props[i]]) Vue.set(itemPart, props[i], {});
               itemPart = itemPart[props[i]];
             }
             Vue.set(itemPart, props[props.length - 1], v);
-            //console.log({k,v, props});
           });
-
-          //console.log('set deep', key, id, val[id]);
         });
       });
     },

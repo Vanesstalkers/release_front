@@ -1,12 +1,11 @@
 <template>
   <div
-    class="domino-dice"
-    v-on:click="pickDice"
+    :class="['domino-dice', dice.rotation ? 'rotated': '']"
+    v-on:click.stop="pickDice"
     :code="dice.storageCode"
     :_id="dice._id"
   >
-    <div class='el' :value="dice.side1" />
-    <div class='el' :value="dice.side2" />
+    <div v-for="side in sideList" :key="side._id" :value="side.value" class='el'/>
   </div>
 
 </template>
@@ -16,11 +15,18 @@ export default {
   props: {
     dice: Object,
   },
+  computed: {
+    sideList(){
+      return this.dice.sideList || [{}, {}];
+    }
+  },
   methods: {
     pickDice (event) {
       const parent = event.target.parentNode;
-      const parentCode = parent.attributes._id.value;
-      this.$store.commit("setPickedDice", parentCode);
+      const diceId = parent.attributes._id.value;
+      this.$store.commit("setPickedDice", diceId);
+
+      api.game.getZonesAvailability({ gameId: this.$route.params.id, diceId });
     },
   },
   mounted() {
@@ -35,6 +41,10 @@ export default {
     justify-content: space-between;
     flex-wrap: wrap;
     cursor: pointer;
+  }
+  .domino-dice.rotated {
+    transform: rotate(180deg);
+    border: 2px solid red;
   }
   .domino-dice:hover {
     opacity: 0.7;
