@@ -2,21 +2,34 @@
   <div
     :_id="zoneData._id"
     :code="zoneData.storageCode"
-    :style="{ left: zoneData.left + 'px', top: zoneData.top + 'px', color: 'white', fontSize: '10px' }"
-    :class="['zone', zoneData.vertical ? 'vertical' : '', zoneData.available ? 'available' : '']"
+    :style="{
+      left: zoneData.left + 'px',
+      top: zoneData.top + 'px',
+      color: 'white',
+      fontSize: '10px',
+    }"
+    :class="[
+      'zone',
+      zoneData.vertical ? 'vertical' : '',
+      zoneData.available ? 'available' : '',
+    ]"
     v-on:click="putDice"
   >
-  	{{ zoneData._id }}
-	<dice v-for="dice in zoneData.itemList" :key="dice._id" :dice="dice" />
+	  <div class="wraper">
+      <plane-zone-sides :sideList="zoneData.sideList" />
+      <dice v-for="dice in zoneData.itemList" :key="dice._id" :dice="dice" />
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
+import planeZoneSides from "./planeZoneSides.vue";
 import dice from "./dice.vue";
 
 export default {
   components: {
+	  planeZoneSides,
     dice,
   },
   props: {
@@ -24,18 +37,18 @@ export default {
   },
   computed: {
     zoneData() {
-      return {...this.getSimple(this.zone._id, 'zone'), ...this.zone};
+      return { ...this.getSimple(this.zone._id, "zone"), ...this.zone };
     },
     ...mapGetters({
-		getSimple: "getSimple",
-      	pickedDice: "pickedDice",
+      getSimple: "getSimple",
+      pickedDice: "pickedDice",
     }),
   },
   methods: {
     putDice(event) {
       if (this.pickedDice) {
-        const code = event.target.attributes._id.value;
-        console.log("putDice", this.pickedDice, "to", code);
+        //console.log("putDice event", event);
+        const code = event.target.closest('.zone').attributes._id.value;
         api.game.replaceDice({
           gameId: this.$route.params.id,
           diceCode: this.pickedDice,
@@ -64,11 +77,21 @@ export default {
   height: 142px;
   width: 73px;
 }
+.zone > .wraper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+.zone > .wraper > .domino-dice {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
 .zone.available {
-	box-shadow: inset 0 0 20px 8px lightgreen;
+  box-shadow: inset 0 0 20px 8px lightgreen;
 }
 .zone.available.hard {
-	box-shadow: inset 0 0 20px 8px yellow;
+  box-shadow: inset 0 0 20px 8px yellow;
 }
 /* 					.*css*[data-vertical="1"], .*css*[data-vertical="1"] .domino-dice {
 						height: 142px;

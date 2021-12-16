@@ -2,7 +2,7 @@
   <div 
     class="bridge" 
     :id="bridge._id"
-    :style="{ left: bridge.left + 'px', top: bridge.top + 'px' }"
+    :style="customStyle"
   >
     <div class="zone-wraper" >
       <plane-zone v-for="zone in bridge.zoneList" v-bind:zone="zone" :key="zone._id" />
@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import planeZone from '../../components/game/planeZone.vue';
+import planeZone from './planeZone.vue';
 
 export default {
   name: 'bridge',
@@ -20,6 +20,18 @@ export default {
   },
   props: {
     bridge: Object,
+  },
+  computed: {
+    customStyle() {
+      const style = {...this.bridge} || {};
+      console.log('style=', style);
+      if(style.left) style.left += 'px';
+      if(style.top) style.top += 'px';
+      if(style.width) style.width += 'px';
+      if(style.height) style.height += 'px';
+      if(style.rotation) style.transform = `rotate(${90 * (style.rotation||0)}deg)`;
+      return style;
+    },
   },
   methods: {
 
@@ -34,7 +46,13 @@ export default {
 <style scoped>
 .bridge {
   position: absolute;
+}
+.bridge .zone {
   margin-left: -73px;
-	margin-top: -36px;
+	margin-top: -36.5px;
+}
+.bridge .zone.vertical {
+  margin-left: -36.5px;
+	margin-top: -73px;
 }
 </style>

@@ -17,8 +17,8 @@
 <script>
 
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
-import planeZone from '../../components/game/planeZone.vue';
-import planePort from '../../components/game/planePort.vue';
+import planeZone from './planeZone.vue';
+import planePort from './planePort.vue';
 
 export default {
   name: 'plane',
@@ -31,14 +31,12 @@ export default {
   },
   computed: {
     customStyle() {
-      //const style = this.$store.state[this.plane._id]?.style || {};
       const style = {...this.plane} || {};
       if(style.left) style.left += 'px';
       if(style.top) style.top += 'px';
       if(style.width) style.width += 'px';
       if(style.height) style.height += 'px';
       if(style.rotation) style.transform = `rotate(${90 * (style.rotation||0)}deg)`;
-      console.log("computed customStyle", style, 'plane=', this.plane);
       return style;
     },
     customStyleLeft() {
