@@ -7,11 +7,12 @@ export default new Vuex.Store({
   strict: true,
   state: {
     pickedDice: null,
+    selectedPort: null,
   },
   getters: {
-    pickedDice: state => {
-      return state.pickedDice;
-    },
+    pickedDice: state => state.pickedDice,
+    selectedPort: state => state.selectedPort,
+    
 
     getSimple: state => (id, col) => {
       return (col ? state[col]?.[id] : state[id]) || {};
@@ -24,10 +25,14 @@ export default new Vuex.Store({
     },
     currentSession: state => state.session?.[state.currentSession] || {},
     currentSessionGame: state => state.session?.[state.currentSession]?.data.game || null,
+    gamePlaneCustomStyleData: state => state.gamePlaneCustomStyleData || {},
   },
   mutations: {
     setPickedDice: (state, value) => {
       state.pickedDice = value;
+    },
+    setSelectedPort: (state, value) => {
+      state.selectedPort = value;
     },
 
     clearData: (state) => {

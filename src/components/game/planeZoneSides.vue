@@ -76,19 +76,17 @@ export default {
 
       const body = document.getElementsByTagName("body")[0];
       body.appendChild(canvas);
-      console.log(canvas, { posX, startX, endX, posY, startY, endY });
+      //console.log(canvas, { posX, startX, endX, posY, startY, endY });
     },
   },
   mounted() {
     this.$nextTick(function () {
-      console.log("planeZoneSides mounted", this.sideList);
       this.sideList.forEach(side => {
         const sideEl = document.getElementById(side.code)
         const sideRect = sideEl.getBoundingClientRect();
         side.links.forEach(link => {
           const linkEl = document.getElementById(link);
           const linkRect = linkEl.getBoundingClientRect();
-          //console.log({linkEl, linkRect, sideEl, sideRect});
           this.drawLink({from: {x: sideRect.x, y: sideRect.y}, to: {x: linkRect.x, y: linkRect.y}});
         });
       });

@@ -39,11 +39,6 @@ export default {
       if(style.rotation) style.transform = `rotate(${90 * (style.rotation||0)}deg)`;
       return style;
     },
-    customStyleLeft() {
-      const val = this.customStyle.left;
-      console.log("customStyleLeft", val, this.plane);
-      return val;
-    }
   },
   methods: {
     customBG(pid){
@@ -67,21 +62,43 @@ export default {
 
         return fillData;
     },
+    centerPlaneBackground() {
+      const p = {},
+        gamePlane = document.getElementById("gamePlane");
+      const gamePlaneRect = gamePlane.getBoundingClientRect();
+
+      gamePlane.querySelectorAll(".plane").forEach((plane) => {
+        const _id = plane.getAttribute("_id");
+        const rect = plane.getBoundingClientRect();
+        const offsetTop = rect.top - gamePlaneRect.top;
+        const offsetLeft = rect.left - gamePlaneRect.left;
+
+        if (p.t == undefined || rect.top < p.t) p.t = rect.top;
+        if (p.b == undefined || rect.bottom > p.b) p.b = rect.bottom;
+        if (p.l == undefined || rect.left < p.l) p.l = rect.left;
+        if (p.r == undefined || rect.right > p.r) p.r = rect.right;
+
+        if (p.ot == undefined || offsetTop < p.ot) p.ot = offsetTop;
+        if (p.ol == undefined || offsetLeft < p.ol) p.ol = offsetLeft;
+      });
+
+      const gamePlaneCustomStyleData = {
+        height: p.b - p.t + "px",
+        width: p.r - p.l + "px",
+        top: "calc(50% - " + ((p.b - p.t) / 2 + p.ot * 1) + "px)",
+        left: "calc(50% - " + ((p.r - p.l) / 2 + p.ol * 1) + "px)",
+      };
+      this.$store.dispatch('setSimple', { gamePlaneCustomStyleData });
+    },
   },
   mounted() {
     console.log('plane mounted', this.plane);
-    this.$emit('centerPlaneBackground');
+    this.centerPlaneBackground();
     this.$store.dispatch('setSimple', {[this.plane._id]: this.plane});
-    
-    // setInterval(()=>{
-    //   const style = {color: Date.now()%2?'red':'blue'};
-    //   this.$store.dispatch('setSimple', {[this.plane._id]: Object.assign({...this.plane}, {style})});
-    // }, 1000);
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .plane {
     position: relative;
