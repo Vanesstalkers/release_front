@@ -4,9 +4,7 @@
     :_id="port._id"
     :style="{ left: port.left + 'px', top: port.top + 'px' }"
     v-on:click.stop="selectPort"
-  >
-    {{ port }}
-  </div>
+  />
 </template>
 
 <script>
@@ -18,22 +16,16 @@ export default {
   },
   computed: {
     ...mapGetters({
-      selectedPort: "selectedPort",
     }),
   },
   methods: {
-    selectPort(event) {
+    async selectPort(event) {
       const portId = event.target.attributes._id.value;
-      if (!this.selectedPort) {
-        this.$store.commit("setSelectedPort", portId);
-      } else {
-        api.game.getPlanePortsAvailability({
-          gameId: this.$route.params.id,
-          joinPortId: this.selectedPort,
-          targetPortId: portId,
-        });
-        this.$store.commit("setSelectedPort", null);
-      }
+      const { availablePorts } = await api.game.getPlanePortsAvailability({
+        gameId: this.$route.params.id,
+        targetPortId: portId,
+      });
+      this.$store.commit("setAvailablePorts", availablePorts);
     },
   },
   mounted() {

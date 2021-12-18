@@ -1,14 +1,22 @@
 <template>
   <div id="game">
-    <div style="position: absolute; bottom: 0px">{{ this.game }}</div>
-
+    <!-- <div style="position: absolute; bottom: 0px">{{ this.game }}</div> -->
+    
     <div id="gamePlane" :style="gamePlaneCustomStyleData">
-      <plane
-        v-for="plane in planeList"
-        :key="plane._id"
-        :plane="plane"
-      />
+      <plane v-for="plane in planeList" :key="plane._id" :plane="plane" />
       <bridge v-for="bridge in bridgeList" :key="bridge._id" :bridge="bridge" />
+
+      <div
+        v-for="position in possibleAddPlanePositions"
+        :key="position.joinPortId+position.joinPortDirect+position.targetPortId+position.targetPortDirect"
+        :joinPortId="position.joinPortId"
+        :joinPortDirect="position.joinPortDirect"
+        :targetPortId="position.targetPortId"
+        :targetPortDirect="position.targetPortDirect"
+        :style="position.style"
+        class="fake-plane"
+        v-on:click="addPlane"
+      />
     </div>
     <div class="gui">
       <div
@@ -29,7 +37,7 @@
           width: '50%',
         }"
       >
-        {{ playerList }}
+        <!-- {{ playerList }} -->
         <player
           v-for="player in playerList"
           :key="player._id"
@@ -76,6 +84,7 @@ export default {
       currentSession: "currentSession",
       currentSessionGame: "currentSessionGame",
       gamePlaneCustomStyleData: "gamePlaneCustomStyleData",
+      availablePorts: "availablePorts",
     }),
     game() {
       return this.$store.state.game?.[this.gameId] || {};
@@ -95,6 +104,30 @@ export default {
     bridgeList() {
       return this.game.bridgeList;
     },
+    possibleAddPlanePositions() {
+      return this.availablePorts.map(
+        ({
+          joinPortId,
+          joinPortDirect,
+          targetPortId,
+          targetPortDirect,
+          position,
+        }) => {
+          return {
+            joinPortId,
+            joinPortDirect,
+            targetPortId,
+            targetPortDirect,
+            style: {
+              left: position.left + "px",
+              top: position.top + "px",
+              width: position.right - position.left + "px",
+              height: position.bottom - position.top + "px",
+            },
+          };
+        }
+      );
+    },
   },
   watch: {
     // 'currentSessionGame': function (val, oldVal) {
@@ -108,9 +141,6 @@ export default {
     // }
   },
   methods: {
-    ...mapActions({
-      getGame: "getGame",
-    }),
     async endRound() {
       console.log("endRound");
       await api.game.endRound({ gameId: this.game._id });
@@ -118,6 +148,16 @@ export default {
     async leaveGame() {
       console.log("leaveGame");
       await api.game.leaveGame({ gameId: this.game._id });
+    },
+    async addPlane(event) {
+      api.game.addPlane({
+        gameId: this.$route.params.id,
+        joinPortId: event.target.attributes.joinPortId.value,
+        targetPortId: event.target.attributes.targetPortId.value,
+        joinPortDirect: event.target.attributes.joinPortDirect.value,
+        targetPortDirect: event.target.attributes.targetPortDirect.value,
+      });
+      this.$store.commit("setAvailablePorts", []);
     },
   },
   async created() {
@@ -178,5 +218,15 @@ export default {
 .port {
   background: yellow;
   position: absolute;
+}
+.fake-plane {
+  position: absolute;
+  background: red;
+  border: 1px solid;
+  opacity: 0.5;
+}
+.fake-plane:hover {
+  opacity: 0.8;
+  z-index: 1;
 }
 </style>

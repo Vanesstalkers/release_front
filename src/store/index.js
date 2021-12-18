@@ -7,12 +7,11 @@ export default new Vuex.Store({
   strict: true,
   state: {
     pickedDice: null,
-    selectedPort: null,
+    availablePorts: [],
   },
   getters: {
     pickedDice: state => state.pickedDice,
-    selectedPort: state => state.selectedPort,
-    
+    availablePorts: state => state.availablePorts,
 
     getSimple: state => (id, col) => {
       return (col ? state[col]?.[id] : state[id]) || {};
@@ -31,8 +30,8 @@ export default new Vuex.Store({
     setPickedDice: (state, value) => {
       state.pickedDice = value;
     },
-    setSelectedPort: (state, value) => {
-      state.selectedPort = value;
+    setAvailablePorts: (state, value) => {
+      state.availablePorts = value;
     },
 
     clearData: (state) => {

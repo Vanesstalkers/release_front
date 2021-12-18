@@ -97,7 +97,10 @@ export default {
 .hand-planes {
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
+  transform: scale(0.5);
+	transform-origin: bottom;
+	height: 250px;
 }
 .hand-planes .plane {
   position: relative;
