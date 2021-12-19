@@ -6,11 +6,11 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   strict: true,
   state: {
-    pickedDice: null,
+    pickedDiceId: null,
     availablePorts: [],
   },
   getters: {
-    pickedDice: state => state.pickedDice,
+    pickedDiceId: state => state.pickedDiceId,
     availablePorts: state => state.availablePorts,
 
     getSimple: state => (id, col) => {
@@ -27,8 +27,13 @@ export default new Vuex.Store({
     gamePlaneCustomStyleData: state => state.gamePlaneCustomStyleData || {},
   },
   mutations: {
-    setPickedDice: (state, value) => {
-      state.pickedDice = value;
+    setPickedDiceId: (state, value) => {
+      state.pickedDiceId = value;
+    },
+    hideZonesAvailability: (state) => {
+      Object.keys(state.zone).forEach(id => {
+        if(state.zone[id].available) delete state.zone[id].available;
+      });
     },
     setAvailablePorts: (state, value) => {
       state.availablePorts = value;
@@ -62,13 +67,13 @@ export default new Vuex.Store({
         if (!state[key]) Vue.set(state, key, {});
         Object.keys(val).forEach(id => {
           //console.log("id", id);
-          Object.entries(val[id]).forEach(([k,v]) => {
+          Object.entries(val[id]).forEach(([k, v]) => {
             //console.log("k", k);
             const props = k.split('.');
             if (!state[key][id]) Vue.set(state[key], id, {});
             let itemPart = state[key][id];
-            for(let i = 0; i < props.length - 1; i++){
-              if(!itemPart[props[i]]) Vue.set(itemPart, props[i], {});
+            for (let i = 0; i < props.length - 1; i++) {
+              if (!itemPart[props[i]]) Vue.set(itemPart, props[i], {});
               itemPart = itemPart[props[i]];
             }
             Vue.set(itemPart, props[props.length - 1], v);

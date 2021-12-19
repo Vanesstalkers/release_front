@@ -1,7 +1,5 @@
 <template>
   <div
-    :_id="zoneData._id"
-    :code="zoneData.storageCode"
     :style="{
       left: zoneData.left + 'px',
       top: zoneData.top + 'px',
@@ -15,7 +13,7 @@
     ]"
     v-on:click="putDice"
   >
-	  <div class="wraper">
+    <div class="wraper">
       <plane-zone-sides :sideList="zoneData.sideList" />
       <dice v-for="dice in zoneData.itemList" :key="dice._id" :dice="dice" />
     </div>
@@ -29,7 +27,7 @@ import dice from "./dice.vue";
 
 export default {
   components: {
-	  planeZoneSides,
+    planeZoneSides,
     dice,
   },
   props: {
@@ -41,19 +39,19 @@ export default {
     },
     ...mapGetters({
       getSimple: "getSimple",
-      pickedDice: "pickedDice",
+      pickedDiceId: "pickedDiceId",
     }),
   },
   methods: {
-    putDice(event) {
-      if (this.pickedDice) {
-        //console.log("putDice event", event);
-        const code = event.target.closest('.zone').attributes._id.value;
+    putDice() {
+      if (this.pickedDiceId) {
         api.game.replaceDice({
           gameId: this.$route.params.id,
-          diceCode: this.pickedDice,
-          zoneCode: code,
+          diceId: this.pickedDiceId,
+          zoneId: this.zone._id,
         });
+        this.$store.commit("setPickedDiceId", null);
+        this.$store.commit("hideZonesAvailability");
       }
     },
   },

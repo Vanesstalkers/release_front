@@ -46,6 +46,7 @@ export default {
 <style scoped>
 .bridge {
   position: absolute;
+  z-index: 1;
 }
 .bridge .zone {
   margin-left: -73px;

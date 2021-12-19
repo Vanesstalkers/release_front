@@ -97,12 +97,18 @@ export default {
 .hand-planes {
   width: 100%;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   transform: scale(0.5);
 	transform-origin: bottom;
-	height: 250px;
+	max-height: 125px;
 }
 .hand-planes .plane {
   position: relative;
+  margin: 0px 10px;
+  margin-top: -125px;
+}
+.hand-planes .plane:hover {
+  cursor: pointer;
+  opacity: 0.7;
 }
 </style>
