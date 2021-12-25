@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="['player', player.iam ? 'iam' : '']"
+    :class="['player', player.iam ? 'iam' : '', player.active ? 'active': '']"
     :style="{
       color: player.active ? 'red' : 'blue',
       border: player.iam ? '1px solid green' : 'none',

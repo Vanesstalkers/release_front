@@ -26,7 +26,10 @@
         }"
       >
         Раунд: {{ game.round }}
-        <button v-on:click="endRound">Закончить раунд</button>
+        <button 
+          :style="currentPlayerIsActive ? {} : {opacity: '0.7'}"
+          v-on:click="endRound"
+        >Закончить раунд</button>
         <button v-on:click="leaveGame">Выйти из игры</button>
       </div>
       <div
@@ -81,6 +84,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      currentPlayer: "currentPlayer",
       currentSession: "currentSession",
       currentSessionGame: "currentSessionGame",
       gamePlaneCustomStyleData: "gamePlaneCustomStyleData",
@@ -90,13 +94,18 @@ export default {
       return this.$store.state.game?.[this.gameId] || {};
     },
     playerList() {
-      const currentPlayer = localStorage.getItem("currentPlayer");
       return (
-        this.game.playerList?.map((player) => {
-          if (player._id === currentPlayer) player.iam = true;
+        this.game.playerList?.map(player => {
+          if (player._id === this.currentPlayer) player.iam = true;
           return player;
         }) || []
       );
+    },
+    activePlayerId() {
+      return this.game.playerList?.find(player => player.active)?._id;
+    },
+    currentPlayerIsActive(){
+      return this.currentPlayer === this.activePlayerId;
     },
     planeList() {
       return this.game.planeList;
@@ -169,7 +178,6 @@ export default {
       console.log("api.game.enter", data);
       if (data.status != "ok") {
         localStorage.setItem("currentGame", "");
-        localStorage.setItem("currentPlayer", "");
         this.$router.push({ path: `/` });
       }
     });

@@ -32,7 +32,7 @@ const init = async () => {
       currentGame = res.game || '';
       currentPlayer = res.player || '';
       localStorage.setItem('currentGame', currentGame);
-      localStorage.setItem('currentPlayer', currentPlayer);
+      store.dispatch('setSimple', {currentPlayer});
     }
   }
   if (!logged) {
@@ -76,14 +76,12 @@ const init = async () => {
   });
 
   api.session.on('joinGame', (data)=>{
-    console.log("data.gameId=", data.gameId);
     localStorage.setItem('currentGame', data.gameId);
-    localStorage.setItem('currentPlayer', data.playerId);
+    store.dispatch('setSimple', {currentPlayer: data.playerId});
     router.push({ path: `/game/${data.gameId}` });
   });
   api.session.on('leaveGame', ()=>{
     localStorage.setItem('currentGame', '');
-    localStorage.setItem('currentPlayer', '');
     router.push({ path: `/` });
   });
 };

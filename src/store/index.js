@@ -25,6 +25,7 @@ export default new Vuex.Store({
     currentSession: state => state.session?.[state.currentSession] || {},
     currentSessionGame: state => state.session?.[state.currentSession]?.data.game || null,
     gamePlaneCustomStyleData: state => state.gamePlaneCustomStyleData || {},
+    currentPlayer: state => state.currentPlayer,
   },
   mutations: {
     setPickedDiceId: (state, value) => {

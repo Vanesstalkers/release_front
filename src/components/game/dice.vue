@@ -1,6 +1,6 @@
 <template>
   <div
-    class="domino-dice"
+    :class="['domino-dice', diceData.deleted ? 'deleted' : '']"
     v-on:click.stop="pickDice"
   >
     <div class="controls">
@@ -19,11 +19,19 @@
 </template>
 
 <script>
+import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
+
 export default {
   props: {
     dice: Object,
   },
   computed: {
+    ...mapGetters({
+      getSimple: "getSimple",
+    }),
+    diceData() {
+      return { ...this.getSimple(this.dice._id, "dice"), ...this.dice };
+    },
     sideList() {
       return this.dice.sideList || [{}, {}];
     },
@@ -40,6 +48,7 @@ export default {
     },
     deleteDice() {
       console.log("deleteDice _id=", this.dice._id);
+      api.game.deleteDice({ gameId: this.$route.params.id, diceId: this.dice._id });
     },
   },
   mounted() {},
@@ -54,6 +63,10 @@ export default {
   flex-wrap: wrap;
   cursor: pointer;
 }
+.domino-dice.deleted {
+  transform: scale(0.5);
+}
+
 .domino-dice > .controls {
   display: none;
   position: absolute;
