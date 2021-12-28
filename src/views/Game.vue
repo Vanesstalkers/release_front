@@ -47,9 +47,9 @@
           :player="player"
         />
       </div>
-      <div class="gui" :style="{ right: '0px', left: 'auto', width: '200px' }">
+      <div class="gui" :style="{ top: '100px', right: '0px', left: 'auto', width: '200px' }">
         <div
-          v-for="deck in game.deckList"
+          v-for="deck in deckList"
           :key="deck._id"
           :style="{ margin: '1px', padding: '10px', border: '1px solid black' }"
         >
@@ -58,6 +58,10 @@
             {{ dice._id }}
           </span>
         </div>
+      </div>
+      <div class="gui" :style="{ right: '0px', left: 'auto', width: '200px' }">
+        {{ activeCards }}
+        <card v-for="card in activeCards.itemList" :key="card._id" :card="card" />
       </div>
     </div>
   </div>
@@ -70,12 +74,14 @@ import {} from "../components/game/utils";
 import player from "../components/game/player.vue";
 import plane from "../components/game/plane.vue";
 import bridge from "../components/game/bridge.vue";
+import card from "../components/game/card.vue";
 
 export default {
   components: {
     player,
     plane,
     bridge,
+    card,
   },
   data() {
     return {
@@ -106,6 +112,12 @@ export default {
     },
     currentPlayerIsActive(){
       return this.currentPlayer === this.activePlayerId;
+    },
+    deckList() {
+      return this.game.deckList?.filter(deck => deck.subtype !== 'active');
+    },
+    activeCards() {
+      return this.game.deckList?.find(deck => deck.subtype === 'active') || [];
     },
     planeList() {
       return this.game.planeList;
