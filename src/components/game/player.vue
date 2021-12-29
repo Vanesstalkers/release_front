@@ -2,12 +2,13 @@
   <div
     :class="['player', player.iam ? 'iam' : '', player.active ? 'active': '']"
     :style="{
-      color: player.active ? 'red' : 'blue',
       border: player.iam ? '1px solid green' : 'none',
       width: player.iam ? '100%' : 'auto',
     }"
   >
-    (
+    <div class="workers">
+      <card-worker :card="player" />
+    </div>
     <div
       class="player-hand"
       :style="{
@@ -29,7 +30,6 @@
           :dice="dice"
         />
       </div>
-      )
     </div>
   </div>
 </template>
@@ -37,11 +37,13 @@
 <script>
 import plane from "./plane.vue";
 import dice from "./dice.vue";
+import cardWorker from "./cardWorker.vue";
 
 export default {
   components: {
     plane,
     dice,
+    cardWorker,
   },
   props: {
     player: Object,
@@ -64,7 +66,8 @@ export default {
 
 <style scoped>
 .player:not(.iam) {
-  flex-flow: column;
+  display: flex;
+  flex-flow: wrap;
   transform: scale(0.5);
   transform-origin: top left;
 }
@@ -74,7 +77,12 @@ export default {
   top: auto;
   right: 20px;
   bottom: 20px;
-  flex-direction: row;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.workers {
+  align-self: flex-end;
 }
 
 .hand-dices {

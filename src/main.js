@@ -23,25 +23,25 @@ const init = async () => {
 
   if (token) {
     const res = await api.auth.restore({ token });
-    if( res.status != 'ok' ){
+    if (res.status != 'ok') {
       //alert(res.msg);
       //return;
-    }else{
+    } else {
       logged = true;
       currentSession = res.session;
       currentGame = res.game || '';
       currentPlayer = res.player || '';
       localStorage.setItem('currentGame', currentGame);
-      store.dispatch('setSimple', {currentPlayer});
+      store.dispatch('setSimple', { currentPlayer });
     }
   }
   if (!logged) {
     //const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
     const res = await api.auth.signin({ demo: true });
-    if( !(res.status == 'ok' && res.token) ){
+    if (!(res.status == 'ok' && res.token)) {
       alert(res.msg);
       return;
-    }else{
+    } else {
       localStorage.setItem('metarhia.session.token', res.token);
       currentSession = res.session;
     }
@@ -51,11 +51,10 @@ const init = async () => {
 
   router.beforeEach((to, from, next) => {
     const currentGame = localStorage.getItem('currentGame');
-    console.log("router.beforeEach", {to, from, currentGame});
-    if(to.name === 'Game'){
-      if(!currentGame) return next({name: 'Home'});
-    }else{
-      if(currentGame) return next({name: 'Game', params: { id: currentGame }});
+    if (to.name === 'Game') {
+      if (!currentGame) return next({ name: 'Home' });
+    } else {
+      if (currentGame) return next({ name: 'Game', params: { id: currentGame } });
     }
     return next();
   })
@@ -66,24 +65,36 @@ const init = async () => {
     render: function (h) { return h(App) },
   }).$mount('#app');
 
-  store.dispatch('setSimple', {currentSession});
+  store.dispatch('setSimple', { currentSession });
 
-  api.db.on('updated', (data)=>{
+  api.db.on('updated', (data) => {
     store.dispatch('setData', data);
   });
-  api.db.on('smartUpdated', (data)=>{
+  api.db.on('smartUpdated', (data) => {
     store.dispatch('setDeep', data);
   });
 
-  api.session.on('joinGame', (data)=>{
+  api.session.on('joinGame', (data) => {
     localStorage.setItem('currentGame', data.gameId);
-    store.dispatch('setSimple', {currentPlayer: data.playerId});
+    store.dispatch('setSimple', { currentPlayer: data.playerId });
     router.push({ path: `/game/${data.gameId}` });
   });
-  api.session.on('leaveGame', ()=>{
+  api.session.on('leaveGame', () => {
     localStorage.setItem('currentGame', '');
     router.push({ path: `/` });
   });
+
+  document.addEventListener('click', event => {
+    if (event.target.classList.contains('active-event')) {
+      api.game.eventTrigger({
+        gameId: router.currentRoute.params.id,
+        eventData: {
+          targetId: event.target.attributes.id?.value,
+        }
+      });
+    }
+  });
+
 };
 
 init();

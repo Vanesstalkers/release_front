@@ -23,6 +23,7 @@
         class="gui"
         :style="{
           left: '50%',
+          zIndex: 1,
         }"
       >
         Раунд: {{ game.round }}
@@ -37,7 +38,6 @@
         :style="{
           display: 'flex',
           flexFlow: 'column-reverse',
-          width: '50%',
         }"
       >
         <!-- {{ playerList }} -->
@@ -201,7 +201,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 #game {
   position: fixed !important;
   height: 100%;
@@ -214,6 +214,11 @@ export default {
   background-size: 40px 40px;
   background-position: 0 0, 20px 0, 20px -20px, 0px 20px; */
 }
+#game .active-event {
+  cursor: pointer;
+	box-shadow: inset 0 0 20px 8px yellow;
+}
+
 #gamePlane {
   position: relative;
   width: 100%;
@@ -235,10 +240,10 @@ export default {
   position: absolute;
   transform-origin: 0 0;
 }
-.port {
+/* .port {
   background: yellow;
   position: absolute;
-}
+} */
 .fake-plane {
   position: absolute;
   background: red;
