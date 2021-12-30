@@ -10,7 +10,7 @@
       <card-worker :card="player" />
     </div>
     <div
-      class="player-hand"
+      class="player-hands"
       :style="{
         display: 'flex',
         flexWrap: 'wrap',
@@ -23,12 +23,20 @@
           :plane="plane"
         />
       </div>
-      <div class="hand-dices">
-        <dice
-          v-for="dice in dicesInHand.itemList"
-          :key="dice._id"
-          :dice="dice"
-        />
+      <div class="hand-dices-list">
+        <div 
+          v-for="deck in dominoDecks" 
+          :key="deck._id"
+          class="hand-dices"
+        >
+          <card v-if="deck.subtype === 'teamlead'" :card="{name: 'teamlead'}" />
+          <card v-if="deck.subtype === 'flowstate'" :card="{name: 'flowstate'}" />
+          <dice
+            v-for="dice in deck.itemList"
+            :key="dice._id"
+            :dice="dice"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -37,23 +45,25 @@
 <script>
 import plane from "./plane.vue";
 import dice from "./dice.vue";
+import card from "./card.vue";
 import cardWorker from "./cardWorker.vue";
 
 export default {
   components: {
     plane,
     dice,
+    card,
     cardWorker,
   },
   props: {
     player: Object,
   },
   computed: {
-    dicesInHand() {
-      return this.player.deckList.find((deck) => deck.type === "domino") || [];
+    dominoDecks() {
+      return this.player.deckList.filter(deck => deck.type === "domino") || [];
     },
     planesInHand() {
-      return this.player.deckList.find((deck) => deck.type === "plane") || [];
+      return this.player.deckList.find(deck => deck.type === "plane") || [];
     },
   },
   methods: {},
@@ -82,20 +92,34 @@ export default {
 }
 
 .workers {
+  align-self: flex-start;
+}
+.player.iam .workers {
   align-self: flex-end;
 }
 
+.hand-dices-list {
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+  padding: 0px 15px;
+}
+.player.iam .hand-dices-list {
+  flex-direction: column-reverse;
+}
 .hand-dices {
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-end;
   width: 100%;
-  padding: 5px 15px;
-  --position: fixed !important;
-  left: 0px;
-  bottom: 15px;
+  padding: 0px 0px 10px 0px;
+}
+.player.iam .hand-dices {
+  flex-direction: row-reverse;
+  padding: 10px 0px 0px 0px;
 }
 .hand-dices .domino-dice {
   height: 140px;

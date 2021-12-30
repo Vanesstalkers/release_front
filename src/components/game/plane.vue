@@ -53,7 +53,7 @@ export default {
   methods: {
     async selectPlane(event) {
       const $plane = event.target.closest(".plane");
-      if ($plane.closest(".player-hand")) {
+      if ($plane.closest(".player-hands")) {
         const { availablePorts } = await api.game.getPlanePortsAvailability({
           gameId: this.$route.params.id,
           joinPlaneId: this.plane._id,
