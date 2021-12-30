@@ -7,10 +7,12 @@ export default new Vuex.Store({
   strict: true,
   state: {
     pickedDiceId: null,
+    selectedDiceSideId: null,
     availablePorts: [],
   },
   getters: {
     pickedDiceId: state => state.pickedDiceId,
+    selectedDiceSideId: state => state.selectedDiceSideId,
     availablePorts: state => state.availablePorts,
 
     getSimple: state => (id, col) => {
@@ -30,6 +32,9 @@ export default new Vuex.Store({
   mutations: {
     setPickedDiceId: (state, value) => {
       state.pickedDiceId = value;
+    },
+    setSelectedDiceSideId: (state, value) => {
+      state.selectedDiceSideId = value;
     },
     hideZonesAvailability: (state) => {
       Object.keys(state.zone).forEach(id => {

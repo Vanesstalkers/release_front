@@ -9,46 +9,83 @@
       <div class="control fake" v-on:click.stop>disabled rotate</div>
       <div class="control" v-on:click.stop="deleteDice">delete</div>
     </div>
-    <div
-      v-for="side in sideList"
-      :key="side._id"
-      :value="side.value"
-      class="el"
-    />
+
+    <template v-for="side in sideList">
+      <div
+        :id="side._id"
+        :key="side._id"
+        :value="side.value"
+        :class="[
+          'el',
+          side.activeEvent ? 'active-event' : '',
+          side.eventData.fakeValue ? 'fake-value' : '',
+        ]"
+        v-on:click="
+          (e) =>
+            side.activeEvent
+              ? (e.stopPropagation(), openDiceSideValueSelect(side._id))
+              : null
+        "
+      >
+        <dice-side-value-select
+          v-if="selectedDiceSideId === side._id"
+          v-on:select="pickActiveEventDiceSide"
+        />
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
+import diceSideValueSelect from "./diceSideValueSelect.vue";
 
 export default {
+  components: {
+    diceSideValueSelect,
+  },
   props: {
     dice: Object,
   },
   computed: {
     ...mapGetters({
       getSimple: "getSimple",
+      selectedDiceSideId: "selectedDiceSideId",
     }),
     diceData() {
       return { ...this.getSimple(this.dice._id, "dice"), ...this.dice };
     },
     sideList() {
-      return this.dice.sideList || [{}, {}];
+      return this.dice.sideList || [{ eventData: {} }, { eventData: {} }];
     },
   },
   methods: {
+    openDiceSideValueSelect(targetId) {
+      this.$store.commit("setSelectedDiceSideId", targetId);
+    },
+    pickActiveEventDiceSide(fakeValue) {
+      api.game.eventTrigger({
+        gameId: this.$route.params.id,
+        eventData: { targetId: this.selectedDiceSideId, fakeValue },
+      });
+      this.$store.commit("setSelectedDiceSideId", null);
+    },
     pickDice() {
       const diceId = this.dice._id;
       this.$store.commit("setPickedDiceId", diceId);
       api.game.getZonesAvailability({ gameId: this.$route.params.id, diceId });
     },
     rotateDice() {
-      console.log("rotateDice _id=", this.dice._id);
-      api.game.rotateDice({ gameId: this.$route.params.id, diceId: this.dice._id });
+      api.game.rotateDice({
+        gameId: this.$route.params.id,
+        diceId: this.dice._id,
+      });
     },
     deleteDice() {
-      console.log("deleteDice _id=", this.dice._id);
-      api.game.deleteDice({ gameId: this.$route.params.id, diceId: this.dice._id });
+      api.game.deleteDice({
+        gameId: this.$route.params.id,
+        diceId: this.dice._id,
+      });
     },
   },
   mounted() {},
@@ -75,6 +112,7 @@ export default {
   background: darkgrey;
   opacity: 0.9;
   color: white;
+  z-index: 1;
 }
 .zone.vertical .domino-dice > .controls {
   flex-wrap: wrap;
@@ -110,14 +148,17 @@ export default {
   display: none;
 }
 
-
 .domino-dice > .el {
+  position: relative;
   flex-shrink: 0;
   float: left;
   width: 70px;
   height: 70px;
   background-image: url(../../assets/Dices.png);
   cursor: pointer;
+}
+.domino-dice > .el.fake-value {
+  box-shadow: inset 0 0 20px 8px orange;
 }
 .domino-dice > .el {
   background-position: -497px;
