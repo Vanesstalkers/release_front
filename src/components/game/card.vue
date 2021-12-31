@@ -7,7 +7,6 @@
     ]"
     :style="customStyle"
   >
-    {{ cardData._id }}
     <div class="controls">
       <!-- <div class="control" v-on:click.stop="pickDice">move</div>
       <div class="control rotate" v-on:click.stop="rotateDice">rotate</div>

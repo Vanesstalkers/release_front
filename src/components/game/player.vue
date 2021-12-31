@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="['player', player.iam ? 'iam' : '', player.active ? 'active': '']"
+    :class="['player', player.iam ? 'iam' : '', player.active ? 'active' : '']"
     :style="{
       border: player.iam ? '1px solid green' : 'none',
       width: player.iam ? '100%' : 'auto',
@@ -9,13 +9,7 @@
     <div class="workers">
       <card-worker :card="player" />
     </div>
-    <div
-      class="player-hands"
-      :style="{
-        display: 'flex',
-        flexWrap: 'wrap',
-      }"
-    >
+    <div class="player-hands">
       <div class="hand-planes">
         <plane
           v-for="plane in planesInHand.itemList"
@@ -23,19 +17,22 @@
           :plane="plane"
         />
       </div>
+      <div class="hand-cards-list">
+        <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
+          <card v-for="card in deck.itemList" :key="card._id" :card="card" />
+        </div>
+      </div>
       <div class="hand-dices-list">
-        <div 
-          v-for="deck in dominoDecks" 
-          :key="deck._id"
-          class="hand-dices"
-        >
-          <card v-if="deck.subtype === 'teamlead'" :card="{name: 'teamlead'}" />
-          <card v-if="deck.subtype === 'flowstate'" :card="{name: 'flowstate'}" />
-          <dice
-            v-for="dice in deck.itemList"
-            :key="dice._id"
-            :dice="dice"
+        <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
+          <card
+            v-if="deck.subtype === 'teamlead'"
+            :card="{ name: 'teamlead' }"
           />
+          <card
+            v-if="deck.subtype === 'flowstate'"
+            :card="{ name: 'flowstate' }"
+          />
+          <dice v-for="dice in deck.itemList" :key="dice._id" :dice="dice" />
         </div>
       </div>
     </div>
@@ -60,10 +57,15 @@ export default {
   },
   computed: {
     dominoDecks() {
-      return this.player.deckList.filter(deck => deck.type === "domino") || [];
+      return (
+        this.player.deckList.filter((deck) => deck.type === "domino") || []
+      );
+    },
+    cardDecks() {
+      return this.player.deckList.filter((deck) => deck.type === "card") || [];
     },
     planesInHand() {
-      return this.player.deckList.find(deck => deck.type === "plane") || [];
+      return this.player.deckList.find((deck) => deck.type === "plane") || [];
     },
   },
   methods: {},
@@ -98,12 +100,28 @@ export default {
   align-self: flex-end;
 }
 
+.player-hands {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  padding: 0px 10px;
+  flex-direction: row-reverse;
+}
+.player.iam .player-hands {
+  flex-direction: row;
+}
+.hand-cards-list {
+  width: auto;
+}
+.hand-cards {
+  display: flex;
+}
+
 .hand-dices-list {
-	width: 100%;
-	display: flex;
-	flex-wrap: wrap;
-	flex-direction: column;
-  padding: 0px 15px;
+  width: auto;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
 }
 .player.iam .hand-dices-list {
   flex-direction: column-reverse;
@@ -119,7 +137,7 @@ export default {
 }
 .player.iam .hand-dices {
   flex-direction: row-reverse;
-  padding: 10px 0px 0px 0px;
+  padding: 10px 10px 0px 0px;
 }
 .hand-dices .domino-dice {
   height: 140px;
@@ -127,19 +145,22 @@ export default {
 }
 
 .hand-planes {
-  width: 100%;
   display: flex;
   justify-content: center;
   transform: scale(0.5);
-	transform-origin: bottom;
-	max-height: 125px;
+  transform-origin: left bottom;
+  max-height: 125px;
+}
+.player.iam .hand-planes {
+  width: 100%;
+  transform-origin: bottom;
 }
 .hand-planes .plane {
   position: relative;
   margin: 0px 10px;
   margin-top: -125px;
 }
-.hand-planes .plane:hover {
+.player.iam .hand-planes .plane:hover {
   cursor: pointer;
   opacity: 0.7;
 }

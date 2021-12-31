@@ -154,9 +154,17 @@ export default {
   float: left;
   width: 70px;
   height: 70px;
+  border-radius: 15px;
   background-image: url(../../assets/Dices.png);
   cursor: pointer;
 }
+.player.iam .hand-dices .domino-dice:hover > .el {
+  box-shadow: inset 0 0 20px 8px lightgreen;
+}
+.domino-dice > .el.active-event:hover {
+  box-shadow: inset 0 0 20px 8px lightgreen!important;
+}
+
 .domino-dice > .el.fake-value {
   box-shadow: inset 0 0 20px 8px orange;
 }

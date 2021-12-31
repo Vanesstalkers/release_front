@@ -34,6 +34,7 @@ export default {
   box-shadow: 10px 10px 10px 0px black;
   background: black;
   border-radius: 5px;
+  z-index: 1;
 }
 .el {
   position: relative;
@@ -44,6 +45,9 @@ export default {
   background-image: url(../../assets/Dices.png);
   background-position: -497px;
   cursor: pointer;
+}
+.el:hover {
+  opacity: 0.7;
 }
 .el[value="0"] {
   background-position: -0px;
