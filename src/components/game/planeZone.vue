@@ -67,9 +67,10 @@ export default {
   position: absolute;
   height: 73px;
   width: 142px;
-  border: 1px solid green;
+  border: 2px solid yellow;
   white-space: pre;
   background: url(../../assets/clear-black-back.png);
+  background: black;
 }
 .zone.vertical {
   height: 142px;

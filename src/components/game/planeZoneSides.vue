@@ -16,7 +16,8 @@ export default {
     sideList: Array,
   },
   methods: {
-    drawLink({ from = {x: 0, y: 0}, to = {x: 0, y: 0} }) {
+    drawLink({ from = { x: 0, y: 0 }, to = { x: 0, y: 0 } }, container) {
+      const containerRect = container.getBoundingClientRect();
       let diffX = to.x - from.x;
       let diffY = to.y - from.y;
       let posX = from.x,
@@ -35,62 +36,78 @@ export default {
         startY = Math.abs(diffY);
         endY = 0;
       }
+      posX -= containerRect.x;
+      posY -= containerRect.y;
 
       diffX = Math.abs(diffX);
       diffY = Math.abs(diffY);
-      if(diffX < 4) diffX = 4;
-      if(diffY < 4) diffY = 4;
-      startX += 2;
-      startY += 2;
-      endX -= 2;
-      endY -= 2;
+      if (diffX < 4) diffX = 4;
+      if (diffY < 4) diffY = 4;
+      // startX += 2;
+      // startY += 2;
+      // endX -= 2;
+      // endY -= 2;
 
       const canvas = document.createElement("canvas");
-      canvas.width = diffX;
-      canvas.height = diffY;
-      canvas.style.left = posX + "px";
-      canvas.style.top = posY + "px";
-      canvas.style.zIndex = 8;
+      canvas.width = diffX + 16;
+      canvas.height = diffY + 16;
+      canvas.style.left = (posX - 6) + "px";
+      canvas.style.top = (posY - 6) + "px";
+      canvas.style.zIndex = 0;
       canvas.style.position = "absolute";
       canvas.style.pointerEvents = "none";
-      //canvas.style.border = "1px solid red";
 
       if (canvas.getContext) {
         const ctx = canvas.getContext("2d");
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "white";
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.closePath();
-        ctx.stroke();
-
-        ctx.fillStyle = "white";
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.arc(startX,startY,5,0,Math.PI*2,true);
-        ctx.moveTo(endX, endX);
-        ctx.arc(endX,endY,5,0,Math.PI*2,true);
+        // ctx.globalAlpha = 0.5;
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "yellow";
+        for (let i = 0; i <= 16; (i = i + 8)) {
+          ctx.beginPath();
+          if (diffX > diffY) {
+            ctx.moveTo(startX + i/4 + 2, startY + i + 2);
+            ctx.lineTo(endX + i/4 + 2, endY + i + 2);
+          }else{
+            ctx.moveTo(startX + i + 2, startY + i/4 + 2);
+            ctx.lineTo(endX + i + 2, endY + i/4 + 2);
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
         ctx.fill();
+
+        // ctx.fillStyle = "green";
+        // ctx.beginPath();
+        // ctx.moveTo(startX, startY);
+        // ctx.arc(startX,startY,5,0,Math.PI*2,true);
+        // ctx.moveTo(endX, endX);
+        // ctx.arc(endX,endY,5,0,Math.PI*2,true);
       }
 
-      const body = document.getElementsByTagName("body")[0];
-      body.appendChild(canvas);
+      container.appendChild(canvas);
       //console.log(canvas, { posX, startX, endX, posY, startY, endY });
     },
   },
   mounted() {
-    this.$nextTick(function () {
-      this.sideList.forEach(side => {
-        const sideEl = document.getElementById(side.code)
+    setTimeout(() => {
+      this.sideList.forEach((side) => {
+        const sideEl = document.getElementById(side.code);
         const sideRect = sideEl.getBoundingClientRect();
-        side.links.forEach(link => {
+        const planeEl = sideEl.closest(".plane");
+        console.log({ planeEl, rect: planeEl.getBoundingClientRect() });
+        side.links.forEach((link) => {
           const linkEl = document.getElementById(link);
           const linkRect = linkEl.getBoundingClientRect();
-          this.drawLink({from: {x: sideRect.x, y: sideRect.y}, to: {x: linkRect.x, y: linkRect.y}});
+          this.drawLink(
+            {
+              from: { x: sideRect.x, y: sideRect.y },
+              to: { x: linkRect.x, y: linkRect.y },
+            },
+            planeEl
+          );
         });
       });
-    });
+    }, 300);
   },
 };
 </script>

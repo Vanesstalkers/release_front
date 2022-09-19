@@ -162,7 +162,9 @@ export default {
   width: 480px;
   height: 240px;
   z-index: 0;
-  filter: grayscale(75%);
+  filter: blur(2px);
+  --filter: grayscale(75%);
+	--filter: grayscale(100%) brightness(200%) blur(2px);
 }
 .plane .custom-bg > span {
   width: 80px;
