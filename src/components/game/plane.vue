@@ -1,18 +1,10 @@
 <template>
-  <div class="plane" :style="customStyle" v-on:click.stop="selectPlane">
+  <div class="plane" :style="customStyle" v-on:click.stop="selectPlane" :test="test">
     <div class="zone-wraper">
-      <plane-zone
-        v-for="zone in plane.zoneList"
-        v-bind:zone="zone"
-        :key="zone._id"
-      />
+      <plane-zone v-for="zone in plane.zoneList" v-bind:zone="zone" :key="zone._id" />
     </div>
     <div class="port-wraper">
-      <plane-port
-        v-for="port in plane.portList"
-        v-bind:port="port"
-        :key="port._id"
-      />
+      <plane-port v-for="port in plane.portList" v-bind:port="port" :key="port._id" />
     </div>
     <div class="custom-bg">
       <span
@@ -21,48 +13,53 @@
         :style="`background-position-x: ${item.x}; background-position-y: ${item.y}`"
       />
     </div>
+    <div class="links-bg"></div>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
-import planeZone from "./planeZone.vue";
-import planePort from "./planePort.vue";
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
+import planeZone from './planeZone.vue';
+import planePort from './planePort.vue';
 
 export default {
-  name: "plane",
+  name: 'plane',
   components: {
     planePort,
     planeZone,
   },
+  data() {
+    return { inHandStyle: { test: 123 }, test: 123 };
+  },
   props: {
     plane: Object,
+    inHand: Boolean,
   },
   computed: {
     customStyle() {
-      const style = { ...this.plane } || {};
-      if (style.left) style.left += "px";
-      if (style.top) style.top += "px";
-      if (style.width) style.width += "px";
-      if (style.height) style.height += "px";
-      if (style.rotation)
-        style.transform = `rotate(${90 * (style.rotation || 0)}deg)`;
+      console.log('customStyle');
+      const style = { ...this.plane, ...(this.inHand ? this.inHandStyle : {}) } || {};
+      if (style.left) style.left += 'px';
+      if (style.top) style.top += 'px';
+      if (style.width) style.width += 'px';
+      if (style.height) style.height += 'px';
+      if (style.rotation) style.transform = `rotate(${90 * (style.rotation || 0)}deg)`;
       return style;
     },
   },
   methods: {
     async selectPlane(event) {
-      const $plane = event.target.closest(".plane");
-      if ($plane.closest(".player-hands")) {
+      const $plane = event.target.closest('.plane');
+      if ($plane.closest('.player-hands')) {
         const { availablePorts } = await api.game.getPlanePortsAvailability({
           gameId: this.$route.params.id,
           joinPlaneId: this.plane._id,
         });
-        this.$store.commit("setAvailablePorts", availablePorts);
+        this.$store.commit('setAvailablePorts', availablePorts);
       }
     },
     customBG(pid) {
-      let storageFillData = localStorage.getItem("gamePlaneBackgroundData");
+      let storageFillData = localStorage.getItem('gamePlaneBackgroundData');
       if (storageFillData)
         try {
           storageFillData = JSON.parse(storageFillData);
@@ -76,25 +73,22 @@ export default {
 
       for (let i = 0; i < 18; i++) {
         fillData[i] = {
-          x: -80 * Math.floor(14 * Math.random()) + "px",
-          y: -80 * Math.floor(6 * Math.random()) + "px",
+          x: -80 * Math.floor(14 * Math.random()) + 'px',
+          y: -80 * Math.floor(6 * Math.random()) + 'px',
         };
       }
       storageFillData[pid] = fillData;
-      localStorage.setItem(
-        "gamePlaneBackgroundData",
-        JSON.stringify(storageFillData)
-      );
+      localStorage.setItem('gamePlaneBackgroundData', JSON.stringify(storageFillData));
 
       return fillData;
     },
     centerPlaneBackground() {
       const p = {},
-        gamePlane = document.getElementById("gamePlane");
+        gamePlane = document.getElementById('gamePlane');
       const gamePlaneRect = gamePlane.getBoundingClientRect();
 
-      gamePlane.querySelectorAll(".plane").forEach((plane) => {
-        const _id = plane.getAttribute("_id");
+      gamePlane.querySelectorAll('.plane').forEach((plane) => {
+        const _id = plane.getAttribute('_id');
         const rect = plane.getBoundingClientRect();
         const offsetTop = rect.top - gamePlaneRect.top;
         const offsetLeft = rect.left - gamePlaneRect.left;
@@ -109,18 +103,20 @@ export default {
       });
 
       const gamePlaneCustomStyleData = {
-        height: p.b - p.t + "px",
-        width: p.r - p.l + "px",
-        top: "calc(50% - " + ((p.b - p.t) / 2 + p.ot * 1) + "px)",
-        left: "calc(50% - " + ((p.r - p.l) / 2 + p.ol * 1) + "px)",
+        height: p.b - p.t + 'px',
+        width: p.r - p.l + 'px',
+        top: 'calc(50% - ' + ((p.b - p.t) / 2 + p.ot * 1) + 'px)',
+        left: 'calc(50% - ' + ((p.r - p.l) / 2 + p.ol * 1) + 'px)',
       };
-      this.$store.dispatch("setSimple", { gamePlaneCustomStyleData });
+      this.$store.dispatch('setSimple', { gamePlaneCustomStyleData });
     },
   },
   mounted() {
-    console.log("plane mounted", this.plane);
+    // console.log('plane mounted', this.plane);
     this.centerPlaneBackground();
-    this.$store.dispatch("setSimple", { [this.plane._id]: this.plane });
+    if (this.inHand) this.inHandStyle = { transform: 'scale(0.5)' };
+    else this.inHandStyle = {};
+    this.$store.dispatch('setSimple', { [this.plane._id]: this.plane });
   },
 };
 </script>
@@ -135,7 +131,7 @@ export default {
   transform-origin: 0 0;
 }
 .plane:after {
-  content: "";
+  content: '';
   z-index: -1;
   position: absolute;
   left: 0px;
@@ -164,7 +160,7 @@ export default {
   z-index: 0;
   filter: blur(2px);
   --filter: grayscale(75%);
-	--filter: grayscale(100%) brightness(200%) blur(2px);
+  --filter: grayscale(100%) brightness(200%) blur(2px);
 }
 .plane .custom-bg > span {
   width: 80px;
@@ -172,5 +168,10 @@ export default {
   background-image: url(../../assets/tiles.png);
   background-size: 1120px;
   background-repeat: no-repeat;
+}
+
+.plane .links-bg {
+  width: 100%;
+  height: 100%;
 }
 </style>

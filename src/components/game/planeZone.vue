@@ -6,11 +6,7 @@
       color: 'white',
       fontSize: '10px',
     }"
-    :class="[
-      'zone',
-      zoneData.vertical ? 'vertical' : '',
-      zoneData.available ? 'available' : '',
-    ]"
+    :class="['zone', zoneData.vertical ? 'vertical' : '', zoneData.available ? 'available' : '']"
     v-on:click="putDice"
   >
     <div class="wraper">
@@ -21,9 +17,9 @@
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
-import planeZoneSides from "./planeZoneSides.vue";
-import dice from "./dice.vue";
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
+import planeZoneSides from './planeZoneSides.vue';
+import dice from './dice.vue';
 
 export default {
   components: {
@@ -35,11 +31,11 @@ export default {
   },
   computed: {
     zoneData() {
-      return { ...this.getSimple(this.zone._id, "zone"), ...this.zone };
+      return { ...this.getSimple(this.zone._id, 'zone'), ...this.zone };
     },
     ...mapGetters({
-      getSimple: "getSimple",
-      pickedDiceId: "pickedDiceId",
+      getSimple: 'getSimple',
+      pickedDiceId: 'pickedDiceId',
     }),
   },
   methods: {
@@ -50,13 +46,13 @@ export default {
           diceId: this.pickedDiceId,
           zoneId: this.zone._id,
         });
-        this.$store.commit("setPickedDiceId", null);
-        this.$store.commit("hideZonesAvailability");
+        this.$store.commit('setPickedDiceId', null);
+        this.$store.commit('hideZonesAvailability');
       }
     },
   },
   mounted() {
-    console.log("planeZone mounted", this.zone);
+    // console.log("planeZone mounted", this.zone);
     //this.$store.dispatch("setData", { zone: { [this.zone._id]: this.zone } });
   },
 };

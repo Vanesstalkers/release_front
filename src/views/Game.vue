@@ -1,14 +1,14 @@
 <template>
   <div id="game">
     <!-- <div style="position: absolute; bottom: 0px">{{ this.game }}</div> -->
-    
-    <div id="gamePlane" :style="gamePlaneCustomStyleData">
+
+    <div id="gamePlane" :style="{...gamePlaneCustomStyleData, opacity: 1}">
       <plane v-for="plane in planeList" :key="plane._id" :plane="plane" />
       <bridge v-for="bridge in bridgeList" :key="bridge._id" :bridge="bridge" />
 
       <div
         v-for="position in possibleAddPlanePositions"
-        :key="position.joinPortId+position.joinPortDirect+position.targetPortId+position.targetPortDirect"
+        :key="position.joinPortId + position.joinPortDirect + position.targetPortId + position.targetPortDirect"
         :joinPortId="position.joinPortId"
         :joinPortDirect="position.joinPortDirect"
         :targetPortId="position.targetPortId"
@@ -27,10 +27,7 @@
         }"
       >
         Раунд: {{ game.round }}
-        <button 
-          :style="currentPlayerIsActive ? {} : {opacity: '0.7'}"
-          v-on:click="endRound"
-        >Закончить раунд</button>
+        <button :style="currentPlayerIsActive ? {} : { opacity: '0.7' }" v-on:click="endRound">Закончить раунд</button>
         <button v-on:click="leaveGame">Выйти из игры</button>
       </div>
       <div
@@ -41,11 +38,7 @@
         }"
       >
         <!-- {{ playerList }} -->
-        <player
-          v-for="player in playerList"
-          :key="player._id"
-          :player="player"
-        />
+        <player v-for="player in playerList" :key="player._id" :player="player" />
       </div>
       <div class="gui" :style="{ top: '100px', right: '0px', left: 'auto', width: '200px' }">
         <div
@@ -68,13 +61,13 @@
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
-import {} from "../components/game/utils";
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
+import {} from '../components/game/utils';
 
-import player from "../components/game/player.vue";
-import plane from "../components/game/plane.vue";
-import bridge from "../components/game/bridge.vue";
-import card from "../components/game/card.vue";
+import player from '../components/game/player.vue';
+import plane from '../components/game/plane.vue';
+import bridge from '../components/game/bridge.vue';
+import card from '../components/game/card.vue';
 
 export default {
   components: {
@@ -90,34 +83,34 @@ export default {
   },
   computed: {
     ...mapGetters({
-      currentPlayer: "currentPlayer",
-      currentSession: "currentSession",
-      currentSessionGame: "currentSessionGame",
-      gamePlaneCustomStyleData: "gamePlaneCustomStyleData",
-      availablePorts: "availablePorts",
+      currentPlayer: 'currentPlayer',
+      currentSession: 'currentSession',
+      currentSessionGame: 'currentSessionGame',
+      gamePlaneCustomStyleData: 'gamePlaneCustomStyleData',
+      availablePorts: 'availablePorts',
     }),
     game() {
       return this.$store.state.game?.[this.gameId] || {};
     },
     playerList() {
       return (
-        this.game.playerList?.map(player => {
+        this.game.playerList?.map((player) => {
           if (player._id === this.currentPlayer) player.iam = true;
           return player;
         }) || []
       );
     },
     activePlayerId() {
-      return this.game.playerList?.find(player => player.active)?._id;
+      return this.game.playerList?.find((player) => player.active)?._id;
     },
-    currentPlayerIsActive(){
+    currentPlayerIsActive() {
       return this.currentPlayer === this.activePlayerId;
     },
     deckList() {
-      return this.game.deckList?.filter(deck => deck.subtype !== 'active');
+      return this.game.deckList?.filter((deck) => deck.subtype !== 'active');
     },
     activeCards() {
-      return this.game.deckList?.find(deck => deck.subtype === 'active') || [];
+      return this.game.deckList?.find((deck) => deck.subtype === 'active') || [];
     },
     planeList() {
       return this.game.planeList;
@@ -126,28 +119,20 @@ export default {
       return this.game.bridgeList;
     },
     possibleAddPlanePositions() {
-      return this.availablePorts.map(
-        ({
+      return this.availablePorts.map(({ joinPortId, joinPortDirect, targetPortId, targetPortDirect, position }) => {
+        return {
           joinPortId,
           joinPortDirect,
           targetPortId,
           targetPortDirect,
-          position,
-        }) => {
-          return {
-            joinPortId,
-            joinPortDirect,
-            targetPortId,
-            targetPortDirect,
-            style: {
-              left: position.left + "px",
-              top: position.top + "px",
-              width: position.right - position.left + "px",
-              height: position.bottom - position.top + "px",
-            },
-          };
-        }
-      );
+          style: {
+            left: position.left + 'px',
+            top: position.top + 'px',
+            width: position.right - position.left + 'px',
+            height: position.bottom - position.top + 'px',
+          },
+        };
+      });
     },
   },
   watch: {
@@ -163,11 +148,11 @@ export default {
   },
   methods: {
     async endRound() {
-      console.log("endRound");
+      console.log('endRound');
       await api.game.endRound({ gameId: this.game._id });
     },
     async leaveGame() {
-      console.log("leaveGame");
+      console.log('leaveGame');
       await api.game.leaveGame({ gameId: this.game._id });
     },
     async addPlane(event) {
@@ -178,24 +163,24 @@ export default {
         joinPortDirect: event.target.attributes.joinPortDirect.value,
         targetPortDirect: event.target.attributes.targetPortDirect.value,
       });
-      this.$store.commit("setAvailablePorts", []);
+      this.$store.commit('setAvailablePorts', []);
     },
   },
   async created() {
-    console.log("async created() {");
+    // console.log('async created() {');
   },
   mounted() {
-    console.log("mounted currentSession=", this.currentSession);
+    // console.log('mounted currentSession=', this.currentSession);
     api.game.enter({ gameId: this.gameId }).then((data) => {
-      console.log("api.game.enter", data);
-      if (data.status != "ok") {
-        localStorage.setItem("currentGame", "");
+      console.log('api.game.enter', data);
+      if (data.status != 'ok') {
+        localStorage.setItem('currentGame', '');
         this.$router.push({ path: `/` });
       }
     });
   },
   async beforeDestroy() {
-    console.log("beforeDestroy");
+    console.log('beforeDestroy');
     api.game.exit();
   },
 };
@@ -216,7 +201,7 @@ export default {
 }
 #game .active-event {
   cursor: pointer;
-	box-shadow: inset 0 0 20px 8px yellow;
+  box-shadow: inset 0 0 20px 8px yellow;
 }
 
 #gamePlane {

@@ -4,7 +4,8 @@
       v-for="(side, index) in sideList"
       :key="side._id"
       :index="index"
-      :id="side.code"
+      :id="side._id"
+      :code="side.code"
       :class="['side' + index]"
     />
   </div>
@@ -17,6 +18,7 @@ export default {
   },
   methods: {
     drawLink({ from = { x: 0, y: 0 }, to = { x: 0, y: 0 } }, container) {
+      // console.log({ from, to });
       const containerRect = container.getBoundingClientRect();
       let diffX = to.x - from.x;
       let diffY = to.y - from.y;
@@ -48,28 +50,28 @@ export default {
       // endX -= 2;
       // endY -= 2;
 
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = diffX + 16;
       canvas.height = diffY + 16;
-      canvas.style.left = (posX - 6) + "px";
-      canvas.style.top = (posY - 6) + "px";
+      canvas.style.left = posX - 6 + 'px';
+      canvas.style.top = posY - 6 + 'px';
       canvas.style.zIndex = 0;
-      canvas.style.position = "absolute";
-      canvas.style.pointerEvents = "none";
+      canvas.style.position = 'absolute';
+      canvas.style.pointerEvents = 'none';
 
       if (canvas.getContext) {
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext('2d');
         // ctx.globalAlpha = 0.5;
         ctx.lineWidth = 4;
-        ctx.strokeStyle = "yellow";
-        for (let i = 0; i <= 16; (i = i + 8)) {
+        ctx.strokeStyle = 'yellow';
+        for (let i = 0; i <= 16; i = i + 8) {
           ctx.beginPath();
           if (diffX > diffY) {
-            ctx.moveTo(startX + i/4 + 2, startY + i + 2);
-            ctx.lineTo(endX + i/4 + 2, endY + i + 2);
-          }else{
-            ctx.moveTo(startX + i + 2, startY + i/4 + 2);
-            ctx.lineTo(endX + i + 2, endY + i/4 + 2);
+            ctx.moveTo(startX + i / 4 + 2, startY + i + 2);
+            ctx.lineTo(endX + i / 4 + 2, endY + i + 2);
+          } else {
+            ctx.moveTo(startX + i + 2, startY + i / 4 + 2);
+            ctx.lineTo(endX + i + 2, endY + i / 4 + 2);
           }
           ctx.closePath();
           ctx.stroke();
@@ -89,25 +91,24 @@ export default {
     },
   },
   mounted() {
-    setTimeout(() => {
-      this.sideList.forEach((side) => {
-        const sideEl = document.getElementById(side.code);
-        const sideRect = sideEl.getBoundingClientRect();
-        const planeEl = sideEl.closest(".plane");
-        console.log({ planeEl, rect: planeEl.getBoundingClientRect() });
-        side.links.forEach((link) => {
-          const linkEl = document.getElementById(link);
-          const linkRect = linkEl.getBoundingClientRect();
-          this.drawLink(
-            {
-              from: { x: sideRect.x, y: sideRect.y },
-              to: { x: linkRect.x, y: linkRect.y },
-            },
-            planeEl
-          );
-        });
-      });
-    }, 300);
+    console.log('planeZoneSide mounted', this.sideList);
+    for (const side of this.sideList) {
+      const sideEl = document.getElementById(side._id);
+      const sideRect = sideEl.getBoundingClientRect();
+      let planeEl = sideEl.closest('.plane');
+      for (const link of Object.keys(side.links)) {
+        const linkEl = document.getElementById(link);
+        const linkRect = linkEl.getBoundingClientRect();
+        if (!planeEl) planeEl = linkEl.closest('.plane');
+        this.drawLink(
+          {
+            from: { x: sideRect.x, y: sideRect.y },
+            to: { x: linkRect.x, y: linkRect.y },
+          },
+          planeEl.querySelector('.links-bg'),
+        );
+      }
+    }
   },
 };
 </script>

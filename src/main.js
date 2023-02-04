@@ -1,25 +1,27 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import App from './App.vue'
-import router from './router'
-import store from './store'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import App from './App.vue';
+import router from './router';
+import store from './store';
 window.vuex = store;
 
 import { Metacom } from '../lib/metacom.js';
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 const init = async () => {
-
   const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-  const metacom = Metacom.create(`${protocol}://localhost:8000`)
+  const metacom = Metacom.create(`${protocol}://localhost:8000`);
   const { api } = metacom;
   window.api = api;
 
   await metacom.load('auth'); // Load `auth` interface
 
   const token = localStorage.getItem('metarhia.session.token');
-  let logged = false, currentGame, currentPlayer, currentSession;
+  let logged = false,
+    currentGame,
+    currentPlayer,
+    currentSession;
 
   if (token) {
     const res = await api.auth.restore({ token });
@@ -57,24 +59,26 @@ const init = async () => {
       if (currentGame) return next({ name: 'Game', params: { id: currentGame } });
     }
     return next();
-  })
+  });
 
   new Vue({
     router,
     store,
-    render: function (h) { return h(App) },
+    render: function(h) {
+      return h(App);
+    },
   }).$mount('#app');
 
   store.dispatch('setSimple', { currentSession });
 
-  api.db.on('updated', (data) => {
+  api.db.on('updated', data => {
     store.dispatch('setData', data);
   });
-  api.db.on('smartUpdated', (data) => {
+  api.db.on('smartUpdated', data => {
     store.dispatch('setDeep', data);
   });
 
-  api.session.on('joinGame', (data) => {
+  api.session.on('joinGame', data => {
     localStorage.setItem('currentGame', data.gameId);
     store.dispatch('setSimple', { currentPlayer: data.playerId });
     router.push({ path: `/game/${data.gameId}` });
@@ -90,11 +94,10 @@ const init = async () => {
         gameId: router.currentRoute.params.id,
         eventData: {
           targetId: event.target.attributes.id?.value,
-        }
+        },
       });
     }
   });
-
 };
 
 init();

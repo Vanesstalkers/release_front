@@ -1,7 +1,7 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from 'vue';
+import Vuex from 'vuex';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   strict: true,
@@ -36,25 +36,23 @@ export default new Vuex.Store({
     setSelectedDiceSideId: (state, value) => {
       state.selectedDiceSideId = value;
     },
-    hideZonesAvailability: (state) => {
+    hideZonesAvailability: state => {
       Object.keys(state.zone).forEach(id => {
-        if(state.zone[id].available) delete state.zone[id].available;
+        if (state.zone[id].available) delete state.zone[id].available;
       });
     },
     setAvailablePorts: (state, value) => {
       state.availablePorts = value;
     },
 
-    clearData: (state) => {
+    clearData: state => {
       Vue.set(state, 'forms', {});
       Vue.set(state, 'session', {});
       Vue.set(state, 'game', {});
-      console.log("clearData end");
+      console.log('clearData end');
     },
     setSimple: (state, value) => {
-      console.log("setSimple", { state, value });
       Object.entries(value).forEach(([key, val]) => {
-        console.log("Vue.set", { key, val });
         Vue.set(state, key, val);
       });
     },
@@ -67,14 +65,10 @@ export default new Vuex.Store({
       });
     },
     setDeep: (state, value) => {
-      //console.log("mutations setDeep", value);
       Object.entries(value).forEach(([key, val]) => {
-        //console.log("key", key);
         if (!state[key]) Vue.set(state, key, {});
         Object.keys(val).forEach(id => {
-          //console.log("id", id);
           Object.entries(val[id]).forEach(([k, v]) => {
-            //console.log("k", k);
             const props = k.split('.');
             if (!state[key][id]) Vue.set(state[key], id, {});
             let itemPart = state[key][id];
@@ -93,14 +87,13 @@ export default new Vuex.Store({
       commit('setSimple', options);
     },
     async setData({ state, commit, dispatch }, options = {}) {
-      console.log('setData', options);
+      // console.log('setData', options);
       commit('setData', options);
     },
     async setDeep({ state, commit, dispatch }, options = {}) {
-      console.log('setDeep', options);
+      // console.log('setDeep', options);
       commit('setDeep', options);
     },
   },
-  modules: {
-  }
-})
+  modules: {},
+});
