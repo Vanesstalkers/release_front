@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     drawLink({ from = { x: 0, y: 0 }, to = { x: 0, y: 0 } }, container) {
-      // console.log({ from, to });
+      // console.log('drawLink', { from, to });
       const containerRect = container.getBoundingClientRect();
       let diffX = to.x - from.x;
       let diffY = to.y - from.y;
@@ -91,7 +91,7 @@ export default {
     },
   },
   mounted() {
-    console.log('planeZoneSide mounted', this.sideList);
+    // console.log('planeZoneSide mounted', this.sideList);
     for (const side of this.sideList) {
       const sideEl = document.getElementById(side._id);
       const sideRect = sideEl.getBoundingClientRect();

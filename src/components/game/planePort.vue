@@ -94,7 +94,7 @@ export default {
     },
   },
   mounted() {
-    console.log('planePort mounted', this.port);
+    // console.log('planePort mounted', this.port);
     if (!this.port.linkedBridge) {
       const portEl = document.getElementById(this.port.code);
       const portRect = portEl.getBoundingClientRect();

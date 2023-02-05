@@ -9,7 +9,7 @@
     :class="['zone', zoneData.vertical ? 'vertical' : '', zoneData.available ? 'available' : '']"
     v-on:click="putDice"
   >
-    <div class="wraper">
+    <div class="scroll-off wraper">
       <plane-zone-sides :sideList="zoneData.sideList" />
       <dice v-for="dice in zoneData.itemList" :key="dice._id" :dice="dice" />
     </div>

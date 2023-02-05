@@ -10,8 +10,9 @@
       <card-worker :card="player" />
     </div>
     <div class="player-hands">
-      <div class="hand-planes">
+      <div v-if="planesInHand.itemList.length" class="hand-planes">
         <plane v-for="plane in planesInHand.itemList" :key="plane._id" :plane="plane" :inHand="true" />
+        <!-- <plane v-for="plane in planesInHand.itemList" :key="plane._id" :planeData="plane" :planeId="plane._id" :inHand="true" /> -->
       </div>
       <div class="hand-cards-list">
         <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
@@ -94,6 +95,8 @@ export default {
   justify-content: flex-end;
   padding: 0px 10px;
   flex-direction: row-reverse;
+  position: relative;
+  width: 100%;
 }
 .player.iam .player-hands {
   flex-direction: row;
@@ -133,11 +136,15 @@ export default {
 }
 
 .hand-planes {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  background: black;
+  height: 100%;
   display: flex;
   justify-content: center;
-  /* transform: scale(0.5); */
-  /* transform-origin: left bottom; */
-  max-height: 125px;
+  align-items: center;
 }
 .player.iam .hand-planes {
   width: 100%;

@@ -1,5 +1,5 @@
 <template>
-  <div class="plane" :style="customStyle" v-on:click.stop="selectPlane" :test="test">
+  <div :class="['plane', ...Object.values(customClass)]" :style="customStyle" v-on:click.stop="selectPlane">
     <div class="zone-wraper">
       <plane-zone v-for="zone in plane.zoneList" v-bind:zone="zone" :key="zone._id" />
     </div>
@@ -29,21 +29,30 @@ export default {
     planeZone,
   },
   data() {
-    return { inHandStyle: { test: 123 }, test: 123 };
+    return { customClass: {}, inHandStyle: {} };
   },
   props: {
     plane: Object,
+    planeId: String,
+    // planeData: Object,
     inHand: Boolean,
   },
   computed: {
+    // plane() {
+    //   const plane = this.$store.state[this.planeId] || {};
+    //   return plane;
+    // },
     customStyle() {
-      console.log('customStyle');
       const style = { ...this.plane, ...(this.inHand ? this.inHandStyle : {}) } || {};
       if (style.left) style.left += 'px';
       if (style.top) style.top += 'px';
       if (style.width) style.width += 'px';
       if (style.height) style.height += 'px';
-      if (style.rotation) style.transform = `rotate(${90 * (style.rotation || 0)}deg)`;
+      if (style.rotation) {
+        const rotateDegree = 90 * (style.rotation || 0);
+        style.transform = `rotate(${rotateDegree}deg)`;
+        this.customClass = { ...this.customClass, rotate: `rotate${rotateDegree}` };
+      }
       return style;
     },
   },
@@ -112,11 +121,11 @@ export default {
     },
   },
   mounted() {
-    // console.log('plane mounted', this.plane);
     this.centerPlaneBackground();
-    if (this.inHand) this.inHandStyle = { transform: 'scale(0.5)' };
-    else this.inHandStyle = {};
-    this.$store.dispatch('setSimple', { [this.plane._id]: this.plane });
+    if (this.inHand) {
+      this.customClass = { ...this.customClass, inHand: `in-hand` };
+    } else this.inHandStyle = {};
+    // this.$store.dispatch('setSimple', { [this.planeId]: this.planeData });
   },
 };
 </script>
@@ -173,5 +182,32 @@ export default {
 .plane .links-bg {
   width: 100%;
   height: 100%;
+}
+
+.plane.rotate90 {
+  transform: rotate(90deg);
+}
+.plane.rotate180 {
+  transform: rotate(180deg);
+}
+.plane.rotate270 {
+  transform: rotate(270deg);
+}
+.plane.rotate90 .links-bg {
+  transform: rotate(270deg) translateX(50%) translateY(0);
+  transform-origin: bottom;
+}
+.plane.rotate270 .links-bg {
+  transform: rotate(90deg);
+  transform-origin: bottom;
+}
+
+.plane.rotate180 .links-bg {
+  transform: rotate(180deg);
+}
+
+.plane.in-hand {
+  transform: scale(0.5);
+  margin: 125px -250px 0px 0px;
 }
 </style>

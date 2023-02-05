@@ -4,10 +4,10 @@
     v-on:click.stop="pickDice"
   >
     <div class="controls">
-      <div class="control" v-on:click.stop="pickDice">move</div>
-      <div class="control rotate" v-on:click.stop="rotateDice">rotate</div>
-      <div class="control fake" v-on:click.stop>disabled rotate</div>
-      <div class="control" v-on:click.stop="deleteDice">delete</div>
+      <div class="scroll-off control" v-on:click.stop="pickDice">move</div>
+      <div class="scroll-off control rotate" v-on:click.stop="rotateDice">rotate</div>
+      <div class="scroll-off control fake" v-on:click.stop>disabled rotate</div>
+      <div class="scroll-off control" v-on:click.stop="deleteDice">delete</div>
     </div>
 
     <template v-for="side in sideList">
