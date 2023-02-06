@@ -10,7 +10,11 @@
     v-on:click="putDice"
   >
     <div class="scroll-off wraper">
-      <plane-zone-sides :sideList="zoneData.sideList" />
+      <plane-zone-sides
+        :linkLines="linkLines"
+        :sideList="zoneData.sideList"
+        :position="{ left: zoneData.left, top: zoneData.top, vertical: zoneData.vertical }"
+      />
       <dice v-for="dice in zoneData.itemList" :key="dice._id" :dice="dice" />
     </div>
   </div>
@@ -28,6 +32,7 @@ export default {
   },
   props: {
     zone: Object,
+    linkLines: Object,
   },
   computed: {
     zoneData() {
@@ -52,7 +57,7 @@ export default {
     },
   },
   mounted() {
-    // console.log("planeZone mounted", this.zone);
+    // console.log('planeZone mounted', this.zone);
     //this.$store.dispatch("setData", { zone: { [this.zone._id]: this.zone } });
   },
 };

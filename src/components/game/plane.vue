@@ -1,10 +1,10 @@
 <template>
   <div :class="['plane', ...Object.values(customClass)]" :style="customStyle" v-on:click.stop="selectPlane">
     <div class="zone-wraper">
-      <plane-zone v-for="zone in plane.zoneList" v-bind:zone="zone" :key="zone._id" />
+      <plane-zone v-for="zone in plane.zoneList" v-bind:zone="zone" :key="zone._id" :linkLines="linkLines" />
     </div>
     <div class="port-wraper">
-      <plane-port v-for="port in plane.portList" v-bind:port="port" :key="port._id" />
+      <plane-port v-for="port in plane.portList" v-bind:port="port" :key="port._id" :linkLines="linkLines" />
     </div>
     <div class="custom-bg">
       <span
@@ -14,6 +14,19 @@
       />
     </div>
     <div class="links-bg"></div>
+    <svg>
+      <line
+        v-for="[key, line] in Object.entries(linkLines)"
+        :key="key"
+        :x1="line.x1"
+        :y1="line.y1"
+        :x2="line.x2"
+        :y2="line.y2"
+        fill="none"
+        stroke="yellow"
+        stroke-width="10"
+      />
+    </svg>
   </div>
 </template>
 
@@ -29,7 +42,7 @@ export default {
     planeZone,
   },
   data() {
-    return { customClass: {}, inHandStyle: {} };
+    return { linkLines: {}, customClass: {}, inHandStyle: {} };
   },
   props: {
     plane: Object,
@@ -182,6 +195,15 @@ export default {
 .plane .links-bg {
   width: 100%;
   height: 100%;
+}
+
+.plane > svg {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
 .plane.rotate90 {

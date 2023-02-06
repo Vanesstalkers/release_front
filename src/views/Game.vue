@@ -221,7 +221,6 @@ export default {
       }
     });
     document.body.addEventListener('mouseup', function (event) {
-      console.log('event.button', event.button);
       if (event.button === 2) {
         config.rotationLast = config.rotation;
         config.isRotating = false;
