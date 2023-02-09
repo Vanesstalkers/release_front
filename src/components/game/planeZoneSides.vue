@@ -26,27 +26,29 @@ export default {
   methods: {},
   mounted() {
     // console.log('planeZoneSide mounted', this.sideList, this.position);
-    for (const side of this.sideList) {
-      const sideEl = document.getElementById(side._id);
-      for (const link of Object.keys(side.links)) {
-        const linkEl = document.getElementById(link);
-        if (sideEl.closest('.plane') && linkEl.closest('.plane')) {
-          const x1 = sideEl.getAttribute('x');
-          const y1 = sideEl.getAttribute('y');
-          const x2 = linkEl.getAttribute('x');
-          const y2 = linkEl.getAttribute('y');
-          const key = [[x1, y1].join('.'), [x2, y2].join('.')].sort().join('.');
-          this.$set(this.linkLines, key, { x1, y1, x2, y2 });
-          // if (this.position.vertical) {
-          //   this.$set(this.linkLines, key + '-', { x1: x1 - 10, y1, x2: x2 - 10, y2 });
-          //   this.$set(this.linkLines, key + '+', { x1: +x1 + 10, y1, x2: +x2 + 10, y2 });
-          // } else {
-          //   this.$set(this.linkLines, key + '-', { x1, y1: y1 - 10, x2, y2: y2 - 10 });
-          //   this.$set(this.linkLines, key + '+', { x1, y1: +y1 + 10, x2, y2: +y2 + 10 });
-          // }
+    this.$nextTick(() => {
+      for (const side of this.sideList) {
+        const sideEl = document.getElementById(side._id);
+        for (const link of Object.keys(side.links)) {
+          const linkEl = document.getElementById(link);
+          if (sideEl.closest('.plane') && linkEl.closest('.plane')) {
+            const x1 = sideEl.getAttribute('x');
+            const y1 = sideEl.getAttribute('y');
+            const x2 = linkEl.getAttribute('x');
+            const y2 = linkEl.getAttribute('y');
+            const key = [[x1, y1].join('.'), [x2, y2].join('.')].sort().join('.');
+            this.$set(this.linkLines, key, { x1, y1, x2, y2 });
+            // if (this.position.vertical) {
+            //   this.$set(this.linkLines, key + '-', { x1: x1 - 10, y1, x2: x2 - 10, y2 });
+            //   this.$set(this.linkLines, key + '+', { x1: +x1 + 10, y1, x2: +x2 + 10, y2 });
+            // } else {
+            //   this.$set(this.linkLines, key + '-', { x1, y1: y1 - 10, x2, y2: y2 - 10 });
+            //   this.$set(this.linkLines, key + '+', { x1, y1: +y1 + 10, x2, y2: +y2 + 10 });
+            // }
+          }
         }
       }
-    }
+    });
   },
 };
 </script>

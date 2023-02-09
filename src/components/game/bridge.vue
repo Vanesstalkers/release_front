@@ -1,12 +1,13 @@
 <template>
-  <div class="bridge" :id="bridge._id" :style="customStyle">
+  <div v-if="bridge._id" class="bridge" :id="bridge._id" :style="customStyle">
     <div class="zone-wraper">
-      <plane-zone v-for="zone in bridge.zoneList" v-bind:zone="zone" :key="zone._id" />
+      <plane-zone v-for="id in zoneIds" :key="id" v-bind:zoneId="id" />
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 import planeZone from './planeZone.vue';
 
 export default {
@@ -15,9 +16,15 @@ export default {
     planeZone,
   },
   props: {
-    bridge: Object,
+    bridgeId: String,
   },
   computed: {
+    ...mapGetters({
+      getSimple: 'getSimple',
+    }),
+    bridge() {
+      return this.getSimple(this.bridgeId, 'bridge');
+    },
     customStyle() {
       const style = { ...this.bridge } || {};
       if (style.left) style.left += 'px';
@@ -26,6 +33,9 @@ export default {
       if (style.height) style.height += 'px';
       if (style.rotation) style.transform = `rotate(${90 * (style.rotation || 0)}deg)`;
       return style;
+    },
+    zoneIds() {
+      return Object.keys(this.bridge.zoneMap || {});
     },
   },
   methods: {},

@@ -1,18 +1,18 @@
 <template>
   <div
-    :class="['player', player.iam ? 'iam' : '', player.active ? 'active' : '']"
+    v-if="player._id"
+    :class="['player', iam ? 'iam' : '', player.active ? 'active' : '']"
     :style="{
-      border: player.iam ? '1px solid green' : 'none',
-      width: player.iam ? '100%' : 'auto',
+      border: iam ? '1px solid green' : 'none',
+      width: iam ? '100%' : 'auto',
     }"
   >
     <div class="workers">
       <card-worker :card="player" />
     </div>
     <div class="player-hands">
-      <div v-if="planesInHand.itemList.length" class="hand-planes">
-        <plane v-for="plane in planesInHand.itemList" :key="plane._id" :plane="plane" :inHand="true" />
-        <!-- <plane v-for="plane in planesInHand.itemList" :key="plane._id" :planeData="plane" :planeId="plane._id" :inHand="true" /> -->
+      <div v-if="planeInHandIds.length" class="hand-planes">
+        <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
       </div>
       <div class="hand-cards-list">
         <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 import plane from './plane.vue';
 import dice from './dice.vue';
 import card from './card.vue';
@@ -44,23 +45,37 @@ export default {
     cardWorker,
   },
   props: {
-    player: Object,
+    playerId: String,
   },
   computed: {
+    ...mapGetters({
+      getSimple: 'getSimple',
+      currentPlayer: 'currentPlayer',
+    }),
+    player() {
+      return this.getSimple(this.playerId, 'player');
+    },
+    iam() {
+      return this.playerId === this.currentPlayer;
+    },
     dominoDecks() {
       return this.player.deckList.filter((deck) => deck.type === 'domino') || [];
     },
     cardDecks() {
       return this.player.deckList.filter((deck) => deck.type === 'card') || [];
     },
-    planesInHand() {
-      return this.player.deckList.find((deck) => deck.type === 'plane') || [];
+    deckIds() {
+      return Object.keys(this.player.deckMap || {});
+    },
+    planeInHandIds() {
+      return Object.keys(
+        this.deckIds.map((id) => this.getSimple(id, 'deck')).find((deck) => deck.type === 'plane')?.itemMap || {},
+      );
     },
   },
   methods: {},
   mounted() {
     // console.log("player mounted", this.player);
-    this.$store.dispatch('setSimple', { [this.player._id]: this.player });
   },
 };
 </script>

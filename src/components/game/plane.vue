@@ -1,10 +1,15 @@
 <template>
-  <div :class="['plane', ...Object.values(customClass)]" :style="customStyle" v-on:click.stop="selectPlane">
+  <div
+    v-if="plane._id"
+    :class="['plane', ...Object.values(customClass)]"
+    :style="customStyle"
+    v-on:click.stop="selectPlane"
+  >
     <div class="zone-wraper">
-      <plane-zone v-for="zone in plane.zoneList" v-bind:zone="zone" :key="zone._id" :linkLines="linkLines" />
+      <plane-zone v-for="id in zoneIds" :key="id" v-bind:zoneId="id" :linkLines="linkLines" />
     </div>
     <div class="port-wraper">
-      <plane-port v-for="port in plane.portList" v-bind:port="port" :key="port._id" :linkLines="linkLines" />
+      <plane-port v-for="id in portIds" :key="id" v-bind:portId="id" :linkLines="linkLines" />
     </div>
     <div class="custom-bg">
       <span
@@ -45,16 +50,16 @@ export default {
     return { linkLines: {}, customClass: {}, inHandStyle: {} };
   },
   props: {
-    plane: Object,
     planeId: String,
-    // planeData: Object,
     inHand: Boolean,
   },
   computed: {
-    // plane() {
-    //   const plane = this.$store.state[this.planeId] || {};
-    //   return plane;
-    // },
+    ...mapGetters({
+      getSimple: 'getSimple',
+    }),
+    plane() {
+      return this.getSimple(this.planeId, 'plane');
+    },
     customStyle() {
       const style = { ...this.plane, ...(this.inHand ? this.inHandStyle : {}) } || {};
       if (style.left) style.left += 'px';
@@ -67,6 +72,12 @@ export default {
         this.customClass = { ...this.customClass, rotate: `rotate${rotateDegree}` };
       }
       return style;
+    },
+    zoneIds() {
+      return Object.keys(this.plane.zoneMap || {});
+    },
+    portIds() {
+      return Object.keys(this.plane.portMap || {});
     },
   },
   methods: {
@@ -138,7 +149,6 @@ export default {
     if (this.inHand) {
       this.customClass = { ...this.customClass, inHand: `in-hand` };
     } else this.inHandStyle = {};
-    // this.$store.dispatch('setSimple', { [this.planeId]: this.planeData });
   },
 };
 </script>

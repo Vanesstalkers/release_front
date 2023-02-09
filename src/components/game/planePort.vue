@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="port._id"
     class="port"
     :id="port.code"
     :style="{ left: port.left + 'px', top: port.top + 'px', opacity: port.linkedBridge ? 0 : 1 }"
@@ -13,28 +14,33 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 
 export default {
   props: {
-    port: Object,
+    portId: String,
     linkLines: Object,
   },
   computed: {
-    ...mapGetters({}),
+    ...mapGetters({
+      getSimple: 'getSimple',
+    }),
+    port() {
+      return this.getSimple(this.portId, 'port');
+    },
   },
   methods: {},
   mounted() {
-    // console.log('planePort mounted', this.port);
-    const portEl = document.getElementById(this.port.code);
-    for (const link of Object.keys(this.port.links)) {
-      const linkEl = document.getElementById(link);
-      if (portEl.closest('.plane') && linkEl.closest('.plane')) {
-        const x1 = portEl.getAttribute('x');
-        const y1 = portEl.getAttribute('y');
-        const x2 = linkEl.getAttribute('x');
-        const y2 = linkEl.getAttribute('y');
-        const key = [[x1, y1].join('.'), [x2, y2].join('.')].sort().join('.');
-        this.$set(this.linkLines, key, { x1, y1, x2, y2 });
+    this.$nextTick(() => {
+      const portEl = document.getElementById(this.port.code);
+      for (const link of Object.keys(this.port.links)) {
+        const linkEl = document.getElementById(link);
+        if (portEl.closest('.plane') && linkEl.closest('.plane')) {
+          const x1 = portEl.getAttribute('x');
+          const y1 = portEl.getAttribute('y');
+          const x2 = linkEl.getAttribute('x');
+          const y2 = linkEl.getAttribute('y');
+          const key = [[x1, y1].join('.'), [x2, y2].join('.')].sort().join('.');
+          this.$set(this.linkLines, key, { x1, y1, x2, y2 });
+        }
       }
-    }
-    this.$store.dispatch('setSimple', { [this.port._id]: this.port });
+    });
   },
 };
 </script>

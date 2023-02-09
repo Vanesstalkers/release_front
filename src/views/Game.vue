@@ -6,9 +6,11 @@
       id="gamePlane"
       :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'top', ...gamePlaneControlStyle }"
     >
-      <plane v-for="plane in planeList" :key="plane._id" :plane="plane" />
+      <!-- <plane v-for="plane in planeList" :key="plane._id" :plane="plane" /> -->
+      <plane v-for="id in planeIds" :key="id" :planeId="id" />
       <!-- <plane v-for="plane in planeList" :key="plane._id" :planeData="plane" :planeId="plane._id" /> -->
-      <bridge v-for="bridge in bridgeList" :key="bridge._id" :bridge="bridge" />
+      <!-- <bridge v-for="bridge in bridgeList" :key="bridge._id" :bridge="bridge" /> -->
+      <bridge v-for="id in bridgeIds" :key="id" :bridgeId="id" />
 
       <div
         v-for="position in possibleAddPlanePositions"
@@ -35,8 +37,7 @@
           flexFlow: 'column-reverse',
         }"
       >
-        <!-- {{ playerList }} -->
-        <player v-for="player in playerList" :key="player._id" :player="player" />
+        <player v-for="id in playerIds" :key="id" :playerId="id" />
       </div>
       <div class="gui" :style="{ top: '100px', right: '0px', left: 'auto', width: '200px' }">
         <div
@@ -101,6 +102,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      getSimple: 'getSimple',
       currentPlayer: 'currentPlayer',
       currentSession: 'currentSession',
       currentSessionGame: 'currentSessionGame',
@@ -117,16 +119,11 @@ export default {
     game() {
       return this.$store.state.game?.[this.gameId] || {};
     },
-    playerList() {
-      return (
-        this.game.playerList?.map((player) => {
-          if (player._id === this.currentPlayer) player.iam = true;
-          return player;
-        }) || []
-      );
+    playerIds(){
+      return Object.keys(this.game.playerMap || {});
     },
     activePlayerId() {
-      return this.game.playerList?.find((player) => player.active)?._id;
+      return this.playerIds.find((id) => this.getSimple(id).active);
     },
     currentPlayerIsActive() {
       return this.currentPlayer === this.activePlayerId;
@@ -137,11 +134,13 @@ export default {
     activeCards() {
       return this.game.deckList?.find((deck) => deck.subtype === 'active') || [];
     },
-    planeList() {
-      return this.game.planeList;
+    planeIds(){
+      console.log('planeIds', this.game.planeMap);
+      return Object.keys(this.game.planeMap || {});
     },
-    bridgeList() {
-      return this.game.bridgeList;
+    bridgeIds(){
+      console.log('bridgeIds', this.game.bridgeMap);
+      return Object.keys(this.game.bridgeMap || {});
     },
     possibleAddPlanePositions() {
       return this.availablePorts.map(({ joinPortId, joinPortDirect, targetPortId, targetPortDirect, position }) => {
@@ -173,11 +172,9 @@ export default {
   },
   methods: {
     async endRound() {
-      console.log('endRound');
       await api.game.endRound({ gameId: this.game._id });
     },
     async leaveGame() {
-      console.log('leaveGame');
       await api.game.leaveGame({ gameId: this.game._id });
     },
     async addPlane(event) {

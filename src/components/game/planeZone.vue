@@ -1,21 +1,22 @@
 <template>
   <div
+    v-if="zone._id"
     :style="{
-      left: zoneData.left + 'px',
-      top: zoneData.top + 'px',
+      left: zone.left + 'px',
+      top: zone.top + 'px',
       color: 'white',
       fontSize: '10px',
     }"
-    :class="['zone', zoneData.vertical ? 'vertical' : '', zoneData.available ? 'available' : '']"
+    :class="['zone', zone.vertical ? 'vertical' : '', zone.available ? 'available' : '']"
     v-on:click="putDice"
   >
     <div class="scroll-off wraper">
       <plane-zone-sides
         :linkLines="linkLines"
-        :sideList="zoneData.sideList"
-        :position="{ left: zoneData.left, top: zoneData.top, vertical: zoneData.vertical }"
+        :sideList="zone.sideList"
+        :position="{ left: zone.left, top: zone.top, vertical: zone.vertical }"
       />
-      <dice v-for="dice in zoneData.itemList" :key="dice._id" :dice="dice" />
+      <dice v-for="dice in zone.itemList" :key="dice._id" :dice="dice" />
     </div>
   </div>
 </template>
@@ -31,17 +32,17 @@ export default {
     dice,
   },
   props: {
-    zone: Object,
+    zoneId: String,
     linkLines: Object,
   },
   computed: {
-    zoneData() {
-      return { ...this.getSimple(this.zone._id, 'zone'), ...this.zone };
-    },
     ...mapGetters({
       getSimple: 'getSimple',
       pickedDiceId: 'pickedDiceId',
     }),
+    zone() {
+      return this.getSimple(this.zoneId, 'zone');
+    },
   },
   methods: {
     putDice() {
@@ -58,7 +59,6 @@ export default {
   },
   mounted() {
     // console.log('planeZone mounted', this.zone);
-    //this.$store.dispatch("setData", { zone: { [this.zone._id]: this.zone } });
   },
 };
 </script>
@@ -93,49 +93,4 @@ export default {
 .zone.available.hard {
   box-shadow: inset 0 0 20px 8px yellow;
 }
-/* 					.*css*[data-vertical="1"], .*css*[data-vertical="1"] .domino-dice {
-						height: 142px;
-						width: 73px;
-					}
-					.*css*:hover {
-						box-shadow: inset 0 0 20px 8px lightgreen;
-					}
-					.*css*:hover:before {
-						content: 'value-' attr(data-value) '\A' attr(data-z) '\A' 'v1-' attr(data-v1) '\A' 'v2-' attr(data-v2);
-						background: white;
-						padding: 5px;
-						top: -20px;
-						position: absolute;
-					}
-					.*css* > .item-controls {
-						margin-right: -24px;
-					}
-					.*css* > .g-token {
-						position: absolute;
-						left: calc(50% - 30px);
-						top: 5px;
-					}
-					.*css*[data-vertical] > .g-token {
-						left: 5px;
-						top: calc(50% - 30px);
-					}
-					.*css*[data-value] > .g-token {
-						left: calc(50% - 20px);
-						top: 15px;
-						z-index: 1;
-					}
-					.*css*[data-value] > .g-token > select.g-token {
-						width: 40px!important;
-						height: 40px!important;
-					}
-					.*css*[data-value][data-vertical] > .g-token {
-						left: 15px;
-						top: calc(50% - 20px);
-					}
-					.*css*:not([data-value]) > .g-token > select.g-token {
-						background-color: #ffffff00;
-					}
-					.*css*[data-deleted_dice] .domino-dice {
-						transform: scale(0.5);
-					} */
 </style>
