@@ -84,11 +84,16 @@ export default {
     async selectPlane(event) {
       const $plane = event.target.closest('.plane');
       if ($plane.closest('.player-hands')) {
-        const { availablePorts } = await api.game.getPlanePortsAvailability({
-          gameId: this.$route.params.id,
-          joinPlaneId: this.plane._id,
-        });
-        this.$store.commit('setAvailablePorts', availablePorts);
+        this.$store.commit('setAvailablePorts', []);
+        await api.game
+          .event({ name: 'getPlanePortsAvailability', data: { joinPlaneId: this.planeId } })
+          .then(({ availablePorts }) => {
+            this.$store.commit('setAvailablePorts', availablePorts);
+          })
+          .catch((err) => {
+            console.log({ err });
+            alert(err.message);
+          });
       }
     },
     customBG(pid) {

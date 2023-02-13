@@ -4,7 +4,6 @@
     :class="['player', iam ? 'iam' : '', player.active ? 'active' : '']"
     :style="{
       border: iam ? '1px solid green' : 'none',
-      width: iam ? '100%' : 'auto',
     }"
   >
     <div class="workers">
@@ -16,14 +15,14 @@
       </div>
       <div class="hand-cards-list">
         <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
-          <card v-for="card in deck.itemList" :key="card._id" :card="card" />
+          <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" />
         </div>
       </div>
       <div class="hand-dices-list">
         <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
           <card v-if="deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
           <card v-if="deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
-          <dice v-for="dice in deck.itemList" :key="dice._id" :dice="dice" />
+          <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" />
         </div>
       </div>
     </div>
@@ -59,10 +58,10 @@ export default {
       return this.playerId === this.currentPlayer;
     },
     dominoDecks() {
-      return this.player.deckList.filter((deck) => deck.type === 'domino') || [];
+      return this.deckIds.map((id) => this.getSimple(id, 'deck')).filter((deck) => deck.type === 'domino') || [];
     },
     cardDecks() {
-      return this.player.deckList.filter((deck) => deck.type === 'card') || [];
+      return this.deckIds.map((id) => this.getSimple(id, 'deck')).filter((deck) => deck.type === 'card') || [];
     },
     deckIds() {
       return Object.keys(this.player.deckMap || {});
@@ -151,12 +150,12 @@ export default {
 }
 
 .hand-planes {
-  position: absolute;
-  top: 0px;
+  position: fixed;
+  bottom: 0px;
   left: 0px;
   z-index: 1;
   background: black;
-  height: 100%;
+  height: 220px;
   display: flex;
   justify-content: center;
   align-items: center;

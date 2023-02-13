@@ -1,10 +1,7 @@
 <template>
   <div
-    :class="[
-      'card-event',
-      cardData.deleted ? 'deleted' : '',
-      'card-event-' + cardData.name,
-    ]"
+    v-if="card._id"
+    :class="['card-event', card.deleted ? 'deleted' : '', 'card-event-' + card.name]"
     :style="customStyle"
   >
     <div class="controls">
@@ -17,18 +14,18 @@
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 
 export default {
   props: {
-    card: Object,
+    cardId: String,
   },
   computed: {
     ...mapGetters({
-      getSimple: "getSimple",
+      getSimple: 'getSimple',
     }),
-    cardData() {
-      return { ...this.getSimple(this.card._id, "card"), ...this.card };
+    card() {
+      return this.getSimple(this.cardId, 'card');
     },
     customStyle() {
       const style = {};
@@ -43,9 +40,6 @@ export default {
 </script>
 
 <style scoped>
-/* .card-event {
-    
-  } */
 .card-event {
   border: 1px solid;
   width: 120px;

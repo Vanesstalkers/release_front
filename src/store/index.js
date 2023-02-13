@@ -38,7 +38,7 @@ export default new Vuex.Store({
     },
     hideZonesAvailability: state => {
       Object.keys(state.zone).forEach(id => {
-        if (state.zone[id].available) delete state.zone[id].available;
+        if (state.zone[id].available) state.zone[id].available = false;
       });
     },
     setAvailablePorts: (state, value) => {

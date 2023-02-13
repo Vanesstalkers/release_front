@@ -16,7 +16,7 @@
         :sideList="zone.sideList"
         :position="{ left: zone.left, top: zone.top, vertical: zone.vertical }"
       />
-      <dice v-for="dice in zone.itemList" :key="dice._id" :dice="dice" />
+      <dice v-for="id in Object.keys(zone.itemMap)" :key="id" :diceId="id" />
     </div>
   </div>
 </template>
@@ -45,15 +45,18 @@ export default {
     },
   },
   methods: {
-    putDice() {
+    async putDice() {
       if (this.pickedDiceId) {
-        api.game.replaceDice({
-          gameId: this.$route.params.id,
-          diceId: this.pickedDiceId,
-          zoneId: this.zone._id,
-        });
-        this.$store.commit('setPickedDiceId', null);
-        this.$store.commit('hideZonesAvailability');
+        await api.game
+          .event({ name: 'replaceDice', data: { diceId: this.pickedDiceId, zoneId: this.zoneId } })
+          .then((res) => {
+            this.$store.commit('setPickedDiceId', null);
+            this.$store.commit('hideZonesAvailability');
+          })
+          .catch((err) => {
+            console.log({ err });
+            alert(err.message);
+          });
       }
     },
   },

@@ -1,16 +1,11 @@
 <template>
-  <div id="game" @wheel.prevent="zoomGamePlane">
-    <!-- <div style="position: absolute; bottom: 0px">{{ this.game }}</div> -->
-
+  <div v-if="game._id" id="game" @wheel.prevent="zoomGamePlane">
     <div
       id="gamePlane"
       :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'top', ...gamePlaneControlStyle }"
     >
-      <!-- <plane v-for="plane in planeList" :key="plane._id" :plane="plane" /> -->
-      <plane v-for="id in planeIds" :key="id" :planeId="id" />
-      <!-- <plane v-for="plane in planeList" :key="plane._id" :planeData="plane" :planeId="plane._id" /> -->
-      <!-- <bridge v-for="bridge in bridgeList" :key="bridge._id" :bridge="bridge" /> -->
-      <bridge v-for="id in bridgeIds" :key="id" :bridgeId="id" />
+      <plane v-for="id in Object.keys(this.game.planeMap)" :key="id" :planeId="id" />
+      <bridge v-for="id in Object.keys(this.game.bridgeMap)" :key="id" :bridgeId="id" />
 
       <div
         v-for="position in possibleAddPlanePositions"
@@ -45,15 +40,16 @@
           :key="deck._id"
           :style="{ margin: '1px', padding: '10px', border: '1px solid black' }"
         >
-          {{ deck.itemList.length }}
-          <span v-for="dice in deck.itemList" :key="dice._id">
-            {{ dice._id }}
-          </span>
+          <div v-if="deck._id">
+            <button v-if="deck.type === 'domino'" v-on:click="takeDice">Взять кость</button>
+            <span v-for="id in Object.keys(deck.itemMap)" :key="id">
+              {{ id }}
+            </span>
+          </div>
         </div>
       </div>
-      <div class="gui" :style="{ right: '0px', left: 'auto', width: '200px' }">
-        {{ activeCards }}
-        <card v-for="card in activeCards.itemList" :key="card._id" :card="card" />
+      <div v-if="activeCards._id" class="gui" :style="{ right: '0px', left: 'auto', width: '200px' }">
+        <card v-for="id in Object.keys(activeCards.itemMap)" :key="id" :cardId="id" />
       </div>
     </div>
   </div>
@@ -119,7 +115,7 @@ export default {
     game() {
       return this.$store.state.game?.[this.gameId] || {};
     },
-    playerIds(){
+    playerIds() {
       return Object.keys(this.game.playerMap || {});
     },
     activePlayerId() {
@@ -129,18 +125,11 @@ export default {
       return this.currentPlayer === this.activePlayerId;
     },
     deckList() {
-      return this.game.deckList?.filter((deck) => deck.subtype !== 'active');
+      const list = Object.keys(this.game.deckMap).map((id) => this.getSimple(id, 'deck')) || [];
+      return list;
     },
     activeCards() {
-      return this.game.deckList?.find((deck) => deck.subtype === 'active') || [];
-    },
-    planeIds(){
-      console.log('planeIds', this.game.planeMap);
-      return Object.keys(this.game.planeMap || {});
-    },
-    bridgeIds(){
-      console.log('bridgeIds', this.game.bridgeMap);
-      return Object.keys(this.game.bridgeMap || {});
+      return this.deckList.find((deck) => deck.subtype === 'active') || {};
     },
     possibleAddPlanePositions() {
       return this.availablePorts.map(({ joinPortId, joinPortDirect, targetPortId, targetPortDirect, position }) => {
@@ -171,20 +160,34 @@ export default {
     // }
   },
   methods: {
+    async takeDice() {
+      await api.game.takeDice({ gameId: this.game._id });
+    },
     async endRound() {
-      await api.game.endRound({ gameId: this.game._id });
+      await api.game.event({ name: 'endRound' }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
     },
     async leaveGame() {
       await api.game.leaveGame({ gameId: this.game._id });
     },
     async addPlane(event) {
-      api.game.addPlane({
-        gameId: this.$route.params.id,
-        joinPortId: event.target.attributes.joinPortId.value,
-        targetPortId: event.target.attributes.targetPortId.value,
-        joinPortDirect: event.target.attributes.joinPortDirect.value,
-        targetPortDirect: event.target.attributes.targetPortDirect.value,
-      });
+      await api.game
+        .event({
+          name: 'addPlane',
+          data: {
+            gameId: this.$route.params.id,
+            joinPortId: event.target.attributes.joinPortId.value,
+            targetPortId: event.target.attributes.targetPortId.value,
+            joinPortDirect: event.target.attributes.joinPortDirect.value,
+            targetPortDirect: event.target.attributes.targetPortDirect.value,
+          },
+        })
+        .catch((err) => {
+          console.log({ err });
+          alert(err.message);
+        });
       this.$store.commit('setAvailablePorts', []);
     },
     zoomGamePlane(event) {
