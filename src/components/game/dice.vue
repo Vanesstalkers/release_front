@@ -42,46 +42,48 @@ export default {
       return this.getSimple(this.diceId, 'dice');
     },
     sideList() {
-      return this.dice?.sideList || [{ eventData: {} }, { eventData: {} }];
+      return this.dice.sideList.map(({ _id }) => this.getSimple(_id, 'diceside'));
     },
   },
   methods: {
     openDiceSideValueSelect(targetId) {
       this.$store.commit('setSelectedDiceSideId', targetId);
     },
-    pickActiveEventDiceSide(fakeValue) {
-      api.game.eventTrigger({
-        gameId: this.$route.params.id,
-        eventData: { targetId: this.selectedDiceSideId, fakeValue },
-      });
-      this.$store.commit('setSelectedDiceSideId', null);
-    },
-    async pickDice() {
-      this.$store.commit('setPickedDiceId', this.diceId);
+    async pickActiveEventDiceSide(fakeValue) {
       await api.game
-        .event({ name: 'getZonesAvailability', data: { diceId: this.diceId } })
-        .then(({ availableZones }) => {
-          this.$store.dispatch('setDeep', { zone: availableZones });
+        .action({
+          name: 'eventTrigger',
+          data: {
+            eventData: { targetId: this.selectedDiceSideId, fakeValue },
+          },
         })
         .catch((err) => {
           console.log({ err });
           alert(err.message);
         });
+      this.$store.commit('setSelectedDiceSideId', null);
+    },
+    async pickDice() {
+      this.$store.commit('setPickedDiceId', this.diceId);
+      await api.game.action({ name: 'getZonesAvailability', data: { diceId: this.diceId } }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
     },
     async rotateDice() {
-      await api.game.event({ name: 'rotateDice', data: { diceId: this.diceId } }).catch((err) => {
+      await api.game.action({ name: 'rotateDice', data: { diceId: this.diceId } }).catch((err) => {
         console.log({ err });
         alert(err.message);
       });
     },
     async deleteDice() {
-      await api.game.event({ name: 'deleteDice', data: { diceId: this.diceId } }).catch((err) => {
+      await api.game.action({ name: 'deleteDice', data: { diceId: this.diceId } }).catch((err) => {
         console.log({ err });
         alert(err.message);
       });
     },
     async restoreDice() {
-      await api.game.event({ name: 'restoreDice', data: { diceId: this.diceId } }).catch((err) => {
+      await api.game.action({ name: 'restoreDice', data: { diceId: this.diceId } }).catch((err) => {
         console.log({ err });
         alert(err.message);
       });

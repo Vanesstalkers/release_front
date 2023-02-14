@@ -86,7 +86,7 @@ export default {
       if ($plane.closest('.player-hands')) {
         this.$store.commit('setAvailablePorts', []);
         await api.game
-          .event({ name: 'getPlanePortsAvailability', data: { joinPlaneId: this.planeId } })
+          .action({ name: 'getPlanePortsAvailability', data: { joinPlaneId: this.planeId } })
           .then(({ availablePorts }) => {
             this.$store.commit('setAvailablePorts', availablePorts);
           })
@@ -139,7 +139,7 @@ export default {
         if (p.ot == undefined || offsetTop < p.ot) p.ot = offsetTop;
         if (p.ol == undefined || offsetLeft < p.ol) p.ol = offsetLeft;
       });
-
+      
       const gamePlaneCustomStyleData = {
         height: p.b - p.t + 'px',
         width: p.r - p.l + 'px',
@@ -150,10 +150,15 @@ export default {
     },
   },
   mounted() {
-    this.centerPlaneBackground();
-    if (this.inHand) {
-      this.customClass = { ...this.customClass, inHand: `in-hand` };
-    } else this.inHandStyle = {};
+    // $nextTick не всегда помогает при запуске новой игры
+    setTimeout(() => {
+      // this.$nextTick(() => {
+        if (this.inHand) {
+          this.customClass = { ...this.customClass, inHand: `in-hand` };
+        } else this.inHandStyle = {};
+        this.centerPlaneBackground();
+      // });
+    }, 100);
   },
 };
 </script>

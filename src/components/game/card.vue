@@ -3,14 +3,8 @@
     v-if="card._id"
     :class="['card-event', card.deleted ? 'deleted' : '', 'card-event-' + card.name]"
     :style="customStyle"
-  >
-    <div class="controls">
-      <!-- <div class="control" v-on:click.stop="pickDice">move</div>
-      <div class="control rotate" v-on:click.stop="rotateDice">rotate</div>
-      <div class="control fake" v-on:click.stop>disabled rotate</div>
-      <div class="control" v-on:click.stop="deleteDice">delete</div> -->
-    </div>
-  </div>
+    v-on:click.stop="playCard"
+  />
 </template>
 
 <script>
@@ -29,12 +23,17 @@ export default {
     },
     customStyle() {
       const style = {};
-      // style.backgroundImage = `url(../../assets/cards/${this.card.name||'unknown'}.jpg)`;
-      // style.backgroundImage = `url(../../assets/plane.png)`;
       return style;
     },
   },
-  methods: {},
+  methods: {
+    async playCard() {
+      await api.game.action({ name: 'playCard', data: { cardId: this.cardId } }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
+    },
+  },
   mounted() {},
 };
 </script>

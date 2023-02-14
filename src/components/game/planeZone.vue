@@ -48,7 +48,7 @@ export default {
     async putDice() {
       if (this.pickedDiceId) {
         await api.game
-          .event({ name: 'replaceDice', data: { diceId: this.pickedDiceId, zoneId: this.zoneId } })
+          .action({ name: 'replaceDice', data: { diceId: this.pickedDiceId, zoneId: this.zoneId } })
           .then((res) => {
             this.$store.commit('setPickedDiceId', null);
             this.$store.commit('hideZonesAvailability');

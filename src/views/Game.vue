@@ -119,7 +119,7 @@ export default {
       return Object.keys(this.game.playerMap || {});
     },
     activePlayerId() {
-      return this.playerIds.find((id) => this.getSimple(id).active);
+      return this.playerIds.find((id) => this.getSimple(id, 'player').active);
     },
     currentPlayerIsActive() {
       return this.currentPlayer === this.activePlayerId;
@@ -164,7 +164,7 @@ export default {
       await api.game.takeDice({ gameId: this.game._id });
     },
     async endRound() {
-      await api.game.event({ name: 'endRound' }).catch((err) => {
+      await api.game.action({ name: 'endRound' }).catch((err) => {
         console.log({ err });
         alert(err.message);
       });
@@ -174,7 +174,7 @@ export default {
     },
     async addPlane(event) {
       await api.game
-        .event({
+        .action({
           name: 'addPlane',
           data: {
             gameId: this.$route.params.id,

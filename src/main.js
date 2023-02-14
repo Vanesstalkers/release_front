@@ -88,13 +88,11 @@ const init = async () => {
     router.push({ path: `/` });
   });
 
-  document.addEventListener('click', event => {
+  document.addEventListener('click', async event => {
     if (event.target.classList.contains('active-event')) {
-      api.game.eventTrigger({
-        gameId: router.currentRoute.params.id,
-        eventData: {
-          targetId: event.target.attributes.id?.value,
-        },
+      await api.game.action({
+        name: 'eventTrigger',
+        data: { eventData: { targetId: event.target.attributes.id?.value } },
       });
     }
   });
