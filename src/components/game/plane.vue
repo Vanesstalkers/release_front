@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="plane._id"
-    :class="['plane', ...Object.values(customClass)]"
+    :class="['plane', ...plane.customClass, ...Object.values(customClass)]"
     :style="customStyle"
     v-on:click.stop="selectPlane"
   >
@@ -11,7 +11,7 @@
     <div class="port-wraper">
       <plane-port v-for="id in portIds" :key="id" v-bind:portId="id" :linkLines="linkLines" />
     </div>
-    <div class="custom-bg">
+    <div v-if="!cardPlane" div class="custom-bg">
       <span
         v-for="item in customBG(plane._id)"
         :key="item.code"
@@ -73,6 +73,9 @@ export default {
       }
       return style;
     },
+    cardPlane() {
+      return this.plane.customClass.includes('card-plane');
+    },
     zoneIds() {
       return Object.keys(this.plane.zoneMap || {});
     },
@@ -87,9 +90,6 @@ export default {
         this.$store.commit('setAvailablePorts', []);
         await api.game
           .action({ name: 'getPlanePortsAvailability', data: { joinPlaneId: this.planeId } })
-          .then(({ availablePorts }) => {
-            this.$store.commit('setAvailablePorts', availablePorts);
-          })
           .catch((err) => {
             console.log({ err });
             alert(err.message);
@@ -139,7 +139,7 @@ export default {
         if (p.ot == undefined || offsetTop < p.ot) p.ot = offsetTop;
         if (p.ol == undefined || offsetLeft < p.ol) p.ol = offsetLeft;
       });
-      
+
       const gamePlaneCustomStyleData = {
         height: p.b - p.t + 'px',
         width: p.r - p.l + 'px',
@@ -153,10 +153,10 @@ export default {
     // $nextTick не всегда помогает при запуске новой игры
     setTimeout(() => {
       // this.$nextTick(() => {
-        if (this.inHand) {
-          this.customClass = { ...this.customClass, inHand: `in-hand` };
-        } else this.inHandStyle = {};
-        this.centerPlaneBackground();
+      if (this.inHand) {
+        this.customClass = { ...this.customClass, inHand: `in-hand` };
+      } else this.inHandStyle = {};
+      this.centerPlaneBackground();
       // });
     }, 100);
   },
@@ -172,7 +172,7 @@ export default {
   margin-bottom: 10px;
   transform-origin: 0 0;
 }
-.plane:after {
+.plane:not(.card-plane):after {
   content: '';
   z-index: -1;
   position: absolute;
@@ -248,8 +248,11 @@ export default {
   transform: rotate(180deg);
 }
 
-.plane.in-hand {
+.plane.in-hand:not(.card-plane) {
   transform: scale(0.5);
   margin: 125px -250px 0px 0px;
+}
+
+.plane.card-plane {
 }
 </style>

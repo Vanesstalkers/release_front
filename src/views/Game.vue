@@ -132,20 +132,23 @@ export default {
       return this.deckList.find((deck) => deck.subtype === 'active') || {};
     },
     possibleAddPlanePositions() {
-      return this.availablePorts.map(({ joinPortId, joinPortDirect, targetPortId, targetPortDirect, position }) => {
-        return {
-          joinPortId,
-          joinPortDirect,
-          targetPortId,
-          targetPortDirect,
-          style: {
-            left: position.left + 'px',
-            top: position.top + 'px',
-            width: position.right - position.left + 'px',
-            height: position.bottom - position.top + 'px',
-          },
-        };
-      });
+      if(!this.currentPlayerIsActive) return [];
+      return (this.game.availablePorts || []).map(
+        ({ joinPortId, joinPortDirect, targetPortId, targetPortDirect, position }) => {
+          return {
+            joinPortId,
+            joinPortDirect,
+            targetPortId,
+            targetPortDirect,
+            style: {
+              left: position.left + 'px',
+              top: position.top + 'px',
+              width: position.right - position.left + 'px',
+              height: position.bottom - position.top + 'px',
+            },
+          };
+        },
+      );
     },
   },
   watch: {

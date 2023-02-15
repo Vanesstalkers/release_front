@@ -38,7 +38,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .card-event {
   border: 1px solid;
   width: 120px;
@@ -65,14 +65,23 @@ export default {
 .card-event-flowstate {
   background-image: url(../../assets/cards/flowstate.jpg);
 }
-.card-event-rain {
-  background-image: url(../../assets/cards/rain.jpg);
+.card-event-water {
+  background-image: url(../../assets/cards/water.jpg);
 }
 .card-event-teamlead {
   background-image: url(../../assets/cards/teamlead.jpg);
 }
 .card-event-weekend {
   background-image: url(../../assets/cards/weekend.jpg);
+}
+.card-event-req_legal {
+  background-image: url(../../assets/cards/req_legal.jpg);
+}
+.card-event-req_tax {
+  background-image: url(../../assets/cards/req_tax.jpg);
+}
+.card-event-pilot {
+  background-image: url(../../assets/cards/pilot.jpg);
 }
 .card-event.active {
   border: 4px solid green;
