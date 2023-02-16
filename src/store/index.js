@@ -11,6 +11,11 @@ export default new Vuex.Store({
     availablePorts: [],
   },
   getters: {
+    currentPlayer: state => state.currentPlayer,
+    currentPlayerIsActive: state =>
+      state.currentPlayer ===
+      Object.keys((state.game?.[state.gameId] || {}).playerMap || {}).find(id => state.player?.[id]?.active),
+
     pickedDiceId: state => state.pickedDiceId,
     selectedDiceSideId: state => state.selectedDiceSideId,
     availablePorts: state => state.availablePorts,
@@ -27,7 +32,6 @@ export default new Vuex.Store({
     currentSession: state => state.session?.[state.currentSession] || {},
     currentSessionGame: state => state.session?.[state.currentSession]?.data.game || null,
     gamePlaneCustomStyleData: state => state.gamePlaneCustomStyleData || {},
-    currentPlayer: state => state.currentPlayer,
   },
   mutations: {
     setPickedDiceId: (state, value) => {

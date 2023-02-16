@@ -1,9 +1,9 @@
 <template>
   <div
     v-if="plane._id"
-    :class="['plane', ...plane.customClass, ...Object.values(customClass)]"
+    :class="['plane', activeEvent ? 'active-event' : '', ...plane.customClass, ...Object.values(customClass)]"
     :style="customStyle"
-    v-on:click.stop="selectPlane"
+    v-on:click.stop="(e) => (activeEvent ? choosePlane() : selectPlane(e))"
   >
     <div class="zone-wraper">
       <plane-zone v-for="id in zoneIds" :key="id" v-bind:zoneId="id" :linkLines="linkLines" />
@@ -56,6 +56,7 @@ export default {
   computed: {
     ...mapGetters({
       getSimple: 'getSimple',
+      currentPlayerIsActive: 'currentPlayerIsActive',
     }),
     plane() {
       return this.getSimple(this.planeId, 'plane');
@@ -82,6 +83,9 @@ export default {
     portIds() {
       return Object.keys(this.plane.portMap || {});
     },
+    activeEvent() {
+      return this.currentPlayerIsActive && this.plane.activeEvent;
+    },
   },
   methods: {
     async selectPlane(event) {
@@ -95,6 +99,12 @@ export default {
             alert(err.message);
           });
       }
+    },
+    async choosePlane() {
+      await api.game.action({ name: 'eventTrigger', data: { eventData: { targetId: this.planeId } } }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
     },
     customBG(pid) {
       let storageFillData = localStorage.getItem('gamePlaneBackgroundData');
@@ -171,6 +181,9 @@ export default {
   height: 250px;
   margin-bottom: 10px;
   transform-origin: 0 0;
+}
+.plane.active-event {
+  box-shadow: 0 0 20px 8px yellow !important;
 }
 .plane:not(.card-plane):after {
   content: '';

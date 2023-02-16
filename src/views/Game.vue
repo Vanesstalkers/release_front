@@ -20,7 +20,7 @@
       />
     </div>
     <div class="gui" :style="{ zIndex: 1 }">
-      <div class="gui" :style="{ left: '50%' }">
+      <div class="gui" :style="{ left: '50%',  zIndex: 1 }">
         Раунд: {{ game.round }}
         <button :style="currentPlayerIsActive ? {} : { opacity: '0.7' }" v-on:click="endRound">Закончить раунд</button>
         <button v-on:click="leaveGame">Выйти из игры</button>
@@ -99,7 +99,7 @@ export default {
   computed: {
     ...mapGetters({
       getSimple: 'getSimple',
-      currentPlayer: 'currentPlayer',
+      currentPlayerIsActive: 'currentPlayerIsActive',
       currentSession: 'currentSession',
       currentSessionGame: 'currentSessionGame',
       gamePlaneCustomStyleData: 'gamePlaneCustomStyleData',
@@ -118,12 +118,6 @@ export default {
     playerIds() {
       return Object.keys(this.game.playerMap || {});
     },
-    activePlayerId() {
-      return this.playerIds.find((id) => this.getSimple(id, 'player').active);
-    },
-    currentPlayerIsActive() {
-      return this.currentPlayer === this.activePlayerId;
-    },
     deckList() {
       const list = Object.keys(this.game.deckMap).map((id) => this.getSimple(id, 'deck')) || [];
       return list;
@@ -132,7 +126,7 @@ export default {
       return this.deckList.find((deck) => deck.subtype === 'active') || {};
     },
     possibleAddPlanePositions() {
-      if(!this.currentPlayerIsActive) return [];
+      if (!this.currentPlayerIsActive) return [];
       return (this.game.availablePorts || []).map(
         ({ joinPortId, joinPortDirect, targetPortId, targetPortDirect, position }) => {
           return {
@@ -199,6 +193,7 @@ export default {
   },
   async created() {
     // console.log('async created() {');
+    this.$store.dispatch('setSimple', { gameId: this.gameId });
   },
   mounted() {
     // console.log('mounted currentSession=', this.currentSession);

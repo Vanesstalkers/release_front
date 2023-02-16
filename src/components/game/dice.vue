@@ -1,5 +1,9 @@
 <template>
-  <div v-if="dice._id" :class="['domino-dice', dice.deleted ? 'deleted' : '']" v-on:click.stop="pickDice">
+  <div
+    v-if="dice._id"
+    :class="['domino-dice', dice.deleted ? 'deleted' : '', activeEvent ? 'active-event' : '']"
+    v-on:click.stop="(e) => (activeEvent ? chooseDice() : pickDice())"
+  >
     <div class="controls">
       <div class="scroll-off control" v-on:click.stop="pickDice">move</div>
       <div class="scroll-off control rotate" v-on:click.stop="rotateDice">rotate</div>
@@ -32,10 +36,12 @@ export default {
   },
   props: {
     diceId: String,
+    moveable: Boolean,
   },
   computed: {
     ...mapGetters({
       getSimple: 'getSimple',
+      currentPlayerIsActive: 'currentPlayerIsActive',
       selectedDiceSideId: 'selectedDiceSideId',
     }),
     dice() {
@@ -44,19 +50,23 @@ export default {
     sideList() {
       return this.dice.sideList.map(({ _id }) => this.getSimple(_id, 'diceside'));
     },
+    activeEvent() {
+      return this.currentPlayerIsActive && this.dice.activeEvent;
+    },
   },
   methods: {
+    async chooseDice() {
+      await api.game.action({ name: 'eventTrigger', data: { eventData: { targetId: this.diceId } } }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
+    },
     openDiceSideValueSelect(targetId) {
       this.$store.commit('setSelectedDiceSideId', targetId);
     },
     async pickActiveEventDiceSide(fakeValue) {
       await api.game
-        .action({
-          name: 'eventTrigger',
-          data: {
-            eventData: { targetId: this.selectedDiceSideId, fakeValue },
-          },
-        })
+        .action({ name: 'eventTrigger', data: { eventData: { targetId: this.selectedDiceSideId, fakeValue } } })
         .catch((err) => {
           console.log({ err });
           alert(err.message);
@@ -64,6 +74,7 @@ export default {
       this.$store.commit('setSelectedDiceSideId', null);
     },
     async pickDice() {
+      if (!this.moveable) return;
       this.$store.commit('setPickedDiceId', this.diceId);
       await api.game.action({ name: 'getZonesAvailability', data: { diceId: this.diceId } }).catch((err) => {
         console.log({ err });
@@ -102,10 +113,14 @@ export default {
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  cursor: pointer;
 }
 .domino-dice.deleted {
   transform: scale(0.5);
+}
+
+.plane .domino-dice,
+.player.iam .hand-dices .domino-dice {
+  cursor: pointer;
 }
 
 .domino-dice > .controls {
@@ -160,13 +175,22 @@ export default {
   height: 70px;
   border-radius: 15px;
   background-image: url(../../assets/Dices.png);
-  cursor: pointer;
 }
 .player.iam .hand-dices .domino-dice:hover > .el {
   box-shadow: inset 0 0 20px 8px lightgreen;
 }
 .domino-dice > .el.active-event:hover {
   box-shadow: inset 0 0 20px 8px lightgreen !important;
+}
+
+.domino-dice.active-event {
+  box-shadow: none !important;
+}
+.domino-dice.active-event > .el {
+  box-shadow: inset 0 0 20px 8px yellow;
+}
+.domino-dice.active-event:hover > .el {
+  opacity: 0.7;
 }
 
 .domino-dice > .el.fake-value {

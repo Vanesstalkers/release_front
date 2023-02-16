@@ -83,6 +83,46 @@ export default {
 .card-event-pilot {
   background-image: url(../../assets/cards/pilot.jpg);
 }
+.card-event-claim {
+  background-image: url(../../assets/cards/claim.jpg);
+}
+.card-event-transfer {
+  background-image: url(../../assets/cards/transfer.jpg);
+}
+.card-event-take_project {
+  background-image: url(../../assets/cards/take_project.jpg);
+}
+.card-event-give_project {
+  background-image: url(../../assets/cards/give_project.jpg);
+}
+.card-event-superman {
+  background-image: url(../../assets/cards/superman.jpg);
+}
+.card-event-insight {
+  background-image: url(../../assets/cards/insight.jpg);
+}
+.card-event-lib {
+  background-image: url(../../assets/cards/lib.jpg);
+}
+.card-event-showoff {
+  background-image: url(../../assets/cards/showoff.jpg);
+}
+.card-event-emergency {
+  background-image: url(../../assets/cards/emergency.jpg);
+}
+.card-event-security {
+  background-image: url(../../assets/cards/security.jpg);
+}
+.card-event-dream {
+  background-image: url(../../assets/cards/dream.jpg);
+}
+.card-event-refactoring {
+  background-image: url(../../assets/cards/refactoring.jpg);
+}
+.card-event-audit {
+  background-image: url(../../assets/cards/audit.jpg);
+}
+
 .card-event.active {
   border: 4px solid green;
 }

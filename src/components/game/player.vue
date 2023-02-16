@@ -7,7 +7,7 @@
     }"
   >
     <div class="workers">
-      <card-worker :card="player" />
+      <card-worker :cardData="player" />
     </div>
     <div class="player-hands">
       <div v-if="planeInHandIds.length" class="hand-planes">
@@ -22,7 +22,7 @@
         <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
           <card v-if="deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
           <card v-if="deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
-          <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" />
+          <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :moveable="iam" />
         </div>
       </div>
     </div>

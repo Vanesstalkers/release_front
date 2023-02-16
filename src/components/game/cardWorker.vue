@@ -1,11 +1,12 @@
 <template>
   <div
+    v-if="cardData._id"
     :id="cardData._id"
     :class="[
       'card-worker',
       'card-worker-' + cardData.code,
-      cardData.active ? 'active': '',
-      cardData.activeEvent ? 'active-event' : '',
+      cardData.active ? 'active' : '',
+      activeEvent ? 'active-event' : '',
     ]"
     :style="customStyle"
   >
@@ -16,24 +17,25 @@
 </template>
 
 <script>
-import { mapGetters, mapState, mapActions, mapMutations } from "vuex";
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 
 export default {
   props: {
-    card: Object,
+    cardData: Object,
   },
   computed: {
     ...mapGetters({
-      getSimple: "getSimple",
+      getSimple: 'getSimple',
+      currentPlayerIsActive: 'currentPlayerIsActive',
     }),
-    cardData() {
-      return { ...this.getSimple(this.card._id, "card"), ...this.card };
-    },
     customStyle() {
       const style = {};
       // style.backgroundImage = `url(../../assets/cards/${this.card.name||'unknown'}.jpg)`;
       // style.backgroundImage = `url(../../assets/plane.png)`;
       return style;
+    },
+    activeEvent() {
+      return this.currentPlayerIsActive && this.cardData.activeEvent;
     },
   },
   methods: {},
