@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="player._id"
-    :class="['player', iam ? 'iam' : '', player.active ? 'active' : '']"
+    :class="['player', ...customClass, iam ? 'iam' : '', player.active ? 'active' : '']"
     :style="{
       border: iam ? '1px solid green' : 'none',
     }"
@@ -22,7 +22,7 @@
         <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
           <card v-if="deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
           <card v-if="deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
-          <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :moveable="iam" />
+          <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :inHand="true" :iam="iam" />
         </div>
       </div>
     </div>
@@ -44,7 +44,9 @@ export default {
     cardWorker,
   },
   props: {
+    customClass: Array,
     playerId: String,
+    iam: Boolean,
   },
   computed: {
     ...mapGetters({
@@ -53,9 +55,6 @@ export default {
     }),
     player() {
       return this.getSimple(this.playerId, 'player');
-    },
-    iam() {
-      return this.playerId === this.currentPlayer;
     },
     dominoDecks() {
       return this.deckIds.map((id) => this.getSimple(id, 'deck')).filter((deck) => deck.type === 'domino') || [];
@@ -82,9 +81,17 @@ export default {
 <style scoped>
 .player:not(.iam) {
   display: flex;
-  flex-flow: wrap;
   transform: scale(0.5);
   transform-origin: top left;
+}
+.player.idx-0:not(.iam) {
+  top: 0px;
+}
+.player.idx-1:not(.iam) {
+  top: 100px;
+}
+.player.idx-2:not(.iam) {
+  top: 200px;
 }
 .player.iam {
   position: fixed !important;

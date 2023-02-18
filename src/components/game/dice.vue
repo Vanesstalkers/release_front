@@ -1,7 +1,13 @@
 <template>
   <div
     v-if="dice._id"
-    :class="['domino-dice', dice.deleted ? 'deleted' : '', activeEvent ? 'active-event' : '']"
+    :class="[
+      'domino-dice',
+      dice.deleted ? 'deleted' : '',
+      dice.locked ? 'locked' : '',
+      activeEvent ? 'active-event' : '',
+      hide ? 'hide' : '',
+    ]"
     v-on:click.stop="(e) => (activeEvent ? chooseDice() : pickDice())"
   >
     <div class="controls">
@@ -36,7 +42,8 @@ export default {
   },
   props: {
     diceId: String,
-    moveable: Boolean,
+    inHand: Boolean,
+    iam: Boolean,
   },
   computed: {
     ...mapGetters({
@@ -52,6 +59,9 @@ export default {
     },
     activeEvent() {
       return this.currentPlayerIsActive && this.dice.activeEvent;
+    },
+    hide() {
+      return this.inHand && !this.iam && !this.dice.visible;
     },
   },
   methods: {
@@ -74,7 +84,8 @@ export default {
       this.$store.commit('setSelectedDiceSideId', null);
     },
     async pickDice() {
-      if (!this.moveable) return;
+      if (!this.iam) return;
+      if (this.dice.locked) return;
       this.$store.commit('setPickedDiceId', this.diceId);
       await api.game.action({ name: 'getZonesAvailability', data: { diceId: this.diceId } }).catch((err) => {
         console.log({ err });
@@ -117,10 +128,18 @@ export default {
 .domino-dice.deleted {
   transform: scale(0.5);
 }
+.domino-dice.hide > .el {
+  background-image: none;
+  background: black;
+}
 
 .plane .domino-dice,
 .player.iam .hand-dices .domino-dice {
   cursor: pointer;
+}
+.domino-dice.locked {
+  opacity: 0.5;
+  cursor: not-allowed !important;
 }
 
 .domino-dice > .controls {
@@ -140,8 +159,8 @@ export default {
   height: 33.333%;
 }
 
-.plane .domino-dice:hover > .controls,
-.bridge .domino-dice:hover > .controls {
+.plane .domino-dice:hover:not(.active-event) > .controls,
+.bridge .domino-dice:hover:not(.active-event) > .controls {
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -176,7 +195,7 @@ export default {
   border-radius: 15px;
   background-image: url(../../assets/Dices.png);
 }
-.player.iam .hand-dices .domino-dice:hover > .el {
+.player.iam .hand-dices .domino-dice:not(.locked):hover > .el {
   box-shadow: inset 0 0 20px 8px lightgreen;
 }
 .domino-dice > .el.active-event:hover {

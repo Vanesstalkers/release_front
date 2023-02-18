@@ -20,20 +20,20 @@
       />
     </div>
     <div class="gui" :style="{ zIndex: 1 }">
-      <div class="gui" :style="{ left: '50%',  zIndex: 1 }">
+      <div class="gui" :style="{ left: '50%', zIndex: 1 }">
         Раунд: {{ game.round }}
         <button :style="currentPlayerIsActive ? {} : { opacity: '0.7' }" v-on:click="endRound">Закончить раунд</button>
         <button v-on:click="leaveGame">Выйти из игры</button>
       </div>
-      <div
-        class="gui"
-        :style="{
-          display: 'flex',
-          flexFlow: 'column-reverse',
-        }"
-      >
-        <player v-for="id in playerIds" :key="id" :playerId="id" />
-      </div>
+
+      <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" />
+      <player
+        v-for="(id, index) in playerIds.filter((id) => id !== currentPlayer).sort((id1, id2) => (id1 > id2 ? -1 : 1))"
+        :key="id"
+        :playerId="id"
+        :customClass="['gui', `idx-${index}`]"
+      />
+
       <div class="gui" :style="{ top: '100px', right: '0px', left: 'auto', width: '200px' }">
         <div
           v-for="deck in deckList"
@@ -99,6 +99,7 @@ export default {
   computed: {
     ...mapGetters({
       getSimple: 'getSimple',
+      currentPlayer: 'currentPlayer',
       currentPlayerIsActive: 'currentPlayerIsActive',
       currentSession: 'currentSession',
       currentSessionGame: 'currentSessionGame',
