@@ -17,7 +17,6 @@
       <div v-if="!dice.deleted" class="scroll-off control" v-on:click.stop="deleteDice">delete</div>
       <div v-if="dice.deleted" class="scroll-off control" v-on:click.stop="restoreDice">restore</div>
     </div>
-
     <template v-for="side in sideList">
       <div
         :id="side._id"
@@ -52,10 +51,14 @@ export default {
       selectedDiceSideId: 'selectedDiceSideId',
     }),
     dice() {
-      return this.getSimple(this.diceId, 'dice');
+      const dice = this.getSimple(this.diceId, 'dice');
+      return dice._id ? dice : { _id: this.diceId, sideList: [{}, {}] };
     },
     sideList() {
-      return this.dice.sideList.map(({ _id }) => this.getSimple(_id, 'diceside'));
+      return this.dice.sideList.map(({ _id }) => {
+        const side = this.getSimple(_id, 'diceside');
+        return side._id ? side : { eventData: {} };
+      });
     },
     activeEvent() {
       return this.currentPlayerIsActive && this.dice.activeEvent;
@@ -66,10 +69,15 @@ export default {
   },
   methods: {
     async chooseDice() {
-      await api.game.action({ name: 'eventTrigger', data: { eventData: { targetId: this.diceId } } }).catch((err) => {
-        console.log({ err });
-        alert(err.message);
-      });
+      await api.game
+        .action({
+          name: 'eventTrigger',
+          data: { eventData: { targetId: this.diceId, targetPlayerId: this.$parent.playerId } },
+        })
+        .catch((err) => {
+          console.log({ err });
+          alert(err.message);
+        });
     },
     openDiceSideValueSelect(targetId) {
       this.$store.commit('setSelectedDiceSideId', targetId);
