@@ -69,7 +69,17 @@ const init = async () => {
     },
   }).$mount('#app');
 
-  store.dispatch('setSimple', { currentSession });
+  const { userAgent } = navigator;
+  const isMobile = () =>
+    userAgent.match(/Android/i) ||
+    userAgent.match(/webOS/i) ||
+    userAgent.match(/iPhone/i) ||
+    userAgent.match(/iPad/i) ||
+    userAgent.match(/iPod/i) ||
+    userAgent.match(/BlackBerry/i) ||
+    userAgent.match(/Windows Phone/i);
+
+  store.dispatch('setSimple', { currentSession, isMobile: isMobile() ? true : false });
 
   api.db.on('updated', data => {
     store.dispatch('setData', data);

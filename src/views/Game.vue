@@ -1,5 +1,5 @@
 <template>
-  <div v-if="game._id" id="game" @wheel.prevent="zoomGamePlane">
+  <div v-if="game._id" id="game" :class="isMobile ? 'mobile-view' : ''" @wheel.prevent="zoomGamePlane">
     <div
       id="gamePlane"
       :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'top', ...gamePlaneControlStyle }"
@@ -79,17 +79,19 @@ export default {
       gamePlaneRotation: 0,
       gamePlaneConfig: {
         isDragging: false,
+        isTouchMoved: false,
         currentX: 0,
         currentY: 0,
         initialX: 0,
         initialY: 0,
+        distanceX: 0,
+        distanceY: 0,
+        initialDistance: 0,
         xOffset: 0,
         yOffset: 0,
 
         isRotating: false,
-        initialRotateX: 0,
-        currentRotateX: 0,
-        xRotateOffset: 0,
+        initialRotateAngle: 0,
         rotation: 0,
         rotationLast: 0,
       },
@@ -99,6 +101,7 @@ export default {
   computed: {
     ...mapGetters({
       getSimple: 'getSimple',
+      isMobile: 'isMobile',
       currentPlayer: 'currentPlayer',
       currentPlayerIsActive: 'currentPlayerIsActive',
       currentSession: 'currentSession',
@@ -197,7 +200,6 @@ export default {
     this.$store.dispatch('setSimple', { gameId: this.gameId });
   },
   mounted() {
-    // console.log('mounted currentSession=', this.currentSession);
     api.game.enter({ gameId: this.gameId }).then((data) => {
       console.log('api.game.enter', data);
       if (data.status != 'ok') {
@@ -206,12 +208,16 @@ export default {
       }
     });
 
+    document.addEventListener('contextmenu', function (event) {
+      event.preventDefault();
+    });
+
     const self = this;
     const config = this.gamePlaneConfig;
     document.body.addEventListener('mousedown', function (event) {
       if (event.target.classList.contains('scroll-off')) return;
       if (event.button === 2) {
-        config.initialRotateX = event.clientX;
+        config.initialRotateAngle = event.clientX;
         config.isRotating = true;
       } else {
         config.initialX = event.clientX - config.xOffset;
@@ -229,9 +235,7 @@ export default {
     });
     document.body.addEventListener('mousemove', function (event) {
       if (config.isRotating) {
-        config.currentRotateX = event.clientX;
-        config.xRotateOffset = config.currentRotateX - config.initialRotateX;
-        config.rotation = config.rotationLast + config.xRotateOffset / 2;
+        config.rotation = config.rotationLast + (event.clientX - config.initialRotateAngle) / 2;
         self.gamePlaneRotation = config.rotation;
       }
       if (config.isDragging) {
@@ -245,8 +249,57 @@ export default {
         self.gamePlaneTranslateY = config.currentY;
       }
     });
-    document.addEventListener('contextmenu', function (event) {
-      event.preventDefault();
+
+    document.body.addEventListener('touchstart', function (event) {
+      const touches = event.touches;
+      if (touches.length === 2) {
+        const [touch1, touch2] = touches;
+        config.initialDistance = Math.hypot(touch1.pageX - touch2.pageX, touch1.pageY - touch2.pageY);
+
+        config.rotationLast = config.rotation;
+        config.initialRotateAngle = Math.atan2(touch2.pageY - touch1.pageY, touch2.pageX - touch1.pageX);
+      } else {
+        config.initialX = touches[0].pageX;
+        config.initialY = touches[0].pageY;
+        config.xOffset = self.gamePlaneTranslateX;
+        config.yOffset = self.gamePlaneTranslateY;
+        config.isTouchMoved = false;
+      }
+    });
+    document.body.addEventListener('touchmove', function (event) {
+      const touches = event.touches;
+      if (touches.length === 2) {
+        const [touch1, touch2] = touches;
+        const distance = Math.hypot(touch1.pageX - touch2.pageX, touch1.pageY - touch2.pageY);
+        const delta = distance / config.initialDistance;
+
+        const angle = Math.atan2(touch2.pageY - touch1.pageY, touch2.pageX - touch1.pageX);
+        config.rotation = config.rotationLast + (angle - config.initialRotateAngle) * 180 / Math.PI;
+        self.gamePlaneRotation = config.rotation;
+
+        // имитируем плавность
+        if (delta < 0.5) return;
+        else config.initialDistance = distance;
+        self.gamePlaneScale += (delta - 1) * 0.5;
+      } else {
+        config.currentX = event.touches[0].pageX;
+        config.currentY = event.touches[0].pageY;
+        config.distanceX = config.currentX - config.initialX;
+        config.distanceY = config.currentY - config.initialY;
+
+        if (Math.abs(config.distanceX) > 10 || Math.abs(config.distanceY) > 10) {
+          config.isTouchMoved = true;
+          self.gamePlaneTranslateX = config.distanceX + config.xOffset;
+          self.gamePlaneTranslateY = config.distanceY + config.yOffset;
+        }
+      }
+    });
+    document.body.addEventListener('touchend', function (event) {
+      if (!config.isTouchMoved) {
+        // handle tap event on the movable element
+        // event.preventDefault();
+      } else {
+      }
     });
   },
   async beforeDestroy() {
@@ -272,6 +325,14 @@ export default {
 #game .active-event {
   cursor: pointer;
   box-shadow: inset 0 0 20px 8px yellow;
+}
+
+#game.mobile-view {
+  touch-action: none;
+}
+
+#game.mobile-view .gui {
+  /* display: none !important; */
 }
 
 #gamePlane {

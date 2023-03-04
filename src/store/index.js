@@ -11,6 +11,7 @@ export default new Vuex.Store({
     availablePorts: [],
   },
   getters: {
+    isMobile: state => state.isMobile,
     currentPlayer: state => state.currentPlayer,
     currentPlayerIsActive: state =>
       state.currentPlayer ===
