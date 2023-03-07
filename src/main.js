@@ -3,11 +3,17 @@ import VueRouter from 'vue-router';
 import App from './App.vue';
 import router from './router';
 import store from './store';
-window.vuex = store;
-
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
+import { fab } from '@fortawesome/free-brands-svg-icons';
 import { Metacom } from '../lib/metacom.js';
 
+library.add(fas, far, fab);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
 Vue.config.productionTip = false;
+window.vuex = store;
 
 const init = async () => {
   const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
@@ -78,8 +84,12 @@ const init = async () => {
     userAgent.match(/iPod/i) ||
     userAgent.match(/BlackBerry/i) ||
     userAgent.match(/Windows Phone/i);
-
-  store.dispatch('setSimple', { currentSession, isMobile: isMobile() ? true : false });
+  const isLandscape = () => window.innerHeight < window.innerWidth;
+  
+  window.addEventListener('orientationchange', () => {
+    store.dispatch('setSimple', { isLandscape: isLandscape() });
+  });
+  store.dispatch('setSimple', { currentSession, isMobile: isMobile() ? true : false, isLandscape: isLandscape() });
 
   api.db.on('updated', data => {
     store.dispatch('setData', data);

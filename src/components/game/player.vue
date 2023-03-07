@@ -2,18 +2,12 @@
   <div
     v-if="player._id"
     :class="['player', ...customClass, iam ? 'iam' : '', player.active ? 'active' : '']"
-    :style="{
-      border: iam ? '1px solid green' : 'none',
-    }"
   >
-    <div class="workers">
-      <card-worker :cardData="player" />
-    </div>
     <div class="player-hands">
       <div v-if="planeInHandIds.length" class="hand-planes">
         <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
       </div>
-      <div class="hand-cards-list">
+      <div v-if="iam" class="hand-cards-list">
         <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
           <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" />
         </div>
@@ -25,6 +19,20 @@
           <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :inHand="true" :iam="iam" />
         </div>
       </div>
+    </div>
+    <div class="workers">
+      <div v-if="deckCounters" class="deck-counters">
+        <div>
+          <font-awesome-icon icon="fa-solid fa-diamond" class="fa-2xl" />
+          <b>{{ deckCounters.card }}</b>
+        </div>
+        <div>
+          <font-awesome-icon icon="fa-solid fa-hat-wizard" class="fa-2xl" />
+          <b>{{ deckCounters.domino }}</b>
+        </div>
+      </div>
+      <card-worker :cardData="player" />
+      <div v-if="iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
     </div>
   </div>
 </template>
@@ -52,6 +60,7 @@ export default {
     ...mapGetters({
       getSimple: 'getSimple',
       currentPlayer: 'currentPlayer',
+      currentPlayerIsActive: 'currentPlayerIsActive',
     }),
     player() {
       return this.getSimple(this.playerId, 'player');
@@ -65,13 +74,28 @@ export default {
     deckIds() {
       return Object.keys(this.player.deckMap || {});
     },
+    deckCounters() {
+      return this.iam
+        ? null
+        : {
+            domino: Object.keys(this.dominoDecks.find((deck) => !deck.subtype)?.itemMap || {}).length || 0,
+            card: Object.keys(this.cardDecks.find((deck) => !deck.subtype)?.itemMap || {}).length || 0,
+          };
+    },
     planeInHandIds() {
       return Object.keys(
         this.deckIds.map((id) => this.getSimple(id, 'deck')).find((deck) => deck.type === 'plane')?.itemMap || {},
       );
     },
   },
-  methods: {},
+  methods: {
+    async endRound() {
+      await api.game.action({ name: 'endRound' }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
+    },
+  },
   mounted() {
     // console.log("player mounted", this.player);
   },
@@ -81,26 +105,20 @@ export default {
 <style scoped>
 .player:not(.iam) {
   display: flex;
-  transform: scale(0.5);
-  transform-origin: top left;
-}
-.player.idx-0:not(.iam) {
-  top: 0px;
-}
-.player.idx-1:not(.iam) {
-  top: 100px;
-}
-.player.idx-2:not(.iam) {
-  top: 200px;
+  position: relative;
 }
 .player.iam {
-  position: fixed !important;
+  position: absolute !important;
   left: auto;
   top: auto;
   right: 20px;
   bottom: 20px;
   display: flex;
-  flex-direction: row-reverse;
+}
+
+#game.mobile-view .player.iam {
+  transform: scale(0.7);
+  transform-origin: bottom right;
 }
 
 .workers {
@@ -118,9 +136,6 @@ export default {
   flex-direction: row-reverse;
   position: relative;
   width: 100%;
-}
-.player.iam .player-hands {
-  flex-direction: row;
 }
 .hand-cards-list {
   width: auto;
@@ -179,5 +194,33 @@ export default {
 .player.iam .hand-planes .plane:hover {
   cursor: pointer;
   opacity: 0.7;
+}
+
+.deck-counters {
+  position: absolute;
+  color: white;
+  font-size: 24px;
+  width: 100%;
+  right: 0px;
+  bottom: 0px;
+  text-align: right;
+}
+.deck-counters b {
+  font-size: 42px;
+}
+
+.end-round-btn {
+  font-size: 0.5em;
+  border: 1px solid black;
+  text-align: center;
+  padding: 4px;
+  cursor: pointer;
+  position: absolute;
+  top: 0px;
+  width: 100px;
+  margin: 6px 10px;
+  background: red;
+  color: white;
+  font-size: 16px;
 }
 </style>

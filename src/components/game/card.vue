@@ -19,7 +19,8 @@ export default {
       getSimple: 'getSimple',
     }),
     card() {
-      return this.getSimple(this.cardId, 'card');
+      const card = this.getSimple(this.cardId, 'card');
+      return card._id ? card : { _id: this.cardId };
     },
     customStyle() {
       const style = {};

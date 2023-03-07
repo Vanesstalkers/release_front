@@ -12,6 +12,7 @@ export default new Vuex.Store({
   },
   getters: {
     isMobile: state => state.isMobile,
+    isLandscape: state => state.isLandscape,
     currentPlayer: state => state.currentPlayer,
     currentPlayerIsActive: state =>
       state.currentPlayer ===

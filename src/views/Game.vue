@@ -1,5 +1,10 @@
 <template>
-  <div v-if="game._id" id="game" :class="isMobile ? 'mobile-view' : ''" @wheel.prevent="zoomGamePlane">
+  <div
+    v-if="game._id"
+    id="game"
+    :class="[isMobile ? 'mobile-view' : '', isLandscape ? 'landscape-view' : 'portrait-view']"
+    @wheel.prevent="zoomGamePlane"
+  >
     <div
       id="gamePlane"
       :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'top', ...gamePlaneControlStyle }"
@@ -19,38 +24,50 @@
         v-on:click="addPlane"
       />
     </div>
-    <div class="gui" :style="{ zIndex: 1 }">
-      <div class="gui" :style="{ left: '50%', zIndex: 1 }">
-        Раунд: {{ game.round }}
-        <button :style="currentPlayerIsActive ? {} : { opacity: '0.7' }" v-on:click="endRound">Закончить раунд</button>
-        <button v-on:click="leaveGame">Выйти из игры</button>
-      </div>
+    <div
+      class="gui exit"
+      :style="{
+        top: '0px',
+        left: '0px',
+        fontSize: '2em',
+        border: '1px solid black',
+        padding: '2px',
+        margin: '4px',
+      }"
+    >
+      <font-awesome-icon icon="fa-solid fa-right-from-bracket" v-on:click="leaveGame" />
+    </div>
 
-      <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" />
-      <player
-        v-for="(id, index) in playerIds.filter((id) => id !== currentPlayer).sort((id1, id2) => (id1 > id2 ? -1 : 1))"
-        :key="id"
-        :playerId="id"
-        :customClass="['gui', `idx-${index}`]"
-      />
-
-      <div class="gui" :style="{ top: '100px', right: '0px', left: 'auto', width: '200px' }">
-        <div
-          v-for="deck in deckList"
-          :key="deck._id"
-          :style="{ margin: '1px', padding: '10px', border: '1px solid black' }"
-        >
-          <div v-if="deck._id">
-            <button v-if="deck.type === 'domino'" v-on:click="takeDice">Взять кость</button>
-            <span v-for="id in Object.keys(deck.itemMap)" :key="id">
-              {{ id }}
-            </span>
-          </div>
+    <div class="gui" :style="{ top: '0px', right: '0px', display: 'flex' }">
+      <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
+        <!-- <div v-if="deck._id"> -->
+        <div v-if="deck._id && deck.code === 'Deck[domino]'">
+          <!-- <button v-on:click="takeDice"> -->
+          <font-awesome-icon icon="fa-solid fa-hat-wizard" />
+          <!-- </button> -->
+          <b class="deck-count">{{ Object.keys(deck.itemMap).length }}</b>
+        </div>
+        <div v-if="deck._id && deck.code === 'Deck[card]'">
+          <font-awesome-icon icon="fa-solid fa-diamond" />
+          <b class="deck-count">{{ Object.keys(deck.itemMap).length }}</b>
+        </div>
+        <div v-if="deck._id && deck.code === 'Deck[card_drop]'">
+          <font-awesome-icon icon="fa-solid fa-trash" />
+          <b class="deck-count">{{ Object.keys(deck.itemMap).length }}</b>
+        </div>
+        <div v-if="deck._id && deck.code === 'Deck[card_active]'">
+          <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" />
         </div>
       </div>
-      <div v-if="activeCards._id" class="gui" :style="{ right: '0px', left: 'auto', width: '200px' }">
-        <card v-for="id in Object.keys(activeCards.itemMap)" :key="id" :cardId="id" />
-      </div>
+    </div>
+    <div class="gui round-info">
+      <font-awesome-icon icon="fa-solid fa-calendar-days" />
+      Раунд: {{ game.round }}
+    </div>
+
+    <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" />
+    <div class="gui players">
+      <player v-for="(id, index) in playerIds" :key="id" :playerId="id" :customClass="[`idx-${index}`]" />
     </div>
   </div>
 </template>
@@ -102,6 +119,7 @@ export default {
     ...mapGetters({
       getSimple: 'getSimple',
       isMobile: 'isMobile',
+      isLandscape: 'isLandscape',
       currentPlayer: 'currentPlayer',
       currentPlayerIsActive: 'currentPlayerIsActive',
       currentSession: 'currentSession',
@@ -120,7 +138,12 @@ export default {
       return this.$store.state.game?.[this.gameId] || {};
     },
     playerIds() {
-      return Object.keys(this.game.playerMap || {});
+      const ids = Object.keys(this.game.playerMap || {}).sort((id1, id2) => (id1 > id2 ? 1 : -1));
+      const curPlayerIdx = ids.indexOf(this.currentPlayer);
+      return ids.slice(curPlayerIdx + 1).concat(ids.slice(0, curPlayerIdx));
+    },
+    helper() {
+      return this.getSimple(this.currentPlayer, 'player')?.helper || {};
     },
     deckList() {
       const list = Object.keys(this.game.deckMap).map((id) => this.getSimple(id, 'deck')) || [];
@@ -150,6 +173,12 @@ export default {
     },
   },
   watch: {
+    helper: function (val, oldVal) {
+      if (val.selector) {
+        document.body.setAttribute('tutorial-active', true);
+        document.querySelector(val.selector).classList.add('tutorial-active');
+      }
+    },
     // 'currentSessionGame': function (val, oldVal) {
     //   console.log("currentSessionGame", val, oldVal);
     //   if(!val) this.$router.push({ name: 'Home' });
@@ -163,12 +192,6 @@ export default {
   methods: {
     async takeDice() {
       await api.game.takeDice({ gameId: this.game._id });
-    },
-    async endRound() {
-      await api.game.action({ name: 'endRound' }).catch((err) => {
-        console.log({ err });
-        alert(err.message);
-      });
     },
     async leaveGame() {
       await api.game.leaveGame({ gameId: this.game._id });
@@ -215,7 +238,7 @@ export default {
     const self = this;
     const config = this.gamePlaneConfig;
     document.body.addEventListener('mousedown', function (event) {
-      if (event.target.classList.contains('scroll-off')) return;
+      if (event.target.classList.contains('scroll-off') || event.target.classList.contains('gui')) return;
       if (event.button === 2) {
         config.initialRotateAngle = event.clientX;
         config.isRotating = true;
@@ -274,7 +297,7 @@ export default {
         const delta = distance / config.initialDistance;
 
         const angle = Math.atan2(touch2.pageY - touch1.pageY, touch2.pageX - touch1.pageX);
-        config.rotation = config.rotationLast + (angle - config.initialRotateAngle) * 180 / Math.PI;
+        config.rotation = config.rotationLast + ((angle - config.initialRotateAngle) * 180) / Math.PI;
         self.gamePlaneRotation = config.rotation;
 
         // имитируем плавность
@@ -309,47 +332,89 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 #game {
-  position: fixed !important;
   height: 100%;
   width: 100%;
-
-  /* background-image: linear-gradient(45deg, blue 25%, transparent 25%),
-    linear-gradient(135deg, blue 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, blue 75%),
-    linear-gradient(135deg, transparent 75%, blue 75%);
-  background-size: 40px 40px;
-  background-position: 0 0, 20px 0, 20px -20px, 0px 20px; */
+}
+#game.mobile-view {
+  touch-action: none;
 }
 #game .active-event {
   cursor: pointer;
   box-shadow: inset 0 0 20px 8px yellow;
 }
 
-#game.mobile-view {
-  touch-action: none;
-}
-
-#game.mobile-view .gui {
-  /* display: none !important; */
-}
-
 #gamePlane {
   position: relative;
   width: 100%;
   height: 100%;
-  /* left: 25%;
-  top: 25%; */
 }
-/* #gamePlane {
-  transform-origin: 50% 50%;
-  transform: scale(0.5);
-} */
 
 .gui {
-  position: fixed;
+  position: absolute;
+  cursor: pointer;
+}
+
+.gui .deck > div {
+  margin: 1px;
+  padding: 10px;
+  text-align: right;
+}
+.gui .deck svg {
+  font-size: 2em;
+}
+.gui .deck .deck-count {
+  font-size: 2em;
+  margin-left: 0.25em;
+}
+#game.mobile-view .gui .deck-count {
+  font-size: 1.5em;
+}
+
+#game.mobile-view .gui .deck svg,
+#game.mobile-view .gui .deck .deck-count {
+  font-size: 1.5em;
+}
+
+.deck[code='Deck[card_active]'] {
+  position: absolute;
+  top: 80px;
+  right: 0px;
+}
+#game.mobile-view .deck[code='Deck[card_active]'] {
+  transform: scale(0.5);
+  transform-origin: top right;
+}
+#game.mobile-view.landscape-view .deck[code='Deck[card_active]'] {
   top: 0px;
+  right: 200px;
+}
+
+.gui.round-info {
+  top: 50px;
+  right: 0px;
+  font-size: 2em;
+  padding: 2px;
+  padding-right: 10px;
+  text-align: right;
+}
+#game.mobile-view .gui.round-info {
+  font-size: 1.5em;
+}
+
+.gui.players {
+  height: auto;
+  transform: scale(0.5);
+  display: flex;
+  flex-direction: row;
+  top: auto;
+  bottom: 120px;
+  right: 20px;
+  transform-origin: right top;
+}
+#game.mobile-view .gui.players {
+  bottom: 70px;
 }
 
 .plane {

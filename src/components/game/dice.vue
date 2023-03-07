@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="dice._id"
+    :code="dice.code"
     :class="[
       'domino-dice',
       dice.deleted ? 'deleted' : '',
