@@ -53,10 +53,11 @@ export default {
     }),
     dice() {
       const dice = this.getSimple(this.diceId, 'dice');
-      return dice._id ? dice : { _id: this.diceId, sideList: [{}, {}] };
+      return dice._id ? dice : { _id: this.diceId };
     },
     sideList() {
-      return this.dice.sideList.map(({ _id }) => {
+      const sideList = this.dice.sideList || [{}, {}];
+      return sideList.map(({ _id }) => {
         const side = this.getSimple(_id, 'diceside');
         return side._id ? side : { eventData: {} };
       });
@@ -120,10 +121,6 @@ export default {
       });
     },
   },
-  created() {
-    this.$store.dispatch('setData', { dice: { [this.dice._id]: this.dice } });
-  },
-  mounted() {},
 };
 </script>
 

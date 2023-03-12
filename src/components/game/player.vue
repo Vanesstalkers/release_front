@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="player._id"
-    :class="['player', ...customClass, iam ? 'iam' : '', player.active ? 'active' : '']"
-  >
+  <div v-if="player._id" :class="['player', ...customClass, iam ? 'iam' : '', player.active ? 'active' : '']">
     <div class="player-hands">
       <div v-if="planeInHandIds.length" class="hand-planes">
         <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
@@ -14,24 +11,14 @@
       </div>
       <div class="hand-dices-list">
         <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
-          <card v-if="deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
-          <card v-if="deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
+          <card v-if="iam && deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
+          <card v-if="iam && deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
           <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :inHand="true" :iam="iam" />
         </div>
       </div>
     </div>
     <div class="workers">
-      <div v-if="deckCounters" class="deck-counters">
-        <div>
-          <font-awesome-icon icon="fa-solid fa-diamond" class="fa-2xl" />
-          <b>{{ deckCounters.card }}</b>
-        </div>
-        <div>
-          <font-awesome-icon icon="fa-solid fa-hat-wizard" class="fa-2xl" />
-          <b>{{ deckCounters.domino }}</b>
-        </div>
-      </div>
-      <card-worker :cardData="player" />
+      <card-worker :cardData="player" :iam="iam" />
       <div v-if="iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
     </div>
   </div>
@@ -87,6 +74,9 @@ export default {
         this.deckIds.map((id) => this.getSimple(id, 'deck')).find((deck) => deck.type === 'plane')?.itemMap || {},
       );
     },
+    showDecks() {
+      return this.currentPlayerIsActive && this.player.activeEvent?.showDecks;
+    },
   },
   methods: {
     async endRound() {
@@ -104,8 +94,13 @@ export default {
 
 <style scoped>
 .player:not(.iam) {
-  display: flex;
   position: relative;
+  display: flex;
+  flex-direction: row-reverse;
+  margin-top: 10px;
+}
+#game.mobile-view.portrait-view .player:not(.iam) {
+  flex-direction: row;
 }
 .player.iam {
   position: absolute !important;
@@ -132,11 +127,16 @@ export default {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: flex-end;
   padding: 0px 10px;
   flex-direction: row-reverse;
   position: relative;
   width: 100%;
 }
+#game.mobile-view.portrait-view .player-hands {
+  justify-content: flex-start;
+}
+
 .hand-cards-list {
   width: auto;
 }
@@ -163,7 +163,6 @@ export default {
   padding: 0px 0px 10px 0px;
 }
 .player.iam .hand-dices {
-  flex-direction: row-reverse;
   padding: 10px 10px 0px 0px;
 }
 .hand-dices .domino-dice {
@@ -210,14 +209,14 @@ export default {
 }
 
 .end-round-btn {
+  position: absolute;
+  top: 0px;
+  width: 100px;
   font-size: 0.5em;
   border: 1px solid black;
   text-align: center;
   padding: 4px;
   cursor: pointer;
-  position: absolute;
-  top: 0px;
-  width: 100px;
   margin: 6px 10px;
   background: red;
   color: white;

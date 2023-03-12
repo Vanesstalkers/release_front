@@ -6,12 +6,12 @@
       'card-worker',
       'card-worker-' + cardData.code,
       cardData.active ? 'active' : '',
-      activeEvent ? 'active-event' : '',
+      choiceEnabled ? 'active-event' : '',
     ]"
     :style="customStyle"
   >
-    <div class="controls">
-      <!-- <div class="control" v-on:click.stop="pickDice">move</div> -->
+    <div v-if="!iam" class="card-event">
+      {{ Object.keys(cardDeckCount).length }}
     </div>
   </div>
 </template>
@@ -22,6 +22,7 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 export default {
   props: {
     cardData: Object,
+    iam: Boolean,
   },
   computed: {
     ...mapGetters({
@@ -34,8 +35,17 @@ export default {
       // style.backgroundImage = `url(../../assets/plane.png)`;
       return style;
     },
-    activeEvent() {
-      return this.currentPlayerIsActive && this.cardData.activeEvent;
+    choiceEnabled() {
+      return this.currentPlayerIsActive && this.cardData.activeEvent?.choiceEnabled;
+    },
+    cardDeckCount() {
+      return (
+        Object.keys(
+          Object.keys(this.cardData.deckMap || {})
+            .map((id) => this.getSimple(id, 'deck'))
+            .filter((deck) => deck.type === 'card' && !deck.subtype)[0]?.itemMap || {},
+        ).length || 0
+      );
     },
   },
   methods: {},
@@ -45,6 +55,7 @@ export default {
 
 <style scoped>
 .card-worker {
+  position: relative;
   border: 1px solid;
   width: 120px;
   height: 180px;
@@ -75,5 +86,23 @@ export default {
 }
 .card-worker.active {
   outline: 4px solid green;
+}
+
+.card-worker .card-event {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 60px;
+  height: 90px;
+  color: white;
+  border: none;
+  font-size: 36px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+#game.mobile-view.portrait-view .card-worker .card-event {
+  left: auto;
+  right: 0px;
 }
 </style>

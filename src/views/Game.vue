@@ -38,31 +38,27 @@
       <font-awesome-icon icon="fa-solid fa-right-from-bracket" v-on:click="leaveGame" />
     </div>
 
-    <div class="gui" :style="{ top: '0px', right: '0px', display: 'flex' }">
-      <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
-        <!-- <div v-if="deck._id"> -->
-        <div v-if="deck._id && deck.code === 'Deck[domino]'">
-          <!-- <button v-on:click="takeDice"> -->
-          <font-awesome-icon icon="fa-solid fa-hat-wizard" />
-          <!-- </button> -->
-          <b class="deck-count">{{ Object.keys(deck.itemMap).length }}</b>
-        </div>
-        <div v-if="deck._id && deck.code === 'Deck[card]'">
-          <font-awesome-icon icon="fa-solid fa-diamond" />
-          <b class="deck-count">{{ Object.keys(deck.itemMap).length }}</b>
-        </div>
-        <div v-if="deck._id && deck.code === 'Deck[card_drop]'">
-          <font-awesome-icon icon="fa-solid fa-trash" />
-          <b class="deck-count">{{ Object.keys(deck.itemMap).length }}</b>
-        </div>
-        <div v-if="deck._id && deck.code === 'Deck[card_active]'">
-          <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" />
+    <div class="gui game-decks">
+      <div class="wrapper">
+        <div class="round-info">Раунд {{ game.round }}</div>
+        <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
+          <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat">
+            <!-- <button v-on:click="takeDice">
+            <font-awesome-icon icon="fa-solid fa-hat-wizard" />
+          </button> -->
+            {{ Object.keys(deck.itemMap).length }}
+          </div>
+          <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event">
+            {{ Object.keys(deck.itemMap).length }}
+          </div>
+          <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
+            {{ Object.keys(deck.itemMap).length }}
+          </div>
+          <div v-if="deck._id && deck.code === 'Deck[card_active]'">
+            <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" />
+          </div>
         </div>
       </div>
-    </div>
-    <div class="gui round-info">
-      <font-awesome-icon icon="fa-solid fa-calendar-days" />
-      Раунд: {{ game.round }}
     </div>
 
     <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" />
@@ -191,7 +187,10 @@ export default {
   },
   methods: {
     async takeDice() {
-      await api.game.takeDice({ gameId: this.game._id });
+      await api.game.action({ name: 'takeDice', data: { count: 2 } }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
     },
     async leaveGame() {
       await api.game.leaveGame({ gameId: this.game._id });
@@ -223,13 +222,15 @@ export default {
     this.$store.dispatch('setSimple', { gameId: this.gameId });
   },
   mounted() {
-    api.game.enter({ gameId: this.gameId }).then((data) => {
-      console.log('api.game.enter', data);
-      if (data.status != 'ok') {
+    api.game
+      .enter({ gameId: this.gameId })
+      .then((data) => {
+        console.log('api.game.enter', data);
+      })
+      .catch((err) => {
         localStorage.setItem('currentGame', '');
         this.$router.push({ path: `/` });
-      }
-    });
+      });
 
     document.addEventListener('contextmenu', function (event) {
       event.preventDefault();
@@ -332,7 +333,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 #game {
   height: 100%;
   width: 100%;
@@ -356,50 +357,83 @@ export default {
   cursor: pointer;
 }
 
-.gui .deck > div {
-  margin: 1px;
-  padding: 10px;
-  text-align: right;
-}
-.gui .deck svg {
-  font-size: 2em;
-}
-.gui .deck .deck-count {
-  font-size: 2em;
-  margin-left: 0.25em;
-}
-#game.mobile-view .gui .deck-count {
-  font-size: 1.5em;
+.gui .deck > .card-event {
+  width: 60px;
+  height: 90px;
+  color: white;
+  border: none;
+  font-size: 36px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
 }
 
-#game.mobile-view .gui .deck svg,
-#game.mobile-view .gui .deck .deck-count {
-  font-size: 1.5em;
+.gui.game-decks {
+  top: 10px;
+  right: 10px;
+}
+#game.mobile-view .gui.game-decks {
+  transform: scale(0.5);
+  transform-origin: top right;
+}
+.gui.game-decks > .wrapper {
+}
+
+.gui .deck[code='Deck[domino]'] {
+  position: absolute;
+  top: 35px;
+  left: 0px;
+  background: url(../assets/hat.png);
+  background-size: cover;
+  padding: 20px;
+  cursor: default;
+}
+.gui .deck[code='Deck[domino]'] > .hat {
+  color: white;
+  font-size: 36px;
+  padding: 4px;
+  border-radius: 50%;
+  box-shadow: inset 0px 0px 20px 0px black;
+}
+
+.gui .deck[code='Deck[card]'] {
+  position: absolute;
+  top: 35px;
+  left: 90px;
+  cursor: default;
+}
+
+.gui .deck[code='Deck[card_drop]'] {
+  position: absolute;
+  filter: grayscale(1);
+  transform: scale(0.5);
+  top: 65px;
+  left: 120px;
+  cursor: default;
 }
 
 .deck[code='Deck[card_active]'] {
   position: absolute;
-  top: 80px;
+  top: 140px;
   right: 0px;
-}
-#game.mobile-view .deck[code='Deck[card_active]'] {
-  transform: scale(0.5);
-  transform-origin: top right;
+  display: flex;
 }
 #game.mobile-view.landscape-view .deck[code='Deck[card_active]'] {
-  top: 0px;
-  right: 200px;
+  /* top: 150px;
+  left: 0px; */
 }
 
-.gui.round-info {
-  top: 50px;
-  right: 0px;
-  font-size: 2em;
-  padding: 2px;
-  padding-right: 10px;
+.round-info {
+  width: 170px;
   text-align: right;
+  color: white;
+  font-weight: bold;
+  font-size: 2em;
+  white-space: nowrap;
+  text-shadow: black 1px 0 10px;
 }
-#game.mobile-view .gui.round-info {
+#game.mobile-view .round-info {
+  /* width: 20px; */
   font-size: 1.5em;
 }
 
@@ -407,24 +441,21 @@ export default {
   height: auto;
   transform: scale(0.5);
   display: flex;
-  flex-direction: row;
-  top: auto;
-  bottom: 120px;
-  right: 20px;
-  transform-origin: right top;
+  flex-direction: column;
+  bottom: 10px;
+  left: 10px;
+  transform-origin: left bottom;
 }
-#game.mobile-view .gui.players {
-  bottom: 70px;
+#game.mobile-view.portrait-view .gui.players {
+  bottom: 160px;
+  right: 20px;
+  transform-origin: right bottom;
 }
 
 .plane {
   position: absolute;
   transform-origin: 0 0;
 }
-/* .port {
-  background: yellow;
-  position: absolute;
-} */
 .fake-plane {
   position: absolute;
   background: red;
