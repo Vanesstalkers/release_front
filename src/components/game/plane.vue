@@ -18,7 +18,6 @@
         :style="`background-position-x: ${item.x}; background-position-y: ${item.y}`"
       />
     </div>
-    <div class="links-bg"></div>
     <svg>
       <line
         v-for="[key, line] in Object.entries(linkLines)"
@@ -225,11 +224,6 @@ export default {
   background-repeat: no-repeat;
 }
 
-.plane .links-bg {
-  width: 100%;
-  height: 100%;
-}
-
 .plane > svg {
   position: absolute;
   left: 0px;
@@ -247,18 +241,6 @@ export default {
 }
 .plane.rotate270 {
   transform: rotate(270deg);
-}
-.plane.rotate90 .links-bg {
-  transform: rotate(270deg) translateX(50%) translateY(0);
-  transform-origin: bottom;
-}
-.plane.rotate270 .links-bg {
-  transform: rotate(90deg);
-  transform-origin: bottom;
-}
-
-.plane.rotate180 .links-bg {
-  transform: rotate(180deg);
 }
 
 .plane.in-hand:not(.card-plane) {

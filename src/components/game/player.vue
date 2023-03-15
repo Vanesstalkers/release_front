@@ -126,7 +126,6 @@ export default {
 .player-hands {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
   align-items: flex-end;
   padding: 0px 10px;
   flex-direction: row-reverse;
@@ -157,7 +156,7 @@ export default {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  justify-content: flex-start;
+  justify-content: flex-end;
   align-items: flex-end;
   width: 100%;
   padding: 0px 0px 10px 0px;
@@ -210,7 +209,7 @@ export default {
 
 .end-round-btn {
   position: absolute;
-  top: 0px;
+  bottom: 0px;
   width: 100px;
   font-size: 0.5em;
   border: 1px solid black;
