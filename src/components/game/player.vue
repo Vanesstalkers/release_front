@@ -19,7 +19,6 @@
     </div>
     <div class="workers">
       <card-worker :cardData="player" :iam="iam" />
-      <div v-if="iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
     </div>
   </div>
 </template>
@@ -42,6 +41,9 @@ export default {
     customClass: Array,
     playerId: String,
     iam: Boolean,
+  },
+  data() {
+    return {};
   },
   computed: {
     ...mapGetters({
@@ -78,14 +80,7 @@ export default {
       return this.currentPlayerIsActive && this.player.activeEvent?.showDecks;
     },
   },
-  methods: {
-    async endRound() {
-      await api.game.action({ name: 'endRound' }).catch((err) => {
-        console.log({ err });
-        alert(err.message);
-      });
-    },
-  },
+  methods: {},
   mounted() {
     // console.log("player mounted", this.player);
   },
@@ -206,20 +201,5 @@ export default {
 }
 .deck-counters b {
   font-size: 42px;
-}
-
-.end-round-btn {
-  position: absolute;
-  bottom: 0px;
-  width: 100px;
-  font-size: 0.5em;
-  border: 1px solid black;
-  text-align: center;
-  padding: 4px;
-  cursor: pointer;
-  margin: 6px 10px;
-  background: red;
-  color: white;
-  font-size: 16px;
 }
 </style>

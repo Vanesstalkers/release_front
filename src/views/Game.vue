@@ -40,7 +40,7 @@
 
     <div class="gui game-decks">
       <div class="wrapper">
-        <div class="round-info">Раунд {{ game.round }}</div>
+        <div class="round-info">{{ game.round > 0 ? 'Раунд ' + game.round : 'Создание игрового поля' }}</div>
         <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
           <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat">
             <!-- <button v-on:click="takeDice">
@@ -133,6 +133,9 @@ export default {
     game() {
       return this.$store.state.store.game?.[this.gameId] || {};
     },
+    gameFinished() {
+      return this.game.finished;
+    },
     playerIds() {
       const ids = Object.keys(this.game.playerMap || {}).sort((id1, id2) => (id1 > id2 ? 1 : -1));
       const curPlayerIdx = ids.indexOf(this.currentPlayer);
@@ -175,6 +178,12 @@ export default {
         document.querySelector(val.selector).classList.add('tutorial-active');
       }
     },
+    gameFinished: function (val) {
+      if (val) {
+        localStorage.setItem('currentGame', '');
+        this.$router.push({ path: `/` });
+      }
+    },
     // 'currentSessionGame': function (val, oldVal) {
     //   console.log("currentSessionGame", val, oldVal);
     //   if(!val) this.$router.push({ name: 'Home' });
@@ -187,13 +196,22 @@ export default {
   },
   methods: {
     async takeDice() {
-      await api.game.action({ name: 'takeDice', data: { count: 2 } }).catch((err) => {
+      await api.game.action({ name: 'takeDice', data: { count: 3 } }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
+    },
+    async takeCard() {
+      await api.game.action({ name: 'takeCard', data: { count: 5 } }).catch((err) => {
         console.log({ err });
         alert(err.message);
       });
     },
     async leaveGame() {
-      await api.game.leaveGame({ gameId: this.game._id });
+      await api.game.action({ name: 'leaveGame' }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
     },
     async addPlane(event) {
       await api.game
@@ -382,7 +400,7 @@ export default {
 .gui .deck[code='Deck[domino]'] {
   position: absolute;
   top: 35px;
-  left: 0px;
+  right: 100px;
   background: url(../assets/hat.png);
   background-size: cover;
   padding: 20px;
@@ -399,7 +417,7 @@ export default {
 .gui .deck[code='Deck[card]'] {
   position: absolute;
   top: 35px;
-  left: 90px;
+  right: 30px;
   cursor: default;
 }
 
@@ -408,7 +426,7 @@ export default {
   filter: grayscale(1);
   transform: scale(0.5);
   top: 65px;
-  left: 120px;
+  right: 0px;
   cursor: default;
 }
 
@@ -428,7 +446,6 @@ export default {
 }
 
 .round-info {
-  width: 170px;
   text-align: right;
   color: white;
   font-weight: bold;
@@ -437,7 +454,6 @@ export default {
   text-shadow: black 1px 0 10px;
 }
 #game.mobile-view .round-info {
-  /* width: 20px; */
   font-size: 1.5em;
 }
 

@@ -10,6 +10,8 @@
     ]"
     :style="customStyle"
   >
+    <div v-if="iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
+    <div v-if="cardData.active && this.localTimer !== null" class="end-round-timer">{{ this.localTimer }}</div>
     <div v-if="!iam" class="card-event">
       {{ Object.keys(cardDeckCount).length }}
     </div>
@@ -23,6 +25,21 @@ export default {
   props: {
     cardData: Object,
     iam: Boolean,
+  },
+  data() {
+    return {
+      localTimer: null,
+      localTimerId: null,
+    };
+  },
+  watch: {
+    timer: function (val, oldVal) {
+      clearTimeout(this.localTimerId);
+      this.localTimer = this.cardData.timer;
+      this.localTimerId = setInterval(() => {
+        if (this.localTimer !== null) this.localTimer--;
+      }, 1000);
+    },
   },
   computed: {
     ...mapGetters({
@@ -47,8 +64,18 @@ export default {
         ).length || 0
       );
     },
+    timer() {
+      return this.cardData.timerUpdateTime;
+    },
   },
-  methods: {},
+  methods: {
+    async endRound() {
+      await api.game.action({ name: 'endRound' }).catch((err) => {
+        console.log({ err });
+        alert(err.message);
+      });
+    },
+  },
   mounted() {},
 };
 </script>
@@ -104,5 +131,38 @@ export default {
 #game.mobile-view.portrait-view .card-worker .card-event {
   left: auto;
   right: 0px;
+}
+
+.card-worker.active-event .end-round-btn,
+.card-worker.active-event .end-round-timer {
+  display: none;
+}
+
+.end-round-btn {
+  position: absolute;
+  bottom: 0px;
+  width: 100px;
+  font-size: 0.5em;
+  border: 1px solid black;
+  text-align: center;
+  cursor: pointer;
+  margin: 6px 10px;
+  background: #3f51b5;
+  color: white;
+  font-size: 16px;
+}
+.end-round-timer {
+  position: absolute;
+  bottom: 50px;
+  width: 100px;
+  z-index: 1;
+  font-size: 40px;
+  color: white;
+  border-radius: 50%;
+  height: 100px;
+  line-height: 100px;
+  margin: 10px;
+  box-shadow: inset 0 0 20px 20px #3f51b5;
+  transition: box-shadow 0.5s ease-in-out;
 }
 </style>
