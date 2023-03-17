@@ -37,11 +37,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
       pickedDiceId: 'pickedDiceId',
     }),
     zone() {
-      return this.getSimple(this.zoneId, 'zone');
+      return this.getStore(this.zoneId, 'zone');
     },
   },
   methods: {

@@ -47,18 +47,18 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
       currentPlayerIsActive: 'currentPlayerIsActive',
       selectedDiceSideId: 'selectedDiceSideId',
     }),
     dice() {
-      const dice = this.getSimple(this.diceId, 'dice');
+      const dice = this.getStore(this.diceId, 'dice');
       return dice._id ? dice : { _id: this.diceId };
     },
     sideList() {
       const sideList = this.dice.sideList || [{}, {}];
       return sideList.map(({ _id }) => {
-        const side = this.getSimple(_id, 'diceside');
+        const side = this.getStore(_id, 'diceside');
         return side._id ? side : { eventData: {} };
       });
     },

@@ -20,10 +20,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
     }),
     bridge() {
-      return this.getSimple(this.bridgeId, 'bridge');
+      return this.getStore(this.bridgeId, 'bridge');
     },
     customStyle() {
       const style = { ...this.bridge } || {};

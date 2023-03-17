@@ -99,7 +99,7 @@ export default {
     },
     userList() {
       return Object.keys(this.$store.state.lobby?.__user || {}).map(
-        (userId) => this.$store.getters.getSimple(userId, 'user') || {},
+        (userId) => this.$store.getters.getStore(userId, 'user') || {},
       );
     },
     gameList() {

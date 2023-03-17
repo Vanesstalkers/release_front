@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="card._id"
-    :class="['card-event', card.deleted ? 'deleted' : '', 'card-event-' + card.name]"
+    :class="['card-event', card.played ? 'played' : '', 'card-event-' + card.name]"
     :style="customStyle"
     v-on:click.stop="playCard"
   />
@@ -16,10 +16,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
     }),
     card() {
-      const card = this.getSimple(this.cardId, 'card');
+      const card = this.getStore(this.cardId, 'card');
       return card._id ? card : { _id: this.cardId };
     },
     customStyle() {
@@ -29,6 +29,7 @@ export default {
   },
   methods: {
     async playCard() {
+      if (this.card.played) return;
       await api.game.action({ name: 'playCard', data: { cardId: this.cardId } }).catch((err) => {
         console.log({ err });
         alert(err.message);
@@ -52,6 +53,10 @@ export default {
   margin: 0px 0px 0px 5px;
   box-shadow: inset 0px 20px 20px 0px black;
   background-image: url(../../assets/cards/back-side.jpg);
+}
+.card-event.played {
+  cursor: default;
+  filter: grayscale(1);
 }
 .card-event-coffee {
   background-image: url(../../assets/cards/coffee.jpg);

@@ -85,7 +85,7 @@ const init = async () => {
     userAgent.match(/BlackBerry/i) ||
     userAgent.match(/Windows Phone/i);
   const isLandscape = () => window.innerHeight < window.innerWidth;
-  
+
   window.addEventListener('orientationchange', () => {
     store.dispatch('setSimple', { isLandscape: isLandscape() });
   });
@@ -95,7 +95,7 @@ const init = async () => {
     store.dispatch('setData', data);
   });
   api.db.on('smartUpdated', data => {
-    store.dispatch('setDeep', data);
+    store.dispatch('setStore', data);
   });
 
   api.session.on('joinGame', data => {

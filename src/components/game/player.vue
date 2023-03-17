@@ -45,18 +45,18 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
       currentPlayer: 'currentPlayer',
       currentPlayerIsActive: 'currentPlayerIsActive',
     }),
     player() {
-      return this.getSimple(this.playerId, 'player');
+      return this.getStore(this.playerId, 'player');
     },
     dominoDecks() {
-      return this.deckIds.map((id) => this.getSimple(id, 'deck')).filter((deck) => deck.type === 'domino') || [];
+      return this.deckIds.map((id) => this.getStore(id, 'deck')).filter((deck) => deck.type === 'domino') || [];
     },
     cardDecks() {
-      return this.deckIds.map((id) => this.getSimple(id, 'deck')).filter((deck) => deck.type === 'card') || [];
+      return this.deckIds.map((id) => this.getStore(id, 'deck')).filter((deck) => deck.type === 'card') || [];
     },
     deckIds() {
       return Object.keys(this.player.deckMap || {});
@@ -71,7 +71,7 @@ export default {
     },
     planeInHandIds() {
       return Object.keys(
-        this.deckIds.map((id) => this.getSimple(id, 'deck')).find((deck) => deck.type === 'plane')?.itemMap || {},
+        this.deckIds.map((id) => this.getStore(id, 'deck')).find((deck) => deck.type === 'plane')?.itemMap || {},
       );
     },
     showDecks() {
@@ -117,6 +117,7 @@ export default {
 }
 
 .workers {
+  z-index: 1; /* карточка воркера должна быть видна при размещении игровых зон из руки */
   align-self: flex-start;
 }
 .player.iam .workers {

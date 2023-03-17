@@ -19,10 +19,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
     }),
     port() {
-      return this.getSimple(this.portId, 'port');
+      return this.getStore(this.portId, 'port');
     },
   },
   methods: {},

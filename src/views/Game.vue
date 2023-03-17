@@ -113,7 +113,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
       isMobile: 'isMobile',
       isLandscape: 'isLandscape',
       currentPlayer: 'currentPlayer',
@@ -131,7 +131,7 @@ export default {
       return { transform: transform.join(' ') };
     },
     game() {
-      return this.$store.state.game?.[this.gameId] || {};
+      return this.$store.state.store.game?.[this.gameId] || {};
     },
     playerIds() {
       const ids = Object.keys(this.game.playerMap || {}).sort((id1, id2) => (id1 > id2 ? 1 : -1));
@@ -139,10 +139,10 @@ export default {
       return ids.slice(curPlayerIdx + 1).concat(ids.slice(0, curPlayerIdx));
     },
     helper() {
-      return this.getSimple(this.currentPlayer, 'player')?.helper || {};
+      return this.getStore(this.currentPlayer, 'player')?.helper || {};
     },
     deckList() {
-      const list = Object.keys(this.game.deckMap).map((id) => this.getSimple(id, 'deck')) || [];
+      const list = Object.keys(this.game.deckMap).map((id) => this.getStore(id, 'deck')) || [];
       return list;
     },
     activeCards() {
@@ -418,6 +418,10 @@ export default {
   right: 0px;
   display: flex;
 }
+.deck[code='Deck[card_active]'] .card-event:not(:first-child) {
+  margin-top: -135px;
+}
+
 #game.mobile-view.landscape-view .deck[code='Deck[card_active]'] {
   /* top: 150px;
   left: 0px; */

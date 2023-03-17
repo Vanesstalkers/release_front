@@ -54,11 +54,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
       currentPlayerIsActive: 'currentPlayerIsActive',
     }),
     plane() {
-      return this.getSimple(this.planeId, 'plane');
+      return this.getStore(this.planeId, 'plane');
     },
     customStyle() {
       const style = { ...this.plane, ...(this.inHand ? this.inHandStyle : {}) } || {};

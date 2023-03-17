@@ -6,6 +6,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   strict: true,
   state: {
+    store: {},
     pickedDiceId: null,
     selectedDiceSideId: null,
     availablePorts: [],
@@ -16,7 +17,9 @@ export default new Vuex.Store({
     currentPlayer: state => state.currentPlayer,
     currentPlayerIsActive: state =>
       state.currentPlayer ===
-      Object.keys((state.game?.[state.gameId] || {}).playerMap || {}).find(id => state.player?.[id]?.active),
+      Object.keys((state.store.game?.[state.gameId] || {}).playerMap || {}).find(
+        id => state.store.player?.[id]?.active,
+      ),
 
     pickedDiceId: state => state.pickedDiceId,
     selectedDiceSideId: state => state.selectedDiceSideId,
@@ -24,6 +27,9 @@ export default new Vuex.Store({
 
     getSimple: state => (id, col) => {
       return (col ? state[col]?.[id] : state[id]) || {};
+    },
+    getStore: state => (id, col) => {
+      return (col ? state.store[col]?.[id] : state.store[id]) || {};
     },
     getClone: state => (id, col) => {
       return JSON.parse(JSON.stringify((col ? state[col]?.[id] : state[id]) || {}));
@@ -43,8 +49,8 @@ export default new Vuex.Store({
       state.selectedDiceSideId = value;
     },
     hideZonesAvailability: state => {
-      Object.keys(state.zone).forEach(id => {
-        if (state.zone[id].available) state.zone[id].available = false;
+      Object.keys(state.store.zone).forEach(id => {
+        if (state.store.zone[id].available) state.store.zone[id].available = false;
       });
     },
     setAvailablePorts: (state, value) => {
@@ -87,6 +93,25 @@ export default new Vuex.Store({
         });
       });
     },
+    setStore: (state, value) => {
+      const store = state.store;
+      Object.entries(value).forEach(([key, val]) => {
+        if (!store[key]) store[key] = {};
+        Object.keys(val).forEach(id => {
+          Object.entries(val[id]).forEach(([k, v]) => {
+            const props = k.split('.');
+            if (!store[key][id]) store[key][id] = {};
+            let itemPart = store[key][id];
+            for (let i = 0; i < props.length - 1; i++) {
+              if (!itemPart[props[i]]) Vue.set(itemPart, props[i], {});
+              itemPart = itemPart[props[i]];
+            }
+            Vue.set(itemPart, props[props.length - 1], v);
+          });
+        });
+      });
+      Vue.set(state, 'store', { ...store });
+    },
   },
   actions: {
     async setSimple({ state, commit, dispatch }, options = {}) {
@@ -99,6 +124,10 @@ export default new Vuex.Store({
     async setDeep({ state, commit, dispatch }, options = {}) {
       // console.log('setDeep', options);
       commit('setDeep', options);
+    },
+    async setStore({ state, commit, dispatch }, options = {}) {
+      // console.log('setStore', options);
+      commit('setStore', options);
     },
   },
   modules: {},

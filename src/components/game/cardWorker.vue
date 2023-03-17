@@ -26,7 +26,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      getSimple: 'getSimple',
+      getStore: 'getStore',
       currentPlayerIsActive: 'currentPlayerIsActive',
     }),
     customStyle() {
@@ -42,7 +42,7 @@ export default {
       return (
         Object.keys(
           Object.keys(this.cardData.deckMap || {})
-            .map((id) => this.getSimple(id, 'deck'))
+            .map((id) => this.getStore(id, 'deck'))
             .filter((deck) => deck.type === 'card' && !deck.subtype)[0]?.itemMap || {},
         ).length || 0
       );
