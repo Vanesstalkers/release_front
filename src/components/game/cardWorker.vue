@@ -1,17 +1,17 @@
 <template>
   <div
-    v-if="cardData._id"
-    :id="cardData._id"
+    v-if="player._id"
+    :id="player._id"
     :class="[
       'card-worker',
-      'card-worker-' + cardData.code,
-      cardData.active ? 'active' : '',
+      'card-worker-' + player.code,
+      player.active ? 'active' : '',
       choiceEnabled ? 'active-event' : '',
     ]"
     :style="customStyle"
   >
     <div v-if="iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
-    <div v-if="cardData.active && this.localTimer !== null" class="end-round-timer">{{ this.localTimer }}</div>
+    <div v-if="player.active && this.localTimer !== null" class="end-round-timer">{{ this.localTimer }}</div>
     <div v-if="!iam" class="card-event">
       {{ Object.keys(cardDeckCount).length }}
     </div>
@@ -23,22 +23,26 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 
 export default {
   props: {
-    cardData: Object,
+    playerId: String,
     iam: Boolean,
   },
   data() {
     return {
       localTimer: null,
+      localTimerUpdateTime: null,
       localTimerId: null,
     };
   },
   watch: {
-    timer: function (val, oldVal) {
-      clearTimeout(this.localTimerId);
-      this.localTimer = this.cardData.timer;
-      this.localTimerId = setInterval(() => {
-        if (this.localTimer !== null) this.localTimer--;
-      }, 1000);
+    player: function () {
+      if (this.localTimerUpdateTime !== this.player.timerUpdateTime) {
+        clearTimeout(this.localTimerId);
+        this.localTimer = this.player.timer;
+        this.localTimerUpdateTime = this.player.timerUpdateTime;
+        this.localTimerId = setInterval(() => {
+          if (this.localTimer !== null) this.localTimer--;
+        }, 1000);
+      }
     },
   },
   computed: {
@@ -46,6 +50,9 @@ export default {
       getStore: 'getStore',
       currentPlayerIsActive: 'currentPlayerIsActive',
     }),
+    player() {
+      return this.getStore(this.playerId, 'player') || {};
+    },
     customStyle() {
       const style = {};
       // style.backgroundImage = `url(../../assets/cards/${this.card.name||'unknown'}.jpg)`;
@@ -53,19 +60,16 @@ export default {
       return style;
     },
     choiceEnabled() {
-      return this.currentPlayerIsActive && this.cardData.activeEvent?.choiceEnabled;
+      return this.currentPlayerIsActive && this.player.activeEvent?.choiceEnabled;
     },
     cardDeckCount() {
       return (
         Object.keys(
-          Object.keys(this.cardData.deckMap || {})
+          Object.keys(this.player.deckMap || {})
             .map((id) => this.getStore(id, 'deck'))
             .filter((deck) => deck.type === 'card' && !deck.subtype)[0]?.itemMap || {},
         ).length || 0
       );
-    },
-    timer() {
-      return this.cardData.timerUpdateTime;
     },
   },
   methods: {

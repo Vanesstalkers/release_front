@@ -3,8 +3,16 @@
     v-if="card._id"
     :class="['card-event', card.played ? 'played' : '', 'card-event-' + card.name]"
     :style="customStyle"
-    v-on:click.stop="playCard"
-  />
+    v-on:click.stop=""
+  >
+    <div
+      v-if="canPlay && currentPlayerIsActive && !actionsDisabled && !card.played"
+      v-on:click="playCard"
+      class="play-btn"
+    >
+      Разыграть
+    </div>
+  </div>
 </template>
 
 <script>
@@ -13,10 +21,13 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 export default {
   props: {
     cardId: String,
+    canPlay: Boolean,
   },
   computed: {
     ...mapGetters({
       getStore: 'getStore',
+      actionsDisabled: 'actionsDisabled',
+      currentPlayerIsActive: 'currentPlayerIsActive',
     }),
     card() {
       const card = this.getStore(this.cardId, 'card');
@@ -42,6 +53,8 @@ export default {
 
 <style>
 .card-event {
+  position: relative;
+  cursor: default;
   border: 1px solid;
   width: 120px;
   height: 180px;
@@ -55,9 +68,24 @@ export default {
   background-image: url(../../assets/cards/back-side.jpg);
 }
 .card-event.played {
-  cursor: default;
   filter: grayscale(1);
 }
+.play-btn {
+  cursor: pointer;
+  position: absolute;
+  bottom: 0px;
+  width: 100px;
+  font-size: 0.5em;
+  border: 1px solid black;
+  text-align: center;
+  cursor: pointer;
+  margin: 6px 10px;
+  background: #3f51b5;
+  color: white;
+  font-size: 16px;
+  padding: 8px 0px;
+}
+
 .card-event-coffee {
   background-image: url(../../assets/cards/coffee.jpg);
 }

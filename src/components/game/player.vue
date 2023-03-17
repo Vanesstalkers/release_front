@@ -6,7 +6,7 @@
       </div>
       <div v-if="iam" class="hand-cards-list">
         <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
-          <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" />
+          <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" :canPlay="iam" />
         </div>
       </div>
       <div class="hand-dices-list">
@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="workers">
-      <card-worker :cardData="player" :iam="iam" />
+      <card-worker :playerId="playerId" :iam="iam" />
     </div>
   </div>
 </template>

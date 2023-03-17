@@ -5,13 +5,13 @@
     :class="[
       'domino-dice',
       dice.deleted ? 'deleted' : '',
-      dice.locked ? 'locked' : '',
+      locked ? 'locked' : '',
       activeEvent ? 'active-event' : '',
       hide ? 'hide' : '',
     ]"
     v-on:click.stop="(e) => (activeEvent ? chooseDice() : pickDice())"
   >
-    <div class="controls">
+    <div v-if="!locked" class="controls">
       <div class="scroll-off control" v-on:click.stop="pickDice">move</div>
       <div class="scroll-off control rotate" v-on:click.stop="rotateDice">rotate</div>
       <div class="scroll-off control fake" v-on:click.stop>disabled rotate</div>
@@ -49,6 +49,7 @@ export default {
     ...mapGetters({
       getStore: 'getStore',
       currentPlayerIsActive: 'currentPlayerIsActive',
+      actionsDisabled: 'actionsDisabled',
       selectedDiceSideId: 'selectedDiceSideId',
     }),
     dice() {
@@ -61,6 +62,9 @@ export default {
         const side = this.getStore(_id, 'diceside');
         return side._id ? side : { eventData: {} };
       });
+    },
+    locked() {
+      return this.dice.locked || this.actionsDisabled;
     },
     activeEvent() {
       return this.currentPlayerIsActive && this.dice.activeEvent;
@@ -95,7 +99,7 @@ export default {
     },
     async pickDice() {
       if (!this.iam) return;
-      if (this.dice.locked) return;
+      if (this.locked) return;
       this.$store.commit('setPickedDiceId', this.diceId);
       await api.game.action({ name: 'getZonesAvailability', data: { diceId: this.diceId } }).catch((err) => {
         console.log({ err });

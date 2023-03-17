@@ -54,8 +54,9 @@
           <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
             {{ Object.keys(deck.itemMap).length }}
           </div>
-          <div v-if="deck._id && deck.code === 'Deck[card_active]'">
-            <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" />
+          <div v-if="deck._id && deck.code === 'Deck[card_active]'" class="deck-active">
+            <!-- активная карта всегда первая - для верстки она должна стать последней -->
+            <card v-for="id in sortActiveCards(Object.keys(deck.itemMap))" :key="id" :cardId="id" :canPlay="true" />
           </div>
         </div>
       </div>
@@ -195,6 +196,13 @@ export default {
     // }
   },
   methods: {
+    sortActiveCards(arr) {
+      return arr
+        .map((id) => this.getStore(id, 'card'))
+        .sort((a, b) => (a.played > b.played ? 1 : -1)) // сортируем по времени сыгрывания
+        .sort((a, b) => (a.played ? 0 : 1)) // переносим не сыгранные в конец
+        .map((card) => card._id);
+    },
     async takeDice() {
       await api.game.action({ name: 'takeDice', data: { count: 3 } }).catch((err) => {
         console.log({ err });
@@ -438,6 +446,10 @@ export default {
 }
 .deck[code='Deck[card_active]'] .card-event:not(:first-child) {
   margin-top: -135px;
+}
+.deck-active {
+  display: flex;
+  flex-direction: column;
 }
 
 #game.mobile-view.landscape-view .deck[code='Deck[card_active]'] {
