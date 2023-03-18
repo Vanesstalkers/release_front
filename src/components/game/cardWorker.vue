@@ -33,25 +33,26 @@ export default {
       localTimerId: null,
     };
   },
-  watch: {
-    player: function () {
-      if (this.localTimerUpdateTime !== this.player.timerUpdateTime) {
-        clearTimeout(this.localTimerId);
-        this.localTimer = this.player.timer;
-        this.localTimerUpdateTime = this.player.timerUpdateTime;
-        this.localTimerId = setInterval(() => {
-          if (this.localTimer !== null) this.localTimer--;
-        }, 1000);
-      }
-    },
-  },
   computed: {
     ...mapGetters({
       getStore: 'getStore',
       currentPlayerIsActive: 'currentPlayerIsActive',
     }),
     player() {
-      return this.getStore(this.playerId, 'player') || {};
+      const player = this.getStore(this.playerId, 'player') || {};
+      // через watch не осилил (проблема при создании игры - "Vue cannot detect property addition or deletion")
+      if (this.localTimerUpdateTime !== player.timerUpdateTime) {
+        clearTimeout(this.localTimerId);
+        this.localTimer = player.timer;
+        this.localTimerUpdateTime = player.timerUpdateTime;
+        this.localTimerId = setInterval(() => {
+          if (this.localTimer !== null) {
+            this.localTimer--;
+            if (this.localTimer < 0) this.localTimer = 0;
+          }
+        }, 1000);
+      }
+      return player;
     },
     customStyle() {
       const style = {};

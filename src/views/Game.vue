@@ -173,6 +173,10 @@ export default {
     },
   },
   watch: {
+    'game.round': function () {
+      console.log(":game.round");
+      this.$store.commit('setSelectedDiceSideId', null);
+    },
     helper: function (val, oldVal) {
       if (val.selector) {
         document.body.setAttribute('tutorial-active', true);
@@ -487,6 +491,9 @@ export default {
 .plane {
   position: absolute;
   transform-origin: 0 0;
+}
+.plane.card-event {
+  display: block;
 }
 .fake-plane {
   position: absolute;
