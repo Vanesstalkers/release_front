@@ -40,7 +40,7 @@
 
     <div class="gui game-decks">
       <div class="wrapper">
-        <div class="round-info">{{ game.round > 0 ? 'Раунд ' + game.round : 'Создание игрового поля' }}</div>
+        <div class="game-status-label">{{ statusLabel }}</div>
         <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
           <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat">
             <!-- <button v-on:click="takeDice">
@@ -133,6 +133,19 @@ export default {
     },
     game() {
       return this.$store.state.store.game?.[this.gameId] || {};
+    },
+    statusLabel() {
+      console.log('this.game.status=', this.game.status);
+      switch (this.game.status) {
+        case 'waitForPlayers':
+          return 'Ожидание игроков';
+        case 'prepareStart':
+          return 'Создание игрового поля';
+        case 'inProcess':
+          return 'Раунд ' + this.game.round;
+        case 'finished':
+          return 'Игра закончена';
+      }
     },
     gameFinished() {
       return this.game.finished;
@@ -249,7 +262,8 @@ export default {
   },
   async created() {
     // console.log('async created() {');
-    this.$store.dispatch('setSimple', { gameId: this.gameId });
+    this.$store.commit('setSimple', { gameId: this.gameId });
+    this.$store.commit('setSimple', { store: {} });
   },
   mounted() {
     api.game
@@ -461,7 +475,7 @@ export default {
   left: 0px; */
 }
 
-.round-info {
+.game-status-label {
   text-align: right;
   color: white;
   font-weight: bold;
@@ -469,7 +483,7 @@ export default {
   white-space: nowrap;
   text-shadow: black 1px 0 10px;
 }
-#game.mobile-view .round-info {
+#game.mobile-view .game-status-label {
   font-size: 1.5em;
 }
 

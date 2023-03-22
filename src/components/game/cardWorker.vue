@@ -11,7 +11,7 @@
     :style="customStyle"
   >
     <div v-if="iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
-    <div v-if="player.active && this.localTimer !== null" class="end-round-timer">{{ this.localTimer }}</div>
+    <div v-if="player.active && this.localTimer >= 0" class="end-round-timer">{{ this.localTimer }}</div>
     <div v-if="!iam" class="card-event">
       {{ Object.keys(cardDeckCount).length }}
     </div>
