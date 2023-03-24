@@ -99,7 +99,7 @@ export default {
     },
     userList() {
       return Object.keys(this.$store.state.lobby?.__user || {}).map(
-        (userId) => this.$store.getters.getStore(userId, 'user') || {},
+        (userId) => this.$store.getters.getStore(userId, 'userId') || {},
       );
     },
     gameList() {
@@ -131,6 +131,9 @@ export default {
     async deleteGame({ gameId }) {
       await api.lobby.deleteGame({ gameId: gameId });
     },
+  },
+  async created() {
+    this.$store.commit('setSimple', { store: {} });
   },
   async mounted() {
     // console.log('mounted');

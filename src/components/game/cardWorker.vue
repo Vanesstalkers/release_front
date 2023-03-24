@@ -10,8 +10,8 @@
     ]"
     :style="customStyle"
   >
-    <div v-if="iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
-    <div v-if="player.active && this.localTimer >= 0" class="end-round-timer">{{ this.localTimer }}</div>
+    <div v-if="showControls && iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
+    <div v-if="player.active && player.timerEndTime" class="end-round-timer">{{ this.localTimer }}</div>
     <div v-if="!iam" class="card-event">
       {{ Object.keys(cardDeckCount).length }}
     </div>
@@ -25,6 +25,7 @@ export default {
   props: {
     playerId: String,
     iam: Boolean,
+    showControls: Boolean,
   },
   data() {
     return {
@@ -41,9 +42,9 @@ export default {
     player() {
       const player = this.getStore(this.playerId, 'player') || {};
       // через watch не осилил (проблема при создании игры - "Vue cannot detect property addition or deletion")
-      if (this.localTimerUpdateTime !== player.timerUpdateTime) {
+      if (player.timerEndTime && this.localTimerUpdateTime !== player.timerUpdateTime) {
         clearTimeout(this.localTimerId);
-        this.localTimer = player.timer;
+        this.localTimer = Math.floor((player.timerEndTime - Date.now()) / 1000);
         this.localTimerUpdateTime = player.timerUpdateTime;
         this.localTimerId = setInterval(() => {
           if (this.localTimer !== null) {

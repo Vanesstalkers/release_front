@@ -62,9 +62,9 @@
       </div>
     </div>
 
-    <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" />
+    <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" :showControls="showPlayerControls" />
     <div class="gui players">
-      <player v-for="(id, index) in playerIds" :key="id" :playerId="id" :customClass="[`idx-${index}`]" />
+      <player v-for="(id, index) in playerIds" :key="id" :playerId="id" :customClass="[`idx-${index}`]" :showControls="false" />
     </div>
   </div>
 </template>
@@ -132,10 +132,9 @@ export default {
       return { transform: transform.join(' ') };
     },
     game() {
-      return this.$store.state.store.game?.[this.gameId] || {};
+      return this.getStore(this.gameId, 'game');
     },
     statusLabel() {
-      console.log('this.game.status=', this.game.status);
       switch (this.game.status) {
         case 'waitForPlayers':
           return 'Ожидание игроков';
@@ -147,8 +146,8 @@ export default {
           return 'Игра закончена';
       }
     },
-    gameFinished() {
-      return this.game.finished;
+    showPlayerControls() {
+      return this.game.status === 'inProcess';
     },
     playerIds() {
       const ids = Object.keys(this.game.playerMap || {}).sort((id1, id2) => (id1 > id2 ? 1 : -1));
@@ -187,8 +186,8 @@ export default {
   },
   watch: {
     'game.round': function () {
-      console.log(":game.round");
       this.$store.commit('setSelectedDiceSideId', null);
+      this.$store.commit('setAvailablePorts', []);
     },
     helper: function (val, oldVal) {
       if (val.selector) {
@@ -196,8 +195,8 @@ export default {
         document.querySelector(val.selector).classList.add('tutorial-active');
       }
     },
-    gameFinished: function (val) {
-      if (val) {
+    'game.status': function (val) {
+      if (val === 'finished') {
         localStorage.setItem('currentGame', '');
         this.$router.push({ path: `/` });
       }

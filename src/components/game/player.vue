@@ -18,7 +18,7 @@
       </div>
     </div>
     <div class="workers">
-      <card-worker :playerId="playerId" :iam="iam" />
+      <card-worker :playerId="playerId" :iam="iam" :showControls="showControls" />
     </div>
   </div>
 </template>
@@ -41,6 +41,7 @@ export default {
     customClass: Array,
     playerId: String,
     iam: Boolean,
+    showControls: Boolean,
   },
   data() {
     return {};
