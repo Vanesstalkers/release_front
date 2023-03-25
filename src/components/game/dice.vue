@@ -14,9 +14,20 @@
     <div v-if="!locked" class="controls">
       <div class="scroll-off control" v-on:click.stop="pickDice">move</div>
       <div class="scroll-off control rotate" v-on:click.stop="rotateDice">rotate</div>
-      <div class="scroll-off control fake" v-on:click.stop>disabled rotate</div>
-      <div v-if="!dice.deleted" class="scroll-off control" v-on:click.stop="deleteDice">delete</div>
-      <div v-if="dice.deleted" class="scroll-off control" v-on:click.stop="restoreDice">restore</div>
+      <div class="scroll-off control fake-rotate disabled" v-on:click.stop>disabled rotate</div>
+      <div :class="['scroll-off', 'control', 'disabled', replaceAllowed ? 'hidden' : '']">disabled delete</div>
+      <div
+        :class="['scroll-off', 'control', replaceAllowed && !dice.deleted ? '' : 'hidden']"
+        v-on:click.stop="deleteDice"
+      >
+        delete
+      </div>
+      <div
+        :class="['scroll-off', 'control', replaceAllowed && dice.deleted ? '' : 'hidden']"
+        v-on:click.stop="restoreDice"
+      >
+        restore
+      </div>
     </div>
     <template v-for="side in sideList">
       <div
@@ -48,6 +59,7 @@ export default {
   computed: {
     ...mapGetters({
       getStore: 'getStore',
+      currentRound: 'currentRound',
       currentPlayerIsActive: 'currentPlayerIsActive',
       actionsDisabled: 'actionsDisabled',
       selectedDiceSideId: 'selectedDiceSideId',
@@ -71,6 +83,9 @@ export default {
     },
     hide() {
       return this.inHand && !this.iam && !this.dice.visible;
+    },
+    replaceAllowed() {
+      return this.dice.placedAtRound !== this.currentRound;
     },
   },
   methods: {
@@ -179,18 +194,21 @@ export default {
   width: 100%;
   height: 100%;
 }
-.domino-dice > .controls > .control:not(.fake):hover {
+.domino-dice > .controls > .control:not(.disabled):hover {
   cursor: pointer;
   background: grey;
 }
 
-.domino-dice > .controls > .control.fake {
-  display: none;
-}
-.bridge .domino-dice > .controls > .control.fake {
-  display: block;
+.domino-dice > .controls > .control.disabled {
   cursor: not-allowed;
   background: lightgray;
+}
+.domino-dice > .controls > .control.fake-rotate,
+.domino-dice > .controls > .control.hidden {
+  display: none;
+}
+.bridge .domino-dice > .controls > .control.fake-rotate {
+  display: block;
 }
 .bridge .domino-dice > .controls > .control.rotate {
   display: none;

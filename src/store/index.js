@@ -20,6 +20,7 @@ export default new Vuex.Store({
       Object.keys((state.store.game?.[state.gameId] || {}).playerMap || {}).find(
         id => state.store.player?.[id]?.active,
       ),
+    currentRound: state => (state.store.game?.[state.gameId] || {}).round,
     actionsDisabled: state => state.store.player?.[state.currentPlayer]?.eventData?.actionsDisabled,
     pickedDiceId: state => state.pickedDiceId,
     selectedDiceSideId: state => state.selectedDiceSideId,
