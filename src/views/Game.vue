@@ -5,6 +5,10 @@
     :class="[isMobile ? 'mobile-view' : '', isLandscape ? 'landscape-view' : 'portrait-view']"
     @wheel.prevent="zoomGamePlane"
   >
+    <!-- <div v-if="currentPlayerIsActive" class="gui helper" :style="{ background: 'red' }">
+      {{ helper }}
+      <button v-on:click="(e) => test(e)">ok</button>
+    </div> -->
     <div
       id="gamePlane"
       :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'top', ...gamePlaneControlStyle }"
@@ -42,13 +46,11 @@
       <div class="wrapper">
         <div class="game-status-label">{{ statusLabel }}</div>
         <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
-          <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat">
-            <!-- <button v-on:click="takeDice">
-            <font-awesome-icon icon="fa-solid fa-hat-wizard" />
-          </button> -->
+          <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat" v-on:click="takeDice">
+            <!-- !!! не забыть убрать takeDice -->
             {{ Object.keys(deck.itemMap).length }}
           </div>
-          <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event">
+          <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event" v-on:click="takeCard">
             {{ Object.keys(deck.itemMap).length }}
           </div>
           <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
@@ -119,8 +121,8 @@ export default {
       isLandscape: 'isLandscape',
       currentPlayer: 'currentPlayer',
       currentPlayerIsActive: 'currentPlayerIsActive',
-      currentSession: 'currentSession',
-      currentSessionGame: 'currentSessionGame',
+      // currentSession: 'currentSession',
+      // currentSessionGame: 'currentSessionGame',
       gamePlaneCustomStyleData: 'gamePlaneCustomStyleData',
       availablePorts: 'availablePorts',
     }),
@@ -212,6 +214,12 @@ export default {
     // }
   },
   methods: {
+    test(e) {
+      document.querySelectorAll('.tutorial-active').forEach((el) => {
+        el.classList.remove('tutorial-active');
+      });
+      document.body.removeAttribute('tutorial-active');
+    },
     sortActiveCards(arr) {
       return arr
         .map((id) => this.getStore(id, 'card'))

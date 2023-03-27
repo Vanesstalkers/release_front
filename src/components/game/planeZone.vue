@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="zone._id"
+    :_id="zone._id"
     :style="{
       left: zone.left + 'px',
       top: zone.top + 'px',

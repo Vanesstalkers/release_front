@@ -21,41 +21,16 @@ const init = async () => {
   const { api } = metacom;
   window.api = api;
 
-  await metacom.load('auth'); // Load `auth` interface
+  await metacom.load('auth', 'example', 'db', 'chat', 'session', 'lobby', 'game', 'subscribe');
 
   const token = localStorage.getItem('metarhia.session.token');
-  let logged = false,
-    currentGame,
-    currentPlayer,
-    currentSession;
-
-  if (token) {
-    const res = await api.auth.restore({ token });
-    if (res.status != 'ok') {
-      //alert(res.msg);
-      //return;
-    } else {
-      logged = true;
-      currentSession = res.session;
-      currentGame = res.game || '';
-      currentPlayer = res.player || '';
-      localStorage.setItem('currentGame', currentGame);
-      store.dispatch('setSimple', { currentPlayer });
-    }
+  const session = await api.auth.initSession({ token, demo: true });
+  const { token: sessionToken, gameId, playerId } = session;
+  if (token !== sessionToken) localStorage.setItem('metarhia.session.token', sessionToken);
+  if (gameId && playerId) {
+    localStorage.setItem('currentGame', gameId);
+    store.dispatch('setSimple', { currentPlayer: playerId });
   }
-  if (!logged) {
-    //const res = await api.auth.signin({ login: 'marcus', password: 'marcus' });
-    const res = await api.auth.signin({ demo: true });
-    if (!(res.status == 'ok' && res.token)) {
-      alert(res.msg);
-      return;
-    } else {
-      localStorage.setItem('metarhia.session.token', res.token);
-      currentSession = res.session;
-    }
-  }
-
-  await metacom.load('example', 'db', 'chat', 'session', 'lobby', 'game', 'subscribe');
 
   router.beforeEach((to, from, next) => {
     const currentGame = localStorage.getItem('currentGame');
@@ -89,7 +64,7 @@ const init = async () => {
   window.addEventListener('orientationchange', () => {
     store.dispatch('setSimple', { isLandscape: isLandscape() });
   });
-  store.dispatch('setSimple', { currentSession, isMobile: isMobile() ? true : false, isLandscape: isLandscape() });
+  store.dispatch('setSimple', { isMobile: isMobile() ? true : false, isLandscape: isLandscape() });
 
   api.db.on('updated', data => {
     store.dispatch('setData', data);
@@ -104,7 +79,7 @@ const init = async () => {
     router.push({ path: `/game/${data.gameId}` });
   });
   api.session.on('leaveGame', () => {
-    localStorage.setItem('currentGame', '');
+    localStorage.removeItem('currentGame');
     router.push({ path: `/` });
   });
 

@@ -38,8 +38,8 @@ export default new Vuex.Store({
     getState: state => {
       return state;
     },
-    currentSession: state => state.session?.[state.currentSession] || {},
-    currentSessionGame: state => state.session?.[state.currentSession]?.data.game || null,
+    // currentSession: state => state.session?.[state.currentSession] || {},
+    // currentSessionGame: state => state.session?.[state.currentSession]?.data.game || null,
     gamePlaneCustomStyleData: state => state.gamePlaneCustomStyleData || {},
   },
   mutations: {

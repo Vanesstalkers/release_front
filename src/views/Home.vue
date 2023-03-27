@@ -16,6 +16,12 @@
         ИГРОВАЯ КОМНАТА <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
       <div>
+        <select v-model="gameType">
+          <option disabled value="">Выберите один из вариантов</option>
+          <option value="single-blitz">single-blitz</option>
+          <option value="duel-blitz">duel-blitz</option>
+          <option value="ffa-blitz">ffa-blitz</option>
+        </select>
         <button v-on:click="addGame">Добавить игру</button>
         <div v-for="game in gameList" :key="game._id">
           <router-link v-if="game._id" :to="{ name: 'Game', params: { id: game._id } }">{{ game._id }}</router-link>
@@ -62,6 +68,53 @@
         filter: 'grayscale(1)',
       }"
     />
+    <!-- <map
+      name="image-map"
+      :style="{
+        position: 'absolute',
+        left: `${bg.left || 0}px`,
+        top: `${bg.top || 0}px`,
+        scale: bg.scale || 1,
+        transformOrigin: 'center',
+      }"
+    >
+      <area
+        coords="350,702,352,1021,1401,1023,1394,786,861,640,585,676"
+        shape="poly"
+        v-on:click="show('table')"
+        v-on:mouseover="show('table')"
+        v-on:mouseleave="show('')"
+      />
+      <area
+        coords="525,282,521,517,628,545,628,664,866,633,958,659,961,228"
+        shape="poly"
+        v-on:click="show('leaderboard')"
+        v-on:mouseover="show('leaderboard')"
+        v-on:mouseleave="show('')"
+      />
+    </map>
+    <img
+      src="../assets/lobby-table.png"
+      usemap="#image-map"
+      :style="{
+        position: 'absolute',
+        left: `${bg.left || 0}px`,
+        top: `${bg.top || 0}px`,
+        scale: bg.scale || 1,
+        display: bg.showMask === 'table' ? 'block' : 'none',
+      }"
+    />
+    <img
+      src="../assets/lobby-leaderboard.png"
+      usemap="#image-map"
+      :style="{
+        position: 'absolute',
+        left: `${bg.left || 0}px`,
+        top: `${bg.top || 0}px`,
+        scale: bg.scale || 1,
+        display: bg.showMask === 'leaderboard' ? 'block' : 'none',
+      }"
+    /> -->
   </div>
 </template>
 
@@ -71,6 +124,7 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 export default {
   data() {
     return {
+      gameType: null,
       bg: {
         top: 0,
         left: 0,
@@ -78,34 +132,34 @@ export default {
       },
     };
   },
-  watch: {
-    currentSessionGame: function (val, oldVal) {
-      console.log('currentSessionGame', val, oldVal);
-    },
-    currentSession: function (val, oldVal) {
-      console.log('currentSession', val, oldVal);
-      //this.$router.push({ path: `/` });
-      //this.$store.commit('setGame', {});
-    },
-  },
+  watch: {},
   computed: {
     ...mapGetters({
-      currentSession: 'currentSession',
-      currentSessionGame: 'currentSessionGame',
+      getStore: 'getStore',
       isMobile: 'isMobile',
     }),
-    listOfTest() {
-      return Object.keys(this.$store.state.listOfTest);
-    },
     userList() {
-      return Object.keys(this.$store.state.lobby?.__user || {}).map(
-        (userId) => this.$store.getters.getStore(userId, 'userId') || {},
-      );
+      return [];
+      // return Object.keys(this.$store.state.lobby?.__user || {}).map(
+      //   (userId) => this.$store.getters.getStore(userId, 'userId') || {},
+      // );
+    },
+    // gameList() {
+    //   return Object.keys(this.$store.state.lobby?.__game || {}).map((gameId) => {
+    //     const game = this.$store.getters.getClone(gameId, 'game') || {};
+    //     if (game?.playerList) {
+    //       game.joinedPlayers = game.playerList.filter((player) => player.ready).length + '/' + game.playerList.length;
+    //     }
+    //     return game;
+    //   });
+    // },
+    lobby() {
+      return this.getStore('main', 'lobby') || {};
     },
     gameList() {
-      return Object.keys(this.$store.state.lobby?.__game || {}).map((gameId) => {
-        const game = this.$store.getters.getClone(gameId, 'game') || {};
-        if (game?.playerList) {
+      const list = Object.keys(this.lobby.gameMap || {}).map((id) => this.getStore(id, 'game')) || [];
+      return list.map((game) => {
+        if (game.playerList) {
           game.joinedPlayers = game.playerList.filter((player) => player.ready).length + '/' + game.playerList.length;
         }
         return game;
@@ -121,9 +175,7 @@ export default {
       e.target.closest('.menu-item').classList.toggle('pinned');
     },
     async addGame() {
-      const result = await api.lobby.newGame();
-      // if(result.gameId)
-      //   await this.joinGame({gameId: result.gameId})
+      await api.lobby.newGame({ type: this.gameType });
     },
     async joinGame({ gameId }) {
       await api.lobby.joinGame({ gameId: gameId });

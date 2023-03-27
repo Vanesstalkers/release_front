@@ -31,4 +31,23 @@
     }
   }
 }
+
+body[tutorial-active]:after {
+  content: '';
+  position: fixed !important;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  background-image: url(./assets/clear-grey-back.png);
+}
+.tutorial-active {
+  z-index: 10000 !important;
+  position: relative;
+  box-shadow: 0 0 10px 20px #ffffff;
+}
+.helper {
+  z-index: 10000 !important;
+}
 </style>
