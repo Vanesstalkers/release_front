@@ -42,13 +42,11 @@
       <div class="wrapper">
         <div class="game-status-label">{{ statusLabel }}</div>
         <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
-          <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat">
-            <!-- <button v-on:click="takeDice">
-            <font-awesome-icon icon="fa-solid fa-hat-wizard" />
-          </button> -->
+          <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat" v-on:click="takeDice">
+            <!-- !!! не забыть убрать takeDice -->
             {{ Object.keys(deck.itemMap).length }}
           </div>
-          <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event">
+          <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event" v-on:click="takeCard">
             {{ Object.keys(deck.itemMap).length }}
           </div>
           <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
@@ -64,7 +62,13 @@
 
     <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" :showControls="showPlayerControls" />
     <div class="gui players">
-      <player v-for="(id, index) in playerIds" :key="id" :playerId="id" :customClass="[`idx-${index}`]" :showControls="false" />
+      <player
+        v-for="(id, index) in playerIds"
+        :key="id"
+        :playerId="id"
+        :customClass="[`idx-${index}`]"
+        :showControls="false"
+      />
     </div>
   </div>
 </template>
@@ -119,8 +123,6 @@ export default {
       isLandscape: 'isLandscape',
       currentPlayer: 'currentPlayer',
       currentPlayerIsActive: 'currentPlayerIsActive',
-      currentSession: 'currentSession',
-      currentSessionGame: 'currentSessionGame',
       gamePlaneCustomStyleData: 'gamePlaneCustomStyleData',
       availablePorts: 'availablePorts',
     }),
@@ -201,15 +203,6 @@ export default {
         this.$router.push({ path: `/` });
       }
     },
-    // 'currentSessionGame': function (val, oldVal) {
-    //   console.log("currentSessionGame", val, oldVal);
-    //   if(!val) this.$router.push({ name: 'Home' });
-    // },
-    // 'game.finished': function (val, oldVal) {
-    //   console.log("game.finished");
-    //   this.$router.push({ path: `/` });
-    //   this.$store.commit('setGame', {});
-    // }
   },
   methods: {
     sortActiveCards(arr) {
@@ -232,7 +225,7 @@ export default {
       });
     },
     async leaveGame() {
-      await api.game.action({ name: 'leaveGame' }).catch((err) => {
+      await api.lobby.leaveGame().catch((err) => {
         console.log({ err });
         alert(err.message);
       });

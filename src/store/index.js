@@ -14,6 +14,7 @@ export default new Vuex.Store({
   getters: {
     isMobile: state => state.isMobile,
     isLandscape: state => state.isLandscape,
+    currentUser: state => state.currentUser,
     currentPlayer: state => state.currentPlayer,
     currentPlayerIsActive: state =>
       state.currentPlayer ===
@@ -38,8 +39,6 @@ export default new Vuex.Store({
     getState: state => {
       return state;
     },
-    currentSession: state => state.session?.[state.currentSession] || {},
-    currentSessionGame: state => state.session?.[state.currentSession]?.data.game || null,
     gamePlaneCustomStyleData: state => state.gamePlaneCustomStyleData || {},
   },
   mutations: {
