@@ -1,3 +1,5 @@
+import './style.css';
+
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import App from './App.vue';
@@ -17,7 +19,7 @@ window.vuex = store;
 
 const init = async () => {
   const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-  const metacom = Metacom.create(`${protocol}://localhost:8000`);
+  const metacom = Metacom.create(`wss://smartgames.studio/api`);
   const { api } = metacom;
   window.api = api;
 
@@ -45,7 +47,7 @@ const init = async () => {
   new Vue({
     router,
     store,
-    render: function(h) {
+    render: function (h) {
       return h(App);
     },
   }).$mount('#app');
@@ -66,14 +68,14 @@ const init = async () => {
   });
   store.dispatch('setSimple', { isMobile: isMobile() ? true : false, isLandscape: isLandscape() });
 
-  api.db.on('updated', data => {
+  api.db.on('updated', (data) => {
     store.dispatch('setData', data);
   });
-  api.db.on('smartUpdated', data => {
+  api.db.on('smartUpdated', (data) => {
     store.dispatch('setStore', data);
   });
 
-  api.session.on('joinGame', data => {
+  api.session.on('joinGame', (data) => {
     localStorage.setItem('currentGame', data.gameId);
     store.dispatch('setSimple', { currentPlayer: data.playerId });
     router.push({ path: `/game/${data.gameId}` });
@@ -83,7 +85,7 @@ const init = async () => {
     router.push({ path: `/` });
   });
 
-  document.addEventListener('click', async event => {
+  document.addEventListener('click', async (event) => {
     if (event.target.classList.contains('active-event')) {
       await api.game.action({
         name: 'eventTrigger',

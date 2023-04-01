@@ -27,7 +27,7 @@
         :x2="line.x2"
         :y2="line.y2"
         fill="none"
-        stroke="yellow"
+        __stroke="yellow"
         stroke-width="10"
       />
     </svg>
@@ -182,6 +182,7 @@ export default {
   transform-origin: 0 0;
 }
 .plane.active-event {
+  border-radius: 16px;
   box-shadow: 0 0 20px 8px yellow !important;
 }
 .plane:not(.card-plane):after {
@@ -193,7 +194,11 @@ export default {
   width: 100%;
   height: 100%;
   border-radius: 20px;
-  background: url(../../assets/plane.png);
+  background: url(/rm373batch9-029.jpg);
+  background-size: cover;
+  /* box-shadow: -4px -4px 0px 0px rgb(0 0 0 / 34%); */
+  border: 8px solid #fff;
+  /* background: url(../../assets/plane.png); */
 }
 .plane > .zone-wraper,
 .plane > .port-wraper {
@@ -219,7 +224,7 @@ export default {
 .plane .custom-bg > span {
   width: 80px;
   height: 80px;
-  background-image: url(../../assets/tiles.png);
+  /* background-image: url(../../assets/tiles.png); */
   background-size: 1120px;
   background-repeat: no-repeat;
 }
@@ -231,6 +236,7 @@ export default {
   width: 100%;
   height: 100%;
   z-index: 0;
+  stroke: gray;
 }
 
 .plane.rotate90 {

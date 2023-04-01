@@ -56,15 +56,18 @@ export default {
   position: relative;
   cursor: default;
   border: 1px solid;
-  width: 120px;
-  height: 180px;
+  width: 180px;
+  height: 270px;
+
+  /* width: 120px;
+  height: 180px; */
   background-size: cover;
   display: flex;
   align-items: flex-end;
   flex-wrap: wrap;
   border-radius: 10px;
   margin: 0px 0px 0px 5px;
-  box-shadow: inset 0px 20px 20px 0px black;
+  box-shadow: 4px 4px 0px 0px rgb(0 0 0 / 34%);
   background-image: url(../../assets/cards/back-side.jpg);
 }
 .card-event.played {

@@ -224,24 +224,24 @@ export default {
   background-image: url(../../assets/Dices.png);
 }
 .player.iam .hand-dices .domino-dice:not(.locked):hover > .el {
-  box-shadow: inset 0 0 20px 8px lightgreen;
+  box-shadow: inset 0 0 100px 8px lightgreen;
 }
 .domino-dice > .el.active-event:hover {
-  box-shadow: inset 0 0 20px 8px lightgreen !important;
+  box-shadow: inset 0 0 10px 8px lightgreen !important;
 }
 
 .domino-dice.active-event {
   box-shadow: none !important;
 }
 .domino-dice.active-event > .el {
-  box-shadow: inset 0 0 20px 8px yellow;
+  box-shadow: inset 0 0 100px 8px yellow;
 }
 .domino-dice.active-event:hover > .el {
   opacity: 0.7;
 }
 
 .domino-dice > .el.fake-value {
-  box-shadow: inset 0 0 20px 8px orange;
+  box-shadow: inset 0 0 100px 8px orange;
 }
 .domino-dice > .el {
   background-position: -497px;

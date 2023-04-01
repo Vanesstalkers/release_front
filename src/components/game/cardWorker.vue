@@ -10,7 +10,9 @@
     ]"
     :style="customStyle"
   >
-    <div v-if="showControls && iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
+    <div v-if="showControls && iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">
+      Закончить раунд
+    </div>
     <div v-if="player.active && player.timerEndTime" class="end-round-timer">{{ this.localTimer }}</div>
     <div v-if="!iam" class="card-event">
       {{ Object.keys(cardDeckCount).length }}
@@ -98,7 +100,7 @@ export default {
   flex-wrap: wrap;
   border-radius: 10px;
   margin: 0px 0px 0px 5px;
-  box-shadow: inset 0px 20px 20px 0px black;
+  /* box-shadow: inset 0px 20px 20px 0px black; */
 
   background-image: url(../../assets/workers/1.jpg);
 }
@@ -118,7 +120,7 @@ export default {
   background-image: url(../../assets/workers/5.jpg);
 }
 .card-worker.active {
-  outline: 4px solid green;
+  outline: 4px solid #fff;
 }
 
 .card-worker .card-event {
@@ -149,26 +151,33 @@ export default {
   bottom: 0px;
   width: 100px;
   font-size: 0.5em;
-  border: 1px solid black;
+  border: 1px solid rgb(9, 171, 235);
   text-align: center;
   cursor: pointer;
   margin: 6px 10px;
-  background: #3f51b5;
-  color: white;
-  font-size: 16px;
+  background: #14c4ff;
+  color: rgb(14, 38, 71);
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 2px 4px 0 rgb(5, 147, 203);
 }
 .end-round-timer {
   position: absolute;
-  bottom: 50px;
-  width: 100px;
+  top: 8px;
+  right: 8px;
   z-index: 1;
-  font-size: 40px;
-  color: white;
+  font-size: 62px;
+  color: #ff5900;
+  text-shadow: 4px 4px 0 #fff;
+  font-weight: bold;
+  /* bottom: 50px;
   border-radius: 50%;
   height: 100px;
   line-height: 100px;
   margin: 10px;
   box-shadow: inset 0 0 20px 20px #3f51b5;
-  transition: box-shadow 0.5s ease-in-out;
+  transition: box-shadow 0.5s ease-in-out; */
 }
 </style>
