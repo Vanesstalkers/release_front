@@ -17,7 +17,8 @@ window.vuex = store;
 
 const init = async () => {
   const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-  const metacom = Metacom.create(`${protocol}://localhost:8000`);
+  const url = location.hostname === 'localhost' ? 'localhost:8800' : `${location.hostname}/api`;
+  const metacom = Metacom.create(`${protocol}://${url}`);
   const { api } = metacom;
   window.api = api;
 

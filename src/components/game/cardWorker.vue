@@ -162,13 +162,13 @@ export default {
   bottom: 50px;
   width: 100px;
   z-index: 1;
-  font-size: 40px;
+  font-size: 64px;
   color: white;
   border-radius: 50%;
   height: 100px;
   line-height: 100px;
   margin: 10px;
-  box-shadow: inset 0 0 20px 20px #3f51b5;
-  transition: box-shadow 0.5s ease-in-out;
+  color: #ff5900;
+	text-shadow: 4px 4px 0 #fff;
 }
 </style>

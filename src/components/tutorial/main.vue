@@ -1,6 +1,6 @@
 <template>
-  <div :class="['helper', ...helperClass]">
-    <div class="helper-guru helper-avatar" v-on:click.stop="initMenu" />
+  <div :class="['helper', inGame ? 'in-game' : '', ...helperClass]">
+    <div v-if="!this.menu" class="helper-guru helper-avatar" v-on:click.stop="initMenu" />
     <div v-if="menu" class="helper-menu">
       <div class="helper-avatar" />
       <div class="content">
@@ -8,7 +8,10 @@
           {{ menu.text }}
         </div>
 
-        <ul v-if="menu.showTutorials" class="tutorials">
+        <ul v-if="menu.showTutorials && inGame" class="tutorials">
+          <li v-on:click.stop="action({ tutorial: 'tutorialGameStart' })">Стартовое приветствие</li>
+        </ul>
+        <ul v-if="menu.showTutorials && !inGame" class="tutorials">
           <li v-on:click.stop="action({ tutorial: 'tutorialLobbyStart' })">Стартовое приветствие</li>
         </ul>
 
@@ -19,7 +22,13 @@
             v-on:click.stop="menuAction({ action: button.action })"
           >
             {{ button.text }}
-            <div v-if="button.exit" class="exit-icon" />
+            <font-awesome-icon v-if="button.exit" :icon="['far', 'circle-xmark']" size="lg" style="color: #f4e205" />
+            <font-awesome-icon
+              v-if="button.action === 'leaveGame'"
+              :icon="['fas', 'right-from-bracket']"
+              size="lg"
+              style="color: #f4e205"
+            />
           </button>
         </div>
       </div>
@@ -27,7 +36,9 @@
     <div class="helper-dialog" :style="dialogStyle">
       <div class="helper-avatar" />
       <div class="content">
-        <div class="img" />
+        <div v-if="helperData.img" class="img">
+          <img :src="helperData.img" />
+        </div>
         <div class="text">
           {{ helperData.text }}
         </div>
@@ -53,7 +64,9 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 export default {
   name: 'helper',
   components: {},
-  props: {},
+  props: {
+    inGame: Boolean,
+  },
   data() {
     return { menu: null, dialogActive: false, helperClassMap: {}, dialogStyle: {} };
   },
@@ -105,14 +118,26 @@ export default {
       if (tutorial) this.menu = null;
     },
     async initMenu() {
-      this.menu = {
-        text: 'Чем могу помочь?',
-        bigControls: true,
-        buttons: [
-          { text: 'Спасибо, ничего не нужно', action: 'exit', exit: true },
-          { text: 'Покажи доступные обучения', action: 'tutorials' },
-        ],
-      };
+      if (this.inGame) {
+        this.menu = {
+          text: 'Чем могу помочь?',
+          bigControls: true,
+          buttons: [
+            { text: 'Спасибо, ничего не нужно', action: 'exit', exit: true },
+            { text: 'Покажи доступные обучения', action: 'tutorials' },
+            { text: 'Закончить игру', action: 'leaveGame' },
+          ],
+        };
+      } else {
+        this.menu = {
+          text: 'Чем могу помочь?',
+          bigControls: true,
+          buttons: [
+            { text: 'Спасибо, ничего не нужно', action: 'exit', exit: true },
+            { text: 'Покажи доступные обучения', action: 'tutorials' },
+          ],
+        };
+      }
     },
     menuAction({ action }) {
       switch (action) {
@@ -131,6 +156,12 @@ export default {
               { text: 'Спасибо', action: 'exit', exit: true },
             ],
           };
+          break;
+        case 'leaveGame':
+          api.lobby.leaveGame().catch((err) => {
+            console.log({ err });
+            alert(err.message);
+          });
           break;
       }
     },
@@ -156,6 +187,15 @@ export default {
   cursor: pointer;
   font-size: 14px;
 }
+#lobby.mobile-view .helper-guru {
+  top: 20px;
+  right: 20px;
+  left: auto;
+}
+.helper.in-game .helper-guru {
+  top: 20px;
+  bottom: auto;
+}
 .helper.dialog-active > .helper-guru {
   display: none;
 }
@@ -167,7 +207,17 @@ export default {
   width: 600px;
   right: 20px;
   top: 20px;
+  max-width: 100%;
 }
+#lobby.mobile-view .helper-menu {
+  right: 10px;
+  top: 10px;
+}
+.helper.in-game .helper-menu {
+  left: 0px;
+  right: auto;
+}
+
 .helper-menu > .content > .tutorials > * {
   cursor: pointer;
   padding: 0px 20px;
@@ -178,6 +228,8 @@ export default {
   position: fixed;
   z-index: 10000 !important;
   width: 600px;
+  max-width: 100%;
+  max-height: 95%;
 }
 .helper.dialog-active > .helper-dialog {
   display: flex;
@@ -193,7 +245,7 @@ export default {
   padding-right: 60px;
   white-space: pre-wrap;
   color: #f4e205;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-wrap: wrap;
 }
@@ -226,21 +278,23 @@ export default {
   justify-content: center;
   cursor: pointer;
 }
+
+#lobby.mobile-view .helper-dialog > .content > .controls > button,
+#lobby.mobile-view .helper-menu > .content > .controls > button {
+  padding: 10px 10px;
+}
+
 .helper-dialog > .content > .controls.big > button,
 .helper-menu > .content > .controls.big > button {
   width: 60%;
 }
-.helper-dialog > .content > .controls > button > .exit-icon,
-.helper-menu > .content > .controls > button > .exit-icon {
-  background-image: url(../../assets/exit.png);
-  background-size: contain;
-  margin-left: 4px;
-  height: 16px;
-  width: 16px;
-}
 .helper-dialog > .content > .controls > button:hover,
 .helper-menu > .content > .controls > button:hover {
   color: white;
+}
+.helper-dialog > .content > .controls.big > button > svg,
+.helper-menu > .content > .controls.big > button > svg {
+  margin-left: 4px;
 }
 .helper-dialog > .helper-avatar,
 .helper-menu > .helper-avatar {

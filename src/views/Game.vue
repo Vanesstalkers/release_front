@@ -5,6 +5,8 @@
     :class="[isMobile ? 'mobile-view' : '', isLandscape ? 'landscape-view' : 'portrait-view']"
     @wheel.prevent="zoomGamePlane"
   >
+    <tutorial :inGame="true" />
+
     <div
       id="gamePlane"
       :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'top', ...gamePlaneControlStyle }"
@@ -24,20 +26,7 @@
         v-on:click="addPlane"
       />
     </div>
-    <div
-      class="gui exit"
-      :style="{
-        top: '0px',
-        left: '0px',
-        fontSize: '2em',
-        border: '1px solid black',
-        padding: '2px',
-        margin: '4px',
-      }"
-    >
-      <font-awesome-icon icon="fa-solid fa-right-from-bracket" v-on:click="leaveGame" />
-    </div>
-
+    
     <div class="gui game-decks">
       <div class="wrapper">
         <div class="game-status-label">{{ statusLabel }}</div>
@@ -77,6 +66,7 @@
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 import {} from '../components/game/utils';
 
+import tutorial from '../components/tutorial/main.vue';
 import player from '../components/game/player.vue';
 import plane from '../components/game/plane.vue';
 import bridge from '../components/game/bridge.vue';
@@ -84,6 +74,7 @@ import card from '../components/game/card.vue';
 
 export default {
   components: {
+    tutorial,
     player,
     plane,
     bridge,
@@ -224,12 +215,6 @@ export default {
         alert(err.message);
       });
     },
-    async leaveGame() {
-      await api.lobby.leaveGame().catch((err) => {
-        console.log({ err });
-        alert(err.message);
-      });
-    },
     async addPlane(event) {
       await api.game
         .action({
@@ -250,6 +235,8 @@ export default {
     },
     zoomGamePlane(event) {
       this.gamePlaneScale += event.deltaY > 0 ? -0.1 : 0.1;
+      if (this.gamePlaneScale < 0.3) this.gamePlaneScale = 0.3;
+      if (this.gamePlaneScale > 1) this.gamePlaneScale = 1;
     },
   },
   async created() {
@@ -311,6 +298,7 @@ export default {
     });
 
     document.body.addEventListener('touchstart', function (event) {
+      if(event.target.closest('.helper-dialog')) return;
       const touches = event.touches;
       if (touches.length === 2) {
         const [touch1, touch2] = touches;
@@ -327,6 +315,7 @@ export default {
       }
     });
     document.body.addEventListener('touchmove', function (event) {
+      if(event.target.closest('.helper-dialog')) return;
       const touches = event.touches;
       if (touches.length === 2) {
         const [touch1, touch2] = touches;

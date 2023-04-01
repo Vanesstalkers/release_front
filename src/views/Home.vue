@@ -1,17 +1,6 @@
 <template>
-  <div id="lobby">
+  <div id="lobby" :class="[isMobile ? 'mobile-view' : '', isLandscape ? 'landscape-view' : 'portrait-view']">
     <tutorial />
-
-    <div class="lightning">
-      <div class="noisy">
-        <span>for business</span>
-        smart
-      </div>
-      <div class="noisy">
-        games
-        <span>studio</span>
-      </div>
-    </div>
 
     <div class="menu-item game">
       <label v-on:click="pinMenuItem">
@@ -37,7 +26,7 @@
     </div>
     <div class="menu-item list">
       <label v-on:click="pinMenuItem">
-        СПИСОК ИГР <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
+        ВИТРИНА ИГР <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
       <div>123 456 789</div>
     </div>
@@ -144,6 +133,7 @@ export default {
     ...mapGetters({
       getStore: 'getStore',
       isMobile: 'isMobile',
+      isLandscape: 'isLandscape',
     }),
     userList() {
       return [];
@@ -334,8 +324,6 @@ export default {
 .menu-item {
   z-index: 1;
   position: absolute;
-  top: attr(data-top px);
-  left: 50%;
   transform: translate(-50%, -50%);
   transition: top 0.7s;
 }
@@ -386,11 +374,12 @@ export default {
   background-image: url(../assets/clear-black-back.png);
   color: white;
   transition: visibility 0s, opacity 0.5s linear;
+  overflow: auto;
 }
 .menu-item.pinned > div {
   max-height: none !important;
 }
-.menu-item:hover > div,
+#lobby:not(.mobile-view) .menu-item:hover > div,
 .menu-item.pinned > div {
   visibility: visible;
   opacity: 1;
@@ -448,7 +437,59 @@ export default {
   max-height: 300px;
 }
 
+#lobby.mobile-view .menu-item {
+  left: 0px;
+  width: 100%;
+  transform: none;
+}
+#lobby.mobile-view .menu-item > div {
+  top: auto;
+  left: 5%;
+  width: 90%;
+  height: 100%;
+}
+#lobby.mobile-view .menu-item.pinned {
+  top: 20% !important;
+  height: 70%;
+  z-index: 2;
+}
+#lobby.mobile-view.landscape-view .menu-item.pinned {
+  top: 10% !important;
+}
+#lobby.mobile-view .menu-item.top {
+  top: 30%;
+}
+#lobby.mobile-view .menu-item.list {
+  top: 45%;
+}
+#lobby.mobile-view .menu-item.chat {
+  top: 60%;
+}
+#lobby.mobile-view .menu-item.game {
+  top: 75%;
+}
+
 .menu-item.tutorial-active {
   background: white;
+}
+
+#lobby:before {
+  content: '';
+  z-index: 1;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  height: 100%;
+  width: 100%;
+  background-image: url(../assets/logo.png);
+  background-size: 400px 200px;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+#lobby.mobile-view:before {
+  background-size: 300px 150px;
+}
+#lobby.mobile-view.landscape-view:before {
+  top: -25px;
 }
 </style>

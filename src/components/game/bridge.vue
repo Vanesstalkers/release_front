@@ -1,5 +1,5 @@
 <template>
-  <div v-if="bridge._id" class="bridge" :id="bridge._id" :style="customStyle">
+  <div v-if="bridge._id" :class="['bridge', ...Object.values(customClass)]" :id="bridge._id" :style="customStyle">
     <div class="zone-wraper">
       <plane-zone v-for="id in zoneIds" :key="id" v-bind:zoneId="id" />
     </div>
@@ -18,6 +18,9 @@ export default {
   props: {
     bridgeId: String,
   },
+  data() {
+    return { customClass: {} };
+  },
   computed: {
     ...mapGetters({
       getStore: 'getStore',
@@ -31,7 +34,11 @@ export default {
       if (style.top) style.top += 'px';
       if (style.width) style.width += 'px';
       if (style.height) style.height += 'px';
-      if (style.rotation) style.transform = `rotate(${90 * (style.rotation || 0)}deg)`;
+      if (style.rotation) {
+        const rotateDegree = 90 * (style.rotation || 0);
+        style.transform = `rotate(${rotateDegree}deg)`;
+        this.customClass = { rotate: `rotate${rotateDegree}` };
+      }
       return style;
     },
     zoneIds() {

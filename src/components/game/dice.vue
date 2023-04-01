@@ -12,21 +12,26 @@
     v-on:click.stop="(e) => (activeEvent ? chooseDice() : pickDice())"
   >
     <div v-if="!locked" class="controls">
-      <div class="scroll-off control" v-on:click.stop="pickDice">move</div>
-      <div class="scroll-off control rotate" v-on:click.stop="rotateDice">rotate</div>
-      <div class="scroll-off control fake-rotate disabled" v-on:click.stop>disabled rotate</div>
-      <div :class="['scroll-off', 'control', 'disabled', replaceAllowed ? 'hidden' : '']">disabled delete</div>
+      <div :class="['scroll-off', 'control rotate', dice.deleted ? 'hidden' : '']" v-on:click.stop="rotateDice">
+        <font-awesome-icon :icon="['fas', 'rotate']" size="2xl" style="color: #f4e205" />
+      </div>
+      <div :class="['scroll-off', 'control', 'fake-rotate', 'disabled', dice.deleted ? 'hidden' : '']" v-on:click.stop>
+        <font-awesome-icon :icon="['fas', 'rotate']" size="2xl" style="color: #ccc" />
+      </div>
+      <div :class="['scroll-off', 'control', 'disabled', replaceAllowed || dice.deleted ? 'hidden' : '']">
+        <font-awesome-icon :icon="['fass', 'trash']" size="2xl" style="color: #ccc" />
+      </div>
       <div
         :class="['scroll-off', 'control', replaceAllowed && !dice.deleted ? '' : 'hidden']"
         v-on:click.stop="deleteDice"
       >
-        delete
+        <font-awesome-icon :icon="['fass', 'trash']" size="2xl" style="color: #f4e205" />
       </div>
       <div
         :class="['scroll-off', 'control', replaceAllowed && dice.deleted ? '' : 'hidden']"
         v-on:click.stop="restoreDice"
       >
-        restore
+        <font-awesome-icon :icon="['fas', 'trash-arrow-up']" size="2xl" style="color: #f4e205" />
       </div>
     </div>
     <template v-for="side in sideList">
@@ -176,6 +181,7 @@ export default {
   opacity: 0.9;
   color: white;
   z-index: 1;
+  border-radius: 16px;
 }
 .zone.vertical .domino-dice > .controls {
   flex-wrap: wrap;
@@ -194,20 +200,33 @@ export default {
   width: 100%;
   height: 100%;
 }
-.domino-dice > .controls > .control:not(.disabled):hover {
+.domino-dice > .controls > .control > svg {
+  width: 50%;
+  height: 100%;
+}
+.domino-dice > .controls > .control:not(.disabled):hover > svg {
   cursor: pointer;
-  background: grey;
+  color: white !important;
+}
+
+.rotate180 .domino-dice > .controls {
+  transform: rotate(180deg);
+}
+.rotate90 .domino-dice > .controls > .control {
+  transform: rotate(270deg);
+}
+.rotate270 .domino-dice > .controls > .control {
+  transform: rotate(90deg);
 }
 
 .domino-dice > .controls > .control.disabled {
   cursor: not-allowed;
-  background: lightgray;
 }
 .domino-dice > .controls > .control.fake-rotate,
 .domino-dice > .controls > .control.hidden {
   display: none;
 }
-.bridge .domino-dice > .controls > .control.fake-rotate {
+.bridge .domino-dice > .controls > .control.fake-rotate:not(.hidden) {
   display: block;
 }
 .bridge .domino-dice > .controls > .control.rotate {

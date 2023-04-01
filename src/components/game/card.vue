@@ -1,13 +1,14 @@
 <template>
   <div
     v-if="card._id"
-    :class="['card-event', card.played ? 'played' : '', 'card-event-' + card.name]"
+    :name="card.name"
+    :class="['card-event', card.played ? 'played' : '']"
     :style="customStyle"
-    v-on:click.stop=""
+    v-on:click.stop="showInfo(card.name)"
   >
     <div
       v-if="canPlay && currentPlayerIsActive && !actionsDisabled && !card.played"
-      v-on:click="playCard"
+      v-on:click.stop="playCard"
       class="play-btn"
     >
       Разыграть
@@ -34,7 +35,7 @@ export default {
       return card._id ? card : { _id: this.cardId };
     },
     customStyle() {
-      const style = {};
+      const style = { backgroundImage: `url(/img/cards/${this.card.name}.jpg)` };
       return style;
     },
   },
@@ -46,6 +47,10 @@ export default {
         alert(err.message);
       });
     },
+    showInfo(name) {
+      api.helper.action({ tutorial: 'tutorialCardEvent', step: name });
+      return;
+    },
   },
   mounted() {},
 };
@@ -54,7 +59,7 @@ export default {
 <style>
 .card-event {
   position: relative;
-  cursor: default;
+  cursor: help;
   border: 1px solid;
   width: 120px;
   height: 180px;
@@ -67,6 +72,13 @@ export default {
   box-shadow: inset 0px 20px 20px 0px black;
   background-image: url(../../assets/cards/back-side.jpg);
 }
+/* .card-event:hover:after {
+  content: '?';
+  position: absolute;
+  color: white;
+  top: 0px;
+  right: 0px;
+} */
 .card-event.played {
   filter: grayscale(1);
 }
@@ -85,77 +97,6 @@ export default {
   font-size: 16px;
   padding: 8px 0px;
 }
-
-.card-event-coffee {
-  background-image: url(../../assets/cards/coffee.jpg);
-}
-.card-event-crutch {
-  background-image: url(../../assets/cards/crutch.jpg);
-}
-.card-event-disease {
-  background-image: url(../../assets/cards/disease.jpg);
-}
-.card-event-flowstate {
-  background-image: url(../../assets/cards/flowstate.jpg);
-}
-.card-event-water {
-  background-image: url(../../assets/cards/water.jpg);
-}
-.card-event-teamlead {
-  background-image: url(../../assets/cards/teamlead.jpg);
-}
-.card-event-weekend {
-  background-image: url(../../assets/cards/weekend.jpg);
-}
-.card-event-req_legal {
-  background-image: url(../../assets/cards/req_legal.jpg);
-}
-.card-event-req_tax {
-  background-image: url(../../assets/cards/req_tax.jpg);
-}
-.card-event-pilot {
-  background-image: url(../../assets/cards/pilot.jpg);
-}
-.card-event-claim {
-  background-image: url(../../assets/cards/claim.jpg);
-}
-.card-event-transfer {
-  background-image: url(../../assets/cards/transfer.jpg);
-}
-.card-event-take_project {
-  background-image: url(../../assets/cards/take_project.jpg);
-}
-.card-event-give_project {
-  background-image: url(../../assets/cards/give_project.jpg);
-}
-.card-event-superman {
-  background-image: url(../../assets/cards/superman.jpg);
-}
-.card-event-insight {
-  background-image: url(../../assets/cards/insight.jpg);
-}
-.card-event-lib {
-  background-image: url(../../assets/cards/lib.jpg);
-}
-.card-event-showoff {
-  background-image: url(../../assets/cards/showoff.jpg);
-}
-.card-event-emergency {
-  background-image: url(../../assets/cards/emergency.jpg);
-}
-.card-event-security {
-  background-image: url(../../assets/cards/security.jpg);
-}
-.card-event-dream {
-  background-image: url(../../assets/cards/dream.jpg);
-}
-.card-event-refactoring {
-  background-image: url(../../assets/cards/refactoring.jpg);
-}
-.card-event-audit {
-  background-image: url(../../assets/cards/audit.jpg);
-}
-
 .card-event.active {
   border: 4px solid green;
 }
