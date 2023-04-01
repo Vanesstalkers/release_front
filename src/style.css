@@ -1,0 +1,10 @@
+* {
+  box-sizing: border-box;
+}
+
+#app {
+  background: url(/old-wooden-floor.jpg);
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}

@@ -74,10 +74,11 @@ export default {
   position: absolute;
   height: 73px;
   width: 142px;
-  border: 2px solid yellow;
+  border: 4px solid rgb(171, 171, 171);
+  border-radius: 12px;
   white-space: pre;
-  background: url(../../assets/clear-black-back.png);
-  background: black;
+  /* background: url(../../assets/clear-black-back.png); */
+  background: white;
 }
 .zone.vertical {
   height: 142px;
@@ -94,9 +95,11 @@ export default {
   left: 0px;
 }
 .zone.available {
-  box-shadow: inset 0 0 20px 8px lightgreen;
+  background: #caffa9;
+  /* box-shadow: inset 0 0 20px 8px lightgreen; */
 }
 .zone.available.hard {
-  box-shadow: inset 0 0 20px 8px yellow;
+  background: yellow;
+  /* box-shadow: inset 0 0 20px 8px yellow; */
 }
 </style>
