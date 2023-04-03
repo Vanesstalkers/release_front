@@ -7,19 +7,28 @@
         ИГРОВАЯ КОМНАТА <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
       <div>
-        <select v-model="gameType">
-          <option disabled value="">Выберите один из вариантов</option>
-          <option value="single-blitz">single-blitz</option>
-          <option value="duel-blitz">duel-blitz</option>
-          <option value="ffa-blitz">ffa-blitz</option>
-        </select>
-        <button v-on:click="addGame">Добавить игру</button>
+        <div class="new-game-btn-list">
+          <div v-on:click="addGame('single-blitz')">
+            <font-awesome-icon :icon="['fas', 'user']" size="2xl" />
+            Фриланс
+          </div>
+          <div v-on:click="addGame('duel-blitz')">
+            <font-awesome-icon :icon="['fas', 'user-group']" size="2xl" />
+            Дуэль
+          </div>
+          <div v-on:click="addGame('ffa-blitz')">
+            <font-awesome-icon :icon="['fas', 'users']" size="2xl" />
+            Каждый за себя
+          </div>
+          <div class="disabled">
+            <font-awesome-icon :icon="['fas', 'dice-four']" size="2xl" style="color: #fff" />
+            Команды
+          </div>
+        </div>
+        <hr :style="{ margin: '10px 30px', borderColor: '#f4e205' }" />
         <div v-for="game in gameList" :key="game._id">
-          <router-link v-if="game._id" :to="{ name: 'Game', params: { id: game._id } }">{{ game._id }}</router-link>
-          ( {{ game.joinedPlayers }} )
-          <span v-if="game.finished">Закончена</span>
-          <span v-else>раунд №{{ game.round }}</span>
-          <button v-on:click="joinGame({ gameId: game._id })">Присоединиться к игре</button>
+          Набрано игроков: ( {{ game.joinedPlayers }} )
+          <button class="lobby-btn" v-on:click="joinGame({ gameId: game._id })">Присоединиться к игре</button>
           <!-- <button v-on:click="deleteGame({ gameId: game._id })">Удалить игру</button> -->
         </div>
       </div>
@@ -28,14 +37,125 @@
       <label v-on:click="pinMenuItem">
         ВИТРИНА ИГР <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
-      <div>123 456 789</div>
+      <div>
+        <ul>
+          <li>
+            <label v-on:click.stop="showRules('release')">Релиз</label>
+            <div>Игра про ИТ-разработку</div>
+          </li>
+          <li class="disabled">
+            <label>Автоаукцион</label>
+            <div>Игра про продажи в автобизнесе</div>
+          </li>
+          <li class="disabled">
+            <label>Скорринг</label>
+            <div>Игра про оценку рисков в банках</div>
+          </li>
+        </ul>
+        <!-- <iframe id="fred" style="border:1px solid #666CCC" title="PDF in an i-Frame" src="./rules.pdf" frameborder="1" scrolling="auto" height="1100" width="850" ></iframe> -->
+      </div>
     </div>
     <div class="menu-item chat">
       <label v-on:click="pinMenuItem"> ОБЩЕНИЕ <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" /> </label>
-      <div>
-        <div v-for="user in userList" :key="user._id">
-          <span>{{ user }}</span>
-          <span>(game={{ user.game }})</span>
+      <div :style="{ display: 'flex', flexWrap: 'wrap', overflow: 'hidden' }">
+        <div
+          class="user-list"
+          :style="{
+            width: '100%',
+            display: 'flex',
+            flexWrap: 'wrap',
+            borderBottom: '2px solid #f4e205',
+            padding: '10px',
+          }"
+        >
+          <label class="user-list-label" :style="{ width: '100%' }">Игроки онлайн ({{ userList.length }})</label>
+          <div class="user-list">
+            <span v-for="user in userList" :key="user._id">
+              {{ user.name || 'Гость' }}
+            </span>
+          </div>
+        </div>
+        <div
+          :style="{
+            height: '100%',
+            width: '100%',
+            display: 'flex',
+            flexWrap: 'wrap',
+            overflow: 'hidden',
+          }"
+        >
+          <div class="msg-list" :style="{ paddingBottom: '80px', paddingTop: '10px', paddingLeft: '10px', paddingRight: '10px' }">
+            <div v-for="msg in getChat" :key="msg._id" class="msg">
+              <div class="header">
+                <b>{{ msg.user.name }}</b>
+                <i>{{ msg.timeStr }}</i>
+              </div>
+              {{ msg.text }}
+            </div>
+          </div>
+        </div>
+        <div
+          class="chat-controls"
+          :style="{
+            position: 'absolute',
+            width: '100%',
+            display: 'flex',
+            left: '0px',
+            bottom: '0px',
+            boxShadow: 'inset 0px -20px 20px 20px black',
+          }"
+        >
+          <div
+            v-if="!userData.name"
+            :style="{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              left: '0px',
+              top: '0px',
+              background: 'black',
+              paddingTop: '10px',
+            }"
+          >
+            <div :style="{ padding: '8px' }">Укажите свое имя, чтобы начать писать в чат</div>
+            <div :style="{ display: 'flex', justifyContent: 'space-evenly' }">
+              <input
+                v-model="userName"
+                :style="{ border: '1px solid #f4e205', background: 'black', color: 'white', padding: '4px 10px' }"
+              /><button v-on:click="saveName" class="lobby-btn">Сохранить</button>
+            </div>
+          </div>
+          <textarea
+            v-model="chatMsgText"
+            rows="3"
+            :style="{
+              width: '100%',
+              background: 'black',
+              border: '1px solid #f4e205',
+              resize: 'none',
+              color: 'white',
+              padding: '10px',
+              margin: '10px',
+              zIndex: '1',
+            }"
+          />
+          <button
+            :disabled="disableSendMsgBtn > 0"
+            v-on:click="sendChatMsg"
+            class="lobby-btn"
+            :style="{
+              color: '#ffffff',
+              width: '40px',
+              height: '40px',
+              marginTop: '10px',
+              marginRight: '10px',
+              boxShadow: 'black -10px 10px 20px 20px',
+	            zIndex: '0',
+            }"
+          >
+            <span v-if="disableSendMsgBtn > 0"> {{ disableSendMsgBtn }} </span>
+            <font-awesome-icon v-if="disableSendMsgBtn === 0" :icon="['fas', 'share']" />
+          </button>
         </div>
       </div>
     </div>
@@ -43,7 +163,7 @@
       <label v-on:click="pinMenuItem">
         ЗАЛ СЛАВЫ <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
-      <div>123 456 789</div>
+      <div>раздел в разработке</div>
     </div>
 
     <img
@@ -120,7 +240,9 @@ export default {
   },
   data() {
     return {
-      gameType: null,
+      userName: '',
+      chatMsgText: '',
+      disableSendMsgBtn: 0,
       bg: {
         top: 0,
         left: 0,
@@ -134,12 +256,16 @@ export default {
       getStore: 'getStore',
       isMobile: 'isMobile',
       isLandscape: 'isLandscape',
+      currentUser: 'currentUser',
     }),
+    userData() {
+      return this.getStore(this.currentUser, 'user') || {};
+    },
     userList() {
-      return [];
-      // return Object.keys(this.$store.state.lobby?.__user || {}).map(
-      //   (userId) => this.$store.getters.getStore(userId, 'userId') || {},
-      // );
+      const list = Object.keys(this.lobby.userMap || {}).map((id) => this.getStore(id, 'user')) || [];
+      return list.map((user) => {
+        return user;
+      });
     },
     lobby() {
       return this.getStore('main', 'lobby') || {};
@@ -148,10 +274,17 @@ export default {
       const list = Object.keys(this.lobby.gameMap || {}).map((id) => this.getStore(id, 'game')) || [];
       return list.map((game) => {
         if (game.playerList) {
-          game.joinedPlayers = game.playerList.filter((player) => player.ready).length + '/' + game.playerList.length;
+          game.joinedPlayers =
+            game.playerList.filter((player) => player.ready).length + ' из ' + game.playerList.length;
         }
         return game;
       });
+    },
+    getChat() {
+      const msgList = this.getStore('chat');
+      return Object.values(msgList)
+        .map((msg) => ({ ...msg, timeStr: new Date(msg.time).toLocaleString() }))
+        .reverse();
     },
   },
   methods: {
@@ -162,14 +295,39 @@ export default {
     pinMenuItem(e) {
       e.target.closest('.menu-item').classList.toggle('pinned');
     },
-    async addGame() {
-      await api.lobby.newGame({ type: this.gameType });
+    async addGame(type) {
+      await api.lobby.newGame({ type });
     },
     async joinGame({ gameId }) {
       await api.lobby.joinGame({ gameId: gameId });
     },
     async deleteGame({ gameId }) {
       await api.lobby.deleteGame({ gameId: gameId });
+    },
+    showRules(name) {
+      api.helper.action({ tutorial: 'tutorialGameRules', step: name });
+      return;
+    },
+    saveName() {
+      api.lobby.updateUser({ userName: this.userName });
+    },
+    sendChatMsg() {
+      this.disableSendMsgBtn = 5;
+      api.lobby
+        .updateChat({ text: this.chatMsgText })
+        .then((data) => {
+          this.chatMsgText = '';
+          this.restoreMsgBtn();
+        })
+        .catch((err) => {
+          this.restoreMsgBtn();
+        });
+    },
+    restoreMsgBtn() {
+      if (this.disableSendMsgBtn > 0) {
+        this.disableSendMsgBtn--;
+        setTimeout(this.restoreMsgBtn, 1000);
+      }
     },
   },
   async created() {
@@ -352,6 +510,7 @@ export default {
   background-size: 100% 100%;
   background-position: 0% 100%;
   transition: background-position 0.7s, background-size 0.5s ease-in-out;
+  box-shadow: 1px 0px 20px 6px rgba(0, 0, 0, 1);
 }
 .menu-item > label > svg {
   display: none;
@@ -380,7 +539,8 @@ export default {
   max-height: none !important;
 }
 #lobby:not(.mobile-view) .menu-item:hover > div,
-.menu-item.pinned > div {
+.menu-item.pinned > div,
+.menu-item.tutorial-active > div {
   visibility: visible;
   opacity: 1;
 }
@@ -491,5 +651,122 @@ export default {
 }
 #lobby.mobile-view.landscape-view:before {
   top: -25px;
+}
+
+.menu-item.list ul {
+  font-size: 18px;
+  color: white;
+  text-align: left;
+}
+.menu-item.list ul > li {
+  padding-bottom: 20px;
+}
+.menu-item.list ul > li > label,
+.menu-item.list ul > li > label > a,
+.menu-item.list ul > li::marker {
+  cursor: pointer;
+  font-family: fantasy;
+  font-size: 24px;
+  color: #f4e205;
+}
+.menu-item.list ul > li > label > a {
+  font-size: 16px;
+}
+.menu-item.list ul > li:not(.disabled):hover > label > a,
+.menu-item.list ul > li:not(.disabled):hover::marker {
+  color: white;
+}
+
+.menu-item.list ul > li.disabled * {
+  cursor: default !important;
+}
+.menu-item.list ul > li.disabled > label:after {
+  content: '(в разработке)';
+  color: grey;
+  font-size: 20px;
+  padding-left: 10px;
+}
+
+.new-game-btn-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.new-game-btn-list > div {
+  width: 40%;
+  text-align: left;
+  border: 2px solid #f4e205;
+  color: white;
+  background-color: transparent;
+  padding: 4px 10px;
+  margin: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.new-game-btn-list > div > svg {
+  width: 40px;
+}
+.new-game-btn-list > div.disabled {
+  border: 2px solid #ccc;
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+.new-game-btn-list > div:not(.disabled):hover {
+  background: #f4e205;
+  color: black;
+}
+.new-game-btn-list > div:not(.disabled):hover > svg {
+  color: black !important;
+}
+.lobby-btn {
+  background: #f4e205;
+  border: 2px solid #f4e205;
+  color: black;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.lobby-btn:hover,
+.lobby-btn[disabled='disabled'] {
+  background: black!important;
+  color: #f4e205;
+}
+.chat .user-list-label {
+  display: inherit;
+  color: #f4e205;
+  text-align: left;
+  margin-bottom: 8px;
+}
+.chat .user-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+.chat .user-list > span {
+  border: 1px solid #f4e205;
+  border-radius: 2px;
+  padding: 2px 4px;
+  margin: 2px;
+}
+.chat .msg-list {
+  font-size: 16px;
+  width: 100%;
+}
+.chat .msg-list > .msg {
+  padding: 8px;
+  text-align: left;
+}
+.chat .msg-list > .msg > .header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.chat .msg-list > .msg > .header > b {
+  color: #f4e205;
+}
+.chat .msg-list > .msg > .header > i {
+  font-size: 12px;
+}
+.menu-item:not(.pinned) .chat-controls {
+  display: none!important;
 }
 </style>

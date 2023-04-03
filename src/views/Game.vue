@@ -184,7 +184,7 @@ export default {
     },
     helper: function (val, oldVal) {
       if (val.selector) {
-        document.body.setAttribute('tutorial-active', true);
+        document.getElementById('app').setAttribute('tutorial-active', true);
         document.querySelector(val.selector).classList.add('tutorial-active');
       }
     },
@@ -245,6 +245,8 @@ export default {
     this.$store.commit('setSimple', { store: {} });
   },
   mounted() {
+    this.gamePlaneScale = this.isMobile ? 0.5 : 1;
+
     api.game
       .enter({ gameId: this.gameId })
       .then((data) => {
@@ -376,6 +378,12 @@ export default {
   width: 100%;
   height: 100%;
 }
+#game.mobile-view #gamePlane {
+  margin-left: -50px;
+}
+#game.mobile-view.landscape-view #gamePlane {
+  margin-left: -100px;
+}
 
 .gui {
   position: absolute;
@@ -489,6 +497,12 @@ export default {
 }
 .plane.card-event {
   display: block;
+}
+.plane.card-event.card-event-req_legal {
+  background-image: url(/img/cards/req_legal.jpg);
+}
+.plane.card-event.card-event-req_tax {
+  background-image: url(/img/cards/req_tax.jpg);
 }
 .fake-plane {
   position: absolute;
