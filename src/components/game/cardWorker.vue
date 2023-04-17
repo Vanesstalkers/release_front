@@ -10,10 +10,12 @@
     ]"
     :style="customStyle"
   >
-    <div v-if="showControls && iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">Закончить раунд</div>
+    <div v-if="showControls && iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">
+      Закончить раунд
+    </div>
     <div v-if="player.active && player.timerEndTime" class="end-round-timer">{{ this.localTimer }}</div>
     <div v-if="!iam" class="card-event">
-      {{ Object.keys(cardDeckCount).length }}
+      {{ cardDeckCount }}
     </div>
   </div>
 </template>
@@ -169,6 +171,6 @@ export default {
   line-height: 100px;
   margin: 10px;
   color: #ff5900;
-	text-shadow: 4px 4px 0 #fff;
+  text-shadow: 4px 4px 0 #fff;
 }
 </style>

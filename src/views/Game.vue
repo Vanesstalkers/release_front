@@ -26,7 +26,7 @@
         v-on:click="addPlane"
       />
     </div>
-    
+
     <div class="gui game-decks">
       <div class="wrapper">
         <div class="game-status-label">{{ statusLabel }}</div>
@@ -300,7 +300,7 @@ export default {
     });
 
     document.body.addEventListener('touchstart', function (event) {
-      if(event.target.closest('.helper-dialog')) return;
+      if (event.target.closest('.helper-dialog')) return;
       const touches = event.touches;
       if (touches.length === 2) {
         const [touch1, touch2] = touches;
@@ -317,7 +317,7 @@ export default {
       }
     });
     document.body.addEventListener('touchmove', function (event) {
-      if(event.target.closest('.helper-dialog')) return;
+      if (event.target.closest('.helper-dialog')) return;
       const touches = event.touches;
       if (touches.length === 2) {
         const [touch1, touch2] = touches;

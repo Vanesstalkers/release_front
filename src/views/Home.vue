@@ -27,7 +27,7 @@
         </div>
         <hr :style="{ margin: '10px 30px', borderColor: '#f4e205' }" />
         <div v-for="game in gameList" :key="game._id">
-          Набрано игроков: ( {{ game.joinedPlayers }} )
+          Раунд: ( {{ game.round }} ) Набрано игроков: ( {{ game.joinedPlayers }} )
           <button class="lobby-btn" v-on:click="joinGame({ gameId: game._id })">Присоединиться к игре</button>
           <!-- <button v-on:click="deleteGame({ gameId: game._id })">Удалить игру</button> -->
         </div>
@@ -44,12 +44,37 @@
             <div>Игра про ИТ-разработку</div>
           </li>
           <li class="disabled">
-            <label>Автоаукцион</label>
-            <div>Игра про продажи в автобизнесе</div>
+            <label>Автобизнес</label>
+            <div>Колода для игр про продажи автомобилей</div>
+            <ul>
+              <li>
+                <div v-on:click.stop="showRules('auto-deck')">Описание колоды</div>
+              </li>
+              <li>
+                <label v-on:click.stop="showRules('auto-sale')">Авто-продажи</label>
+              </li>
+              <li>
+                <label v-on:click.stop="showRules('auto-auction')">Авто-аукцион</label>
+              </li>
+              <li>
+                <label v-on:click.stop="showRules('auto-express')">Авто-экспресс</label>
+              </li>
+            </ul>
           </li>
           <li class="disabled">
             <label>Скорринг</label>
-            <div>Игра про оценку рисков в банках</div>
+            <div>Колода для игр про работу в банках</div>
+            <ul>
+              <li>
+                <div v-on:click.stop="showRules('bank-deck')">Описание колоды</div>
+              </li>
+              <li>
+                <label v-on:click.stop="showRules('bank-sale')">Банк-продаж</label>
+              </li>
+              <li>
+                <label v-on:click.stop="showRules('bank-risk')">Банк-рисков</label>
+              </li>
+            </ul>
           </li>
         </ul>
         <!-- <iframe id="fred" style="border:1px solid #666CCC" title="PDF in an i-Frame" src="./rules.pdf" frameborder="1" scrolling="auto" height="1100" width="850" ></iframe> -->
@@ -84,7 +109,10 @@
             overflow: 'hidden',
           }"
         >
-          <div class="msg-list" :style="{ paddingBottom: '80px', paddingTop: '10px', paddingLeft: '10px', paddingRight: '10px' }">
+          <div
+            class="msg-list"
+            :style="{ paddingBottom: '80px', paddingTop: '10px', paddingLeft: '10px', paddingRight: '10px' }"
+          >
             <div v-for="msg in getChat" :key="msg._id" class="msg">
               <div class="header">
                 <b>{{ msg.user.name }}</b>
@@ -115,6 +143,7 @@
               top: '0px',
               background: 'black',
               paddingTop: '10px',
+              zIndex: '2',
             }"
           >
             <div :style="{ padding: '8px' }">Укажите свое имя, чтобы начать писать в чат</div>
@@ -150,7 +179,7 @@
               marginTop: '10px',
               marginRight: '10px',
               boxShadow: 'black -10px 10px 20px 20px',
-	            zIndex: '0',
+              zIndex: '0',
             }"
           >
             <span v-if="disableSendMsgBtn > 0"> {{ disableSendMsgBtn }} </span>
@@ -296,7 +325,9 @@ export default {
       e.target.closest('.menu-item').classList.toggle('pinned');
     },
     async addGame(type) {
-      await api.lobby.newGame({ type });
+      await api.lobby.newGame({ type }).then(({ gameId }) => {
+        if (gameId) this.joinGame({ gameId });
+      });
     },
     async joinGame({ gameId }) {
       await api.lobby.joinGame({ gameId: gameId });
@@ -385,10 +416,7 @@ export default {
     const lobbyData = await api.lobby.enter();
     //this.$store.dispatch("setSimple", { lobby: lobbyData });
   },
-  async beforeDestroy() {
-    // console.log('beforeDestroy');
-    api.lobby.exit();
-  },
+  async beforeDestroy() {},
 };
 </script>
 <style lang="scss">
@@ -506,7 +534,8 @@ export default {
   transition: background-size 0.7s, background-position 0.5s ease-in-out;
 }
 .menu-item:hover > label,
-.menu-item.pinned > label {
+.menu-item.pinned > label,
+.menu-item.tutorial-active > label {
   background-size: 100% 100%;
   background-position: 0% 100%;
   transition: background-position 0.7s, background-size 0.5s ease-in-out;
@@ -535,7 +564,8 @@ export default {
   transition: visibility 0s, opacity 0.5s linear;
   overflow: auto;
 }
-.menu-item.pinned > div {
+.menu-item.pinned > div,
+.menu-item.tutorial-active > div {
   max-height: none !important;
 }
 #lobby:not(.mobile-view) .menu-item:hover > div,
@@ -549,7 +579,8 @@ export default {
   top: 70%;
   left: 45%;
 }
-.menu-item.game.pinned {
+.menu-item.game.pinned,
+.menu-item.game.tutorial-active {
   top: 45%;
   left: 45%;
 }
@@ -562,7 +593,8 @@ export default {
   top: 60%;
   left: 10%;
 }
-.menu-item.chat.pinned {
+.menu-item.chat.pinned,
+.menu-item.chat.tutorial-active {
   top: 10%;
   left: 10%;
 }
@@ -575,7 +607,8 @@ export default {
   top: 35%;
   left: 40%;
 }
-.menu-item.top.pinned {
+.menu-item.top.pinned,
+.menu-item.top.tutorial-active {
   top: 10%;
   left: 40%;
 }
@@ -587,7 +620,8 @@ export default {
   top: 45%;
   left: 80%;
 }
-.menu-item.list.pinned {
+.menu-item.list.pinned,
+.menu-item.list.tutorial-active {
   top: 20%;
   left: 80%;
 }
@@ -608,12 +642,14 @@ export default {
   width: 90%;
   height: 100%;
 }
-#lobby.mobile-view .menu-item.pinned {
+#lobby.mobile-view .menu-item.pinned,
+#lobby.mobile-view .menu-item.tutorial-active {
   top: 20% !important;
   height: 70%;
   z-index: 2;
 }
-#lobby.mobile-view.landscape-view .menu-item.pinned {
+#lobby.mobile-view.landscape-view .menu-item.pinned,
+#lobby.mobile-view.landscape-view .menu-item.tutorial-active {
   top: 10% !important;
 }
 #lobby.mobile-view .menu-item.top {
@@ -728,7 +764,7 @@ export default {
 }
 .lobby-btn:hover,
 .lobby-btn[disabled='disabled'] {
-  background: black!important;
+  background: black !important;
   color: #f4e205;
 }
 .chat .user-list-label {
@@ -766,7 +802,8 @@ export default {
 .chat .msg-list > .msg > .header > i {
   font-size: 12px;
 }
-.menu-item:not(.pinned) .chat-controls {
-  display: none!important;
+.menu-item.pinned .chat-controls,
+.menu-item.tutorial-active .chat-controls {
+  display: flex !important;
 }
 </style>

@@ -9,7 +9,7 @@
         </div>
 
         <ul v-if="menu.showTutorials && inGame" class="tutorials">
-          <li v-on:click.stop="action({ tutorial: 'tutorialGameStart' })">Стартовое приветствие</li>
+          <li v-on:click.stop="action({ tutorial: 'tutorialGameStart' })">Стартовое приветствие игры</li>
         </ul>
         <ul v-if="menu.showTutorials && !inGame" class="tutorials">
           <li v-on:click.stop="action({ tutorial: 'tutorialLobbyStart' })">Стартовое приветствие</li>
@@ -67,34 +67,8 @@ export default {
     return { menu: null, dialogActive: false, helperClassMap: {}, dialogStyle: {}, dialogClassMap: {} };
   },
   watch: {
-    helperData: function ({ text, img, active, pos = 'bottom-right', fullscreen = false }) {
-      this.$set(this.helperClassMap, 'dialog-active', text || img ? true : false);
-      this.$set(this.helperClassMap, 'fullscreen', fullscreen);
-
-      const dialogStyle = {};
-      const offset = '20px';
-      if (fullscreen) {
-        if (pos.includes('top'))
-          Object.assign(dialogStyle, { top: offset, left: offset, width: '100%', height: '100%' });
-      } else {
-        pos = pos.split('-');
-        if (pos.includes('top')) Object.assign(dialogStyle, { top: offset, bottom: 'auto' });
-        if (pos.includes('bottom')) Object.assign(dialogStyle, { bottom: offset, top: 'auto' });
-        if (pos.includes('left')) Object.assign(dialogStyle, { left: offset, right: 'auto' });
-        if (pos.includes('right')) Object.assign(dialogStyle, { right: offset, left: 'auto' });
-      }
-      this.dialogStyle = dialogStyle;
-
-      document.querySelectorAll('.tutorial-active').forEach((el) => {
-        el.classList.remove('tutorial-active');
-      });
-      if (active) {
-        document.getElementById('app').setAttribute('tutorial-active', true);
-        const el = document.querySelector(active);
-        el.classList.add('tutorial-active');
-      } else {
-        document.getElementById('app').removeAttribute('tutorial-active');
-      }
+    helperData: function () {
+      this.update();
     },
   },
   computed: {
@@ -120,6 +94,37 @@ export default {
     },
   },
   methods: {
+    update() {
+      let { text, img, active, pos = 'bottom-right', fullscreen = false } = this.helperData;
+
+      this.$set(this.helperClassMap, 'dialog-active', text || img ? true : false);
+      this.$set(this.helperClassMap, 'fullscreen', fullscreen);
+
+      const dialogStyle = {};
+      const offset = '20px';
+      if (fullscreen) {
+        if (pos.includes('top'))
+          Object.assign(dialogStyle, { top: offset, left: offset, width: '100%', height: '100%' });
+      } else {
+        pos = pos.split('-');
+        if (pos.includes('top')) Object.assign(dialogStyle, { top: offset, bottom: 'auto' });
+        if (pos.includes('bottom')) Object.assign(dialogStyle, { bottom: offset, top: 'auto' });
+        if (pos.includes('left')) Object.assign(dialogStyle, { left: offset, right: 'auto' });
+        if (pos.includes('right')) Object.assign(dialogStyle, { right: offset, left: 'auto' });
+      }
+      this.dialogStyle = dialogStyle;
+
+      document.querySelectorAll('.tutorial-active').forEach((el) => {
+        el.classList.remove('tutorial-active');
+      });
+      if (active) {
+        document.getElementById('app').setAttribute('tutorial-active', true);
+        const el = document.querySelector(active);
+        if (el) el.classList.add('tutorial-active');
+      } else {
+        document.getElementById('app').removeAttribute('tutorial-active');
+      }
+    },
     async action({ action, step, tutorial, link }) {
       if (link) {
         const a = document.createElement('a');
@@ -185,7 +190,10 @@ export default {
       }
     },
   },
-  mounted() {},
+  mounted() {
+    // watch не всегда ловит обновление helperData на старте
+    this.$nextTick(this.update);
+  },
 };
 </script>
 
