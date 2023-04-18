@@ -1,6 +1,19 @@
 <template>
   <div :class="['helper', inGame ? 'in-game' : '', ...helperClass]">
-    <div v-if="!this.menu" class="helper-guru helper-avatar" v-on:click.stop="initMenu" />
+    <div
+      v-for="link in helperLinks"
+      :key="link.code"
+      class="helper-link helper-avatar"
+      :style="{
+        left: `${link.clientRect.left + link.clientRect.width}px`,
+        top: `${link.clientRect.top}px`,
+      }"
+      v-on:click.stop="showTutorial(link)"
+    >
+      <!-- {{ link }} -->
+    </div>
+
+    <div v-if="!menu" class="helper-guru helper-avatar" v-on:click.stop="initMenu" />
     <div v-if="menu" class="helper-menu">
       <div class="helper-avatar" />
       <div class="content">
@@ -79,6 +92,17 @@ export default {
     helperData() {
       return this.getStore(this.currentUser, 'user').helper || {};
     },
+    helperLinks() {
+      const links = this.getStore(this.currentUser, 'user').helperLinks || {};
+      const currentGame = localStorage.getItem('currentGame');
+      return Object.entries(links)
+        .filter(([code, link]) => link.used !== true && link.type === (currentGame ? 'game' : 'lobby'))
+        .map(([code, link]) => ({
+          code,
+          ...link,
+          clientRect: this.$root.$el.querySelector(link.selector)?.getBoundingClientRect() || {},
+        }));
+    },
     helperClass() {
       return Object.entries(this.helperClassMap)
         .filter(([name, enabled]) => enabled)
@@ -111,6 +135,7 @@ export default {
         if (pos.includes('bottom')) Object.assign(dialogStyle, { bottom: offset, top: 'auto' });
         if (pos.includes('left')) Object.assign(dialogStyle, { left: offset, right: 'auto' });
         if (pos.includes('right')) Object.assign(dialogStyle, { right: offset, left: 'auto' });
+        dialogStyle['transform-origin'] = pos.join(' ');
       }
       this.dialogStyle = dialogStyle;
 
@@ -189,6 +214,10 @@ export default {
           break;
       }
     },
+    showTutorial({ tutorial, code }) {
+      if (tutorial) api.helper.action({ tutorial, usedLink: code });
+      return;
+    },
   },
   mounted() {
     // watch не всегда ловит обновление helperData на старте
@@ -214,6 +243,10 @@ export default {
   cursor: pointer;
   font-size: 14px;
 }
+.mobile-view .helper-guru {
+  transform: scale(0.7);
+  transform-origin: left top;
+}
 #lobby.mobile-view .helper-guru {
   top: 20px;
   right: 20px;
@@ -236,6 +269,10 @@ export default {
   top: 20px;
   max-width: 100%;
 }
+.mobile-view .helper-guru {
+  transform: scale(0.7);
+  transform-origin: left top;
+}
 #lobby.mobile-view .helper-menu {
   right: 10px;
   top: 10px;
@@ -257,6 +294,10 @@ export default {
   width: 600px;
   max-width: 100%;
   max-height: 95%;
+}
+.mobile-view .helper-dialog {
+  transform: scale(0.7);
+  transform-origin: left top;
 }
 /* .helper-dialog.fullscreen {
   width: 100%;
@@ -365,5 +406,18 @@ export default {
 }
 .helper.fullscreen .helper-dialog {
   width: auto !important;
+}
+
+.helper-link {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  margin-left: -25px;
+  margin-top: -25px;
+  z-index: 2;
+  cursor: pointer;
+}
+.helper-link:hover {
+  opacity: 0.7;
 }
 </style>

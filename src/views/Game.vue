@@ -486,7 +486,8 @@ export default {
   transform-origin: left bottom;
 }
 #game.mobile-view.portrait-view .gui.players {
-  bottom: 160px;
+  bottom: 120px;
+  left: auto;
   right: 20px;
   transform-origin: right bottom;
 }

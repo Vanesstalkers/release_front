@@ -1,24 +1,26 @@
 <template>
   <div v-if="player._id" :class="['player', ...customClass, iam ? 'iam' : '', player.active ? 'active' : '']">
-    <div class="player-hands">
-      <div v-if="planeInHandIds.length" class="hand-planes">
-        <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
-      </div>
-      <div v-if="iam" class="hand-cards-list">
-        <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
-          <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" :canPlay="iam" />
-        </div>
-      </div>
-      <div class="hand-dices-list">
-        <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
-          <card v-if="iam && deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
-          <card v-if="iam && deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
-          <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :inHand="true" :iam="iam" />
-        </div>
-      </div>
+    <div v-if="planeInHandIds.length" class="hand-planes">
+      <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
     </div>
-    <div class="workers">
-      <card-worker :playerId="playerId" :iam="iam" :showControls="showControls" />
+    <div class="inner-content">
+      <div class="player-hands">
+        <div v-if="iam" class="hand-cards-list">
+          <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
+            <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" :canPlay="iam" />
+          </div>
+        </div>
+        <div class="hand-dices-list">
+          <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
+            <card v-if="iam && deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
+            <card v-if="iam && deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
+            <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :inHand="true" :iam="iam" />
+          </div>
+        </div>
+      </div>
+      <div class="workers">
+        <card-worker :playerId="playerId" :iam="iam" :showControls="showControls" />
+      </div>
     </div>
   </div>
 </template>
@@ -91,25 +93,45 @@ export default {
 <style scoped>
 .player:not(.iam) {
   position: relative;
-  display: flex;
-  flex-direction: row-reverse;
   margin-top: 10px;
 }
-#game.mobile-view.portrait-view .player:not(.iam) {
+.player:not(.iam) > .inner-content {
+  display: flex;
+  flex-direction: row-reverse;
+}
+#game.mobile-view.portrait-view .player:not(.iam)  > .inner-content {
   flex-direction: row;
 }
+
 .player.iam {
   position: absolute !important;
   left: auto;
   top: auto;
   right: 20px;
   bottom: 20px;
+}
+.player.iam > .inner-content {
   display: flex;
 }
-
 #game.mobile-view .player.iam {
-  transform: scale(0.7);
+  width: 0px;
+	height: auto;
+  margin-right: 70px;
+}
+#game.mobile-view .player.iam > .inner-content {
+  transform: scale(0.5);
   transform-origin: bottom right;
+}
+#game.mobile-view .player.iam > .inner-content > .player-hands {
+  flex-wrap: nowrap;
+}
+#game.mobile-view .player.iam > .hand-planes {
+	transform: scale(0.5);
+  width: 200%;
+	height: 50%;
+	transform-origin: top;
+	left: -50%;
+	bottom: -25%;
 }
 
 .workers {

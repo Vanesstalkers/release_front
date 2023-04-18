@@ -2,6 +2,27 @@
   <div id="lobby" :class="[isMobile ? 'mobile-view' : '', isLandscape ? 'landscape-view' : 'portrait-view']">
     <tutorial />
 
+    <div :class="['menu-item', 'info', !isMobile ? 'pinned' : '']">
+      <label v-on:click="pinMenuItem">
+        УСЛУГИ СТУДИИ <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
+      </label>
+      <div>
+        <ul>
+          <li>
+            <label v-on:click.stop="showInfo('games')">Разработка игр на заказ</label>
+            <div>Настольные обучающие игры для любой сферы бизнеса</div>
+          </li>
+          <li>
+            <label v-on:click.stop="showInfo('it')">Создание онлайн-версий игр</label>
+            <div>Собственная команда программистов</div>
+          </li>
+          <li>
+            <label v-on:click.stop="showInfo('contacts')">Связаться с нами</label>
+            <div>Контактная информация</div>
+          </li>
+        </ul>
+      </div>
+    </div>
     <div class="menu-item game">
       <label v-on:click="pinMenuItem">
         ИГРОВАЯ КОМНАТА <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
@@ -47,8 +68,8 @@
             <label>Автобизнес</label>
             <div>Колода для игр про продажи автомобилей</div>
             <ul>
-              <li>
-                <div v-on:click.stop="showRules('auto-deck')">Описание колоды</div>
+              <li class="white">
+                <label v-on:click.stop="showRules('auto-deck')">Описание колоды</label>
               </li>
               <li>
                 <label v-on:click.stop="showRules('auto-sale')">Авто-продажи</label>
@@ -65,8 +86,8 @@
             <label>Скорринг</label>
             <div>Колода для игр про работу в банках</div>
             <ul>
-              <li>
-                <div v-on:click.stop="showRules('bank-deck')">Описание колоды</div>
+              <li class="white">
+                <label v-on:click.stop="showRules('bank-deck')">Описание колоды</label>
               </li>
               <li>
                 <label v-on:click.stop="showRules('bank-sale')">Банк-продаж</label>
@@ -192,7 +213,10 @@
       <label v-on:click="pinMenuItem">
         ЗАЛ СЛАВЫ <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
-      <div>раздел в разработке</div>
+      <div>
+        <!-- {{ getTopPlayers }} -->
+        раздел в разработке
+      </div>
     </div>
 
     <img
@@ -291,8 +315,8 @@ export default {
       return this.getStore(this.currentUser, 'user') || {};
     },
     userList() {
-      const list = Object.keys(this.lobby.userMap || {}).map((id) => this.getStore(id, 'user')) || [];
-      return list.map((user) => {
+      const list = Object.keys(this.lobby.userMap || {}).map(id => this.getStore(id, 'user')) || [];
+      return list.map(user => {
         return user;
       });
     },
@@ -300,11 +324,10 @@ export default {
       return this.getStore('main', 'lobby') || {};
     },
     gameList() {
-      const list = Object.keys(this.lobby.gameMap || {}).map((id) => this.getStore(id, 'game')) || [];
-      return list.map((game) => {
+      const list = Object.keys(this.lobby.gameMap || {}).map(id => this.getStore(id, 'game')) || [];
+      return list.map(game => {
         if (game.playerList) {
-          game.joinedPlayers =
-            game.playerList.filter((player) => player.ready).length + ' из ' + game.playerList.length;
+          game.joinedPlayers = game.playerList.filter(player => player.ready).length + ' из ' + game.playerList.length;
         }
         return game;
       });
@@ -312,8 +335,11 @@ export default {
     getChat() {
       const msgList = this.getStore('chat');
       return Object.values(msgList)
-        .map((msg) => ({ ...msg, timeStr: new Date(msg.time).toLocaleString() }))
+        .map(msg => ({ ...msg, timeStr: new Date(msg.time).toLocaleString() }))
         .reverse();
+    },
+    getTopPlayers() {
+      return this.getStore('topPlayers');
     },
   },
   methods: {
@@ -335,6 +361,10 @@ export default {
     async deleteGame({ gameId }) {
       await api.lobby.deleteGame({ gameId: gameId });
     },
+    showInfo(name) {
+      api.helper.action({ tutorial: 'tutorialSales', step: name });
+      return;
+    },
     showRules(name) {
       api.helper.action({ tutorial: 'tutorialGameRules', step: name });
       return;
@@ -346,11 +376,11 @@ export default {
       this.disableSendMsgBtn = 5;
       api.lobby
         .updateChat({ text: this.chatMsgText })
-        .then((data) => {
+        .then(data => {
           this.chatMsgText = '';
           this.restoreMsgBtn();
         })
-        .catch((err) => {
+        .catch(err => {
           this.restoreMsgBtn();
         });
     },
@@ -575,6 +605,27 @@ export default {
   opacity: 1;
 }
 
+.menu-item.info {
+  top: 5%;
+  left: calc(50% + 350px);
+}
+.menu-item.info > label {
+  font-size: 24px;
+  letter-spacing: 6px;
+  color: black;
+  text-shadow: white 0px 0px 0px, white 0.669131px 0.743145px 0px, white 1.33826px 1.48629px 0px,
+    white 2.00739px 2.22943px 0px, white 2.67652px 2.97258px 0px, white 3.34565px 3.71572px 0px,
+    white 4.01478px 4.45887px 0px, white 4.68391px 5.20201px 0px;
+  background-image: linear-gradient(crimson, crimson);
+}
+.menu-item.info > label > svg {
+  color: crimson;
+}
+.menu-item.info > div {
+  height: 270px;
+  width: 400px;
+  border-color: crimson;
+}
 .menu-item.game {
   top: 70%;
   left: 45%;
@@ -583,6 +634,10 @@ export default {
 .menu-item.game.tutorial-active {
   top: 45%;
   left: 45%;
+}
+.menu-item.game > label {
+  display: block;
+  white-space: pre-line;
 }
 .menu-item.game > div {
   height: 300px;
@@ -652,17 +707,30 @@ export default {
 #lobby.mobile-view.landscape-view .menu-item.tutorial-active {
   top: 10% !important;
 }
+#lobby.mobile-view .menu-item.info {
+  top: 25%;
+}
 #lobby.mobile-view .menu-item.top {
-  top: 30%;
+  top: 35%;
 }
 #lobby.mobile-view .menu-item.list {
-  top: 45%;
+  top: 50%;
 }
 #lobby.mobile-view .menu-item.chat {
-  top: 60%;
+  top: 65%;
 }
 #lobby.mobile-view .menu-item.game {
-  top: 75%;
+  top: 80%;
+}
+#lobby.mobile-view .menu-item.game > label {
+  max-width: 220px;
+  margin: auto;
+}
+#lobby.mobile-view.portrait-view .menu-item.game > div {
+  height: 90%;
+}
+#lobby.mobile-view.landscape-view .menu-item.game > label {
+  max-width: 450px;
 }
 
 .menu-item.tutorial-active {
@@ -689,14 +757,19 @@ export default {
   top: -25px;
 }
 
+.menu-item.info ul,
 .menu-item.list ul {
   font-size: 18px;
   color: white;
   text-align: left;
 }
+.menu-item.info ul > li,
 .menu-item.list ul > li {
   padding-bottom: 20px;
 }
+.menu-item.info ul > li > label,
+.menu-item.info ul > li > label > a,
+.menu-item.info ul > li::marker,
 .menu-item.list ul > li > label,
 .menu-item.list ul > li > label > a,
 .menu-item.list ul > li::marker {
@@ -705,6 +778,17 @@ export default {
   font-size: 24px;
   color: #f4e205;
 }
+.menu-item ul > li.white > label,
+.menu-item ul > li.white > label > a,
+.menu-item ul > li.white::marker {
+  color: white;
+}
+.menu-item.info ul > li > label,
+.menu-item.info ul > li > label > a,
+.menu-item.info ul > li::marker {
+  color: crimson;
+}
+.menu-item.info ul > li > label > a,
 .menu-item.list ul > li > label > a {
   font-size: 16px;
 }
