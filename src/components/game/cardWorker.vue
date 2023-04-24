@@ -10,7 +10,7 @@
     ]"
     :style="customStyle"
   >
-    <div v-if="showControls && iam && currentPlayerIsActive" v-on:click="endRound" class="end-round-btn">
+    <div v-if="showControls && iam && sessionPlayerIsActive" v-on:click="endRound" class="end-round-btn">
       Закончить раунд
     </div>
     <div v-if="player.active && player.timerEndTime" class="end-round-timer">{{ this.localTimer }}</div>
@@ -39,7 +39,7 @@ export default {
   computed: {
     ...mapGetters({
       getStore: 'getStore',
-      currentPlayerIsActive: 'currentPlayerIsActive',
+      sessionPlayerIsActive: 'sessionPlayerIsActive',
     }),
     player() {
       const player = this.getStore(this.playerId, 'player') || {};
@@ -64,7 +64,7 @@ export default {
       return style;
     },
     choiceEnabled() {
-      return this.currentPlayerIsActive && this.player.activeEvent?.choiceEnabled;
+      return this.sessionPlayerIsActive && this.player.activeEvent?.choiceEnabled;
     },
     cardDeckCount() {
       return (

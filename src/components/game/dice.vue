@@ -9,7 +9,7 @@
       activeEvent ? 'active-event' : '',
       hide ? 'hide' : '',
     ]"
-    v-on:click.stop="(e) => (activeEvent ? chooseDice() : pickDice())"
+    v-on:click="(e) => (activeEvent ? chooseDice() : pickDice())"
   >
     <div v-if="!locked" class="controls">
       <div :class="['scroll-off', 'control rotate', dice.deleted ? 'hidden' : '']" v-on:click.stop="rotateDice">
@@ -65,7 +65,7 @@ export default {
     ...mapGetters({
       getStore: 'getStore',
       currentRound: 'currentRound',
-      currentPlayerIsActive: 'currentPlayerIsActive',
+      sessionPlayerIsActive: 'sessionPlayerIsActive',
       actionsDisabled: 'actionsDisabled',
       selectedDiceSideId: 'selectedDiceSideId',
     }),
@@ -84,7 +84,7 @@ export default {
       return this.dice.locked || this.actionsDisabled;
     },
     activeEvent() {
-      return this.currentPlayerIsActive && this.dice.activeEvent;
+      return this.sessionPlayerIsActive && this.dice.activeEvent;
     },
     hide() {
       return this.inHand && !this.iam && !this.dice.visible;
@@ -121,6 +121,7 @@ export default {
       if (!this.iam) return;
       if (this.locked) return;
       this.$store.commit('setPickedDiceId', this.diceId);
+      this.$store.commit('hideZonesAvailability');
       await api.game.action({ name: 'getZonesAvailability', data: { diceId: this.diceId } }).catch((err) => {
         console.log({ err });
         alert(err.message);

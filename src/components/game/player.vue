@@ -1,16 +1,16 @@
 <template>
   <div v-if="player._id" :class="['player', ...customClass, iam ? 'iam' : '', player.active ? 'active' : '']">
-    <div v-if="planeInHandIds.length" class="hand-planes">
-      <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
-    </div>
     <div class="inner-content">
       <div class="player-hands">
-        <div v-if="iam" class="hand-cards-list">
+        <div v-if="hasPlaneInHand" class="hand-planes">
+          <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
+        </div>
+        <div v-if="iam && !hasPlaneInHand" class="hand-cards-list">
           <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
             <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" :canPlay="iam" />
           </div>
         </div>
-        <div class="hand-dices-list">
+        <div v-if="!hasPlaneInHand" class="hand-dices-list">
           <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
             <card v-if="iam && deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
             <card v-if="iam && deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
@@ -51,17 +51,17 @@ export default {
   computed: {
     ...mapGetters({
       getStore: 'getStore',
-      currentPlayer: 'currentPlayer',
-      currentPlayerIsActive: 'currentPlayerIsActive',
+      sessionPlayerId: 'sessionPlayerId',
+      sessionPlayerIsActive: 'sessionPlayerIsActive',
     }),
     player() {
       return this.getStore(this.playerId, 'player');
     },
     dominoDecks() {
-      return this.deckIds.map((id) => this.getStore(id, 'deck')).filter((deck) => deck.type === 'domino') || [];
+      return this.deckIds.map(id => this.getStore(id, 'deck')).filter(deck => deck.type === 'domino') || [];
     },
     cardDecks() {
-      return this.deckIds.map((id) => this.getStore(id, 'deck')).filter((deck) => deck.type === 'card') || [];
+      return this.deckIds.map(id => this.getStore(id, 'deck')).filter(deck => deck.type === 'card') || [];
     },
     deckIds() {
       return Object.keys(this.player.deckMap || {});
@@ -70,17 +70,20 @@ export default {
       return this.iam
         ? null
         : {
-            domino: Object.keys(this.dominoDecks.find((deck) => !deck.subtype)?.itemMap || {}).length || 0,
-            card: Object.keys(this.cardDecks.find((deck) => !deck.subtype)?.itemMap || {}).length || 0,
+            domino: Object.keys(this.dominoDecks.find(deck => !deck.subtype)?.itemMap || {}).length || 0,
+            card: Object.keys(this.cardDecks.find(deck => !deck.subtype)?.itemMap || {}).length || 0,
           };
     },
     planeInHandIds() {
       return Object.keys(
-        this.deckIds.map((id) => this.getStore(id, 'deck')).find((deck) => deck.type === 'plane')?.itemMap || {},
+        this.deckIds.map(id => this.getStore(id, 'deck')).find(deck => deck.type === 'plane')?.itemMap || {},
       );
     },
+    hasPlaneInHand() {
+      return this.planeInHandIds.length > 0;
+    },
     showDecks() {
-      return this.currentPlayerIsActive && this.player.activeEvent?.showDecks;
+      return this.sessionPlayerIsActive && this.player.activeEvent?.showDecks;
     },
   },
   methods: {},
@@ -99,39 +102,26 @@ export default {
   display: flex;
   flex-direction: row-reverse;
 }
-#game.mobile-view.portrait-view .player:not(.iam)  > .inner-content {
+#game.mobile-view.portrait-view .player:not(.iam) > .inner-content {
   flex-direction: row;
 }
 
-.player.iam {
-  position: absolute !important;
-  left: auto;
-  top: auto;
-  right: 20px;
-  bottom: 20px;
-}
 .player.iam > .inner-content {
   display: flex;
-}
-#game.mobile-view .player.iam {
-  width: 0px;
-	height: auto;
-  margin-right: 70px;
-}
-#game.mobile-view .player.iam > .inner-content {
-  transform: scale(0.5);
-  transform-origin: bottom right;
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
 }
 #game.mobile-view .player.iam > .inner-content > .player-hands {
   flex-wrap: nowrap;
 }
 #game.mobile-view .player.iam > .hand-planes {
-	transform: scale(0.5);
+  transform: scale(0.5);
   width: 200%;
-	height: 50%;
-	transform-origin: top;
-	left: -50%;
-	bottom: -25%;
+  height: 50%;
+  transform-origin: top;
+  left: -50%;
+  bottom: -25%;
 }
 
 .workers {
@@ -144,15 +134,16 @@ export default {
 
 .player-hands {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-end;
   padding: 0px 10px;
-  flex-direction: row-reverse;
+  flex-direction: row;
   position: relative;
   width: 100%;
 }
 #game.mobile-view.portrait-view .player-hands {
   justify-content: flex-start;
+  flex-direction: row-reverse;
 }
 
 .hand-cards-list {
@@ -189,11 +180,6 @@ export default {
 }
 
 .hand-planes {
-  position: fixed;
-  bottom: 0px;
-  left: 0px;
-  z-index: 1;
-  background: black;
   height: 220px;
   display: flex;
   justify-content: center;
@@ -201,12 +187,9 @@ export default {
 }
 .player.iam .hand-planes {
   width: 100%;
-  /* transform-origin: bottom; */
 }
 .hand-planes .plane {
   position: relative;
-  /* margin: 0px 10px;
-  margin-top: -125px; */
 }
 .player.iam .hand-planes .plane:hover {
   cursor: pointer;

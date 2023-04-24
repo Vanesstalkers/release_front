@@ -27,37 +27,118 @@
       />
     </div>
 
-    <div class="gui game-decks">
-      <div class="wrapper">
-        <div class="game-status-label">{{ statusLabel }}</div>
-        <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
-          <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat" v-on:click="takeDice">
-            <!-- !!! не забыть убрать takeDice -->
-            {{ Object.keys(deck.itemMap).length }}
-          </div>
-          <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event" v-on:click="takeCard">
-            {{ Object.keys(deck.itemMap).length }}
-          </div>
-          <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
-            {{ Object.keys(deck.itemMap).length }}
-          </div>
-          <div v-if="deck._id && deck.code === 'Deck[card_active]'" class="deck-active">
-            <!-- активная карта всегда первая - для верстки она должна стать последней -->
-            <card v-for="id in sortActiveCards(Object.keys(deck.itemMap))" :key="id" :cardId="id" :canPlay="true" />
+    <div
+      class="game-info"
+      :style="{
+        position: 'absolute',
+        right: '0px',
+        top: '0px',
+        height: '0px',
+        width: '100%',
+      }"
+    >
+      <div
+        :class="['gui-resizeable', `scale-${guiScale}`]"
+        :style="{
+          position: 'absolute',
+          right: '10px',
+          top: '10px',
+          height: 'auto',
+          width: 'auto',
+          transformOrigin: 'right top',
+        }"
+      >
+        <div class="wrapper">
+          <div class="game-status-label">{{ statusLabel }}</div>
+          <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
+            <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat" v-on:click="takeDice">
+              <!-- !!! не забыть убрать takeDice -->
+              {{ Object.keys(deck.itemMap).length }}
+            </div>
+            <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event" v-on:click="takeCard">
+              {{ Object.keys(deck.itemMap).length }}
+            </div>
+            <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
+              {{ Object.keys(deck.itemMap).length }}
+            </div>
+            <div v-if="deck._id && deck.code === 'Deck[card_active]'" class="deck-active">
+              <!-- активная карта всегда первая - для верстки она должна стать последней -->
+              <card v-for="id in sortActiveCards(Object.keys(deck.itemMap))" :key="id" :cardId="id" :canPlay="true" />
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <player :playerId="currentPlayer" :customClass="['gui']" :iam="true" :showControls="showPlayerControls" />
-    <div class="gui players">
-      <player
-        v-for="(id, index) in playerIds"
-        :key="id"
-        :playerId="id"
-        :customClass="[`idx-${index}`]"
-        :showControls="false"
-      />
+    <div
+      class="session-player"
+      :style="{
+        position: 'absolute',
+        right: '0px',
+        bottom: '0px',
+        height: '0px',
+        width: '100%',
+      }"
+    >
+      <div
+        :class="['gui-resizeable', `scale-${guiScale}`]"
+        :style="{
+          position: 'absolute',
+          right: '10px',
+          bottom: '10px',
+          height: 'auto',
+          width: 'auto',
+          transformOrigin: 'right bottom',
+        }"
+      >
+        <player
+          :playerId="sessionPlayerId"
+          :customClass="['gui', `scale-${guiScale}`]"
+          :iam="true"
+          :showControls="showPlayerControls"
+        />
+      </div>
+    </div>
+    <div
+      class="players"
+      :style="{
+        position: 'absolute',
+        left: '0px',
+        bottom: '0px',
+        height: '0px',
+        width: '100%',
+      }"
+    >
+      <div
+        :class="['gui-resizeable', 'gui-small', `scale-${guiScale}`]"
+        :style="
+          isMobile && !isLandscape
+            ? {
+                position: 'absolute',
+                right: '10px',
+                bottom: 10 + 10 + 180 * 0.6 + `px`,
+                height: 'auto',
+                width: 'auto',
+                transformOrigin: 'right bottom',
+              }
+            : {
+                position: 'absolute',
+                left: '10px',
+                bottom: '10px',
+                height: 'auto',
+                width: 'auto',
+                transformOrigin: 'left bottom',
+              }
+        "
+      >
+        <player
+          v-for="(id, index) in playerIds"
+          :key="id"
+          :playerId="id"
+          :customClass="[`idx-${index}`]"
+          :showControls="false"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -110,17 +191,18 @@ export default {
   computed: {
     ...mapGetters({
       getStore: 'getStore',
+      guiScale: 'guiScale',
       isMobile: 'isMobile',
       isLandscape: 'isLandscape',
-      currentPlayer: 'currentPlayer',
-      currentPlayerIsActive: 'currentPlayerIsActive',
+      sessionPlayerId: 'sessionPlayerId',
+      sessionPlayerIsActive: 'sessionPlayerIsActive',
       gamePlaneCustomStyleData: 'gamePlaneCustomStyleData',
       availablePorts: 'availablePorts',
     }),
     gamePlaneControlStyle() {
       const transform = [];
       transform.push('translate(' + this.gamePlaneTranslateX + 'px, ' + this.gamePlaneTranslateY + 'px)');
-      transform.push(`scale(${this.gamePlaneScale})`);
+      transform.push(`scale(${this.gamePlaneScale * (this.guiScale / 2)})`);
       transform.push(`rotate(${this.gamePlaneRotation}deg)`);
       return { transform: transform.join(' ') };
     },
@@ -144,21 +226,24 @@ export default {
     },
     playerIds() {
       const ids = Object.keys(this.game.playerMap || {}).sort((id1, id2) => (id1 > id2 ? 1 : -1));
-      const curPlayerIdx = ids.indexOf(this.currentPlayer);
+      const curPlayerIdx = ids.indexOf(this.sessionPlayerId);
       return ids.slice(curPlayerIdx + 1).concat(ids.slice(0, curPlayerIdx));
     },
+    sessionPlayer() {
+      return this.getStore(this.playerId, 'player');
+    },
     helper() {
-      return this.getStore(this.currentPlayer, 'player')?.helper || {};
+      return this.getStore(this.sessionPlayerId, 'player')?.helper || {};
     },
     deckList() {
-      const list = Object.keys(this.game.deckMap).map((id) => this.getStore(id, 'deck')) || [];
+      const list = Object.keys(this.game.deckMap).map(id => this.getStore(id, 'deck')) || [];
       return list;
     },
     activeCards() {
-      return this.deckList.find((deck) => deck.subtype === 'active') || {};
+      return this.deckList.find(deck => deck.subtype === 'active') || {};
     },
     possibleAddPlanePositions() {
-      if (!this.currentPlayerIsActive) return [];
+      if (!this.sessionPlayerIsActive) return [];
       return (this.game.availablePorts || []).map(
         ({ joinPortId, joinPortDirect, targetPortId, targetPortDirect, position }) => {
           return {
@@ -178,17 +263,17 @@ export default {
     },
   },
   watch: {
-    'game.round': function () {
+    'game.round': function() {
       this.$store.commit('setSelectedDiceSideId', null);
       this.$store.commit('setAvailablePorts', []);
     },
-    helper: function (val, oldVal) {
+    helper: function(val, oldVal) {
       if (val.selector) {
         document.getElementById('app').setAttribute('tutorial-active', true);
         document.querySelector(val.selector).classList.add('tutorial-active');
       }
     },
-    'game.status': function (val) {
+    'game.status': function(val) {
       if (val === 'finished') {
         localStorage.setItem('currentGame', '');
         this.$router.push({ path: `/` });
@@ -198,19 +283,19 @@ export default {
   methods: {
     sortActiveCards(arr) {
       return arr
-        .map((id) => this.getStore(id, 'card'))
+        .map(id => this.getStore(id, 'card'))
         .sort((a, b) => (a.played > b.played ? 1 : -1)) // сортируем по времени сыгрывания
         .sort((a, b) => (a.played ? 0 : 1)) // переносим не сыгранные в конец
-        .map((card) => card._id);
+        .map(card => card._id);
     },
     async takeDice() {
-      await api.game.action({ name: 'takeDice', data: { count: 3 } }).catch((err) => {
+      await api.game.action({ name: 'takeDice', data: { count: 3 } }).catch(err => {
         console.log({ err });
         alert(err.message);
       });
     },
     async takeCard() {
-      await api.game.action({ name: 'takeCard', data: { count: 5 } }).catch((err) => {
+      await api.game.action({ name: 'takeCard', data: { count: 5 } }).catch(err => {
         console.log({ err });
         alert(err.message);
       });
@@ -227,7 +312,7 @@ export default {
             targetPortDirect: event.target.attributes.targetPortDirect.value,
           },
         })
-        .catch((err) => {
+        .catch(err => {
           console.log({ err });
           alert(err.message);
         });
@@ -249,21 +334,22 @@ export default {
 
     api.game
       .enter({ gameId: this.gameId })
-      .then((data) => {
+      .then(data => {
         console.log('api.game.enter', data);
       })
-      .catch((err) => {
+      .catch(err => {
+        console.log({err});
         localStorage.setItem('currentGame', '');
         this.$router.push({ path: `/` });
       });
 
-    document.addEventListener('contextmenu', function (event) {
+    document.addEventListener('contextmenu', function(event) {
       event.preventDefault();
     });
 
     const self = this;
     const config = this.gamePlaneConfig;
-    document.body.addEventListener('mousedown', function (event) {
+    document.body.addEventListener('mousedown', function(event) {
       if (event.target.classList.contains('scroll-off') || event.target.classList.contains('gui')) return;
       if (event.button === 2) {
         config.initialRotateAngle = event.clientX;
@@ -274,7 +360,7 @@ export default {
         config.isDragging = true;
       }
     });
-    document.body.addEventListener('mouseup', function (event) {
+    document.body.addEventListener('mouseup', function(event) {
       if (event.button === 2) {
         config.rotationLast = config.rotation;
         config.isRotating = false;
@@ -282,7 +368,7 @@ export default {
         config.isDragging = false;
       }
     });
-    document.body.addEventListener('mousemove', function (event) {
+    document.body.addEventListener('mousemove', function(event) {
       if (config.isRotating) {
         config.rotation = config.rotationLast + (event.clientX - config.initialRotateAngle) / 2;
         self.gamePlaneRotation = config.rotation;
@@ -299,7 +385,7 @@ export default {
       }
     });
 
-    document.body.addEventListener('touchstart', function (event) {
+    document.body.addEventListener('touchstart', function(event) {
       if (event.target.closest('.helper-dialog')) return;
       const touches = event.touches;
       if (touches.length === 2) {
@@ -316,7 +402,7 @@ export default {
         config.isTouchMoved = false;
       }
     });
-    document.body.addEventListener('touchmove', function (event) {
+    document.body.addEventListener('touchmove', function(event) {
       if (event.target.closest('.helper-dialog')) return;
       const touches = event.touches;
       if (touches.length === 2) {
@@ -345,7 +431,7 @@ export default {
         }
       }
     });
-    document.body.addEventListener('touchend', function (event) {
+    document.body.addEventListener('touchend', function(event) {
       if (!config.isTouchMoved) {
         // handle tap event on the movable element
         // event.preventDefault();
@@ -389,8 +475,83 @@ export default {
   position: absolute;
   cursor: pointer;
 }
+.gui-resizeable.scale-1 {
+  scale: 0.8;
+}
+.gui-resizeable.scale-2 {
+  scale: 1;
+}
+.gui-resizeable.scale-3 {
+  scale: 1.5;
+}
+.gui-resizeable.scale-4 {
+  scale: 2;
+}
+.gui-resizeable.scale-5 {
+  scale: 2.5;
+}
+#game.mobile-view .gui-resizeable.scale-1 {
+  scale: 0.6;
+}
+#game.mobile-view .gui-resizeable.scale-2 {
+  scale: 0.8;
+}
+#game.mobile-view .gui-resizeable.scale-3 {
+  scale: 1;
+}
+#game.mobile-view .gui-resizeable.scale-4 {
+  scale: 1.2;
+}
+#game.mobile-view .gui-resizeable.scale-5 {
+  scale: 1.5;
+}
+.gui-resizeable.gui-small.scale-1 {
+  scale: 0.6;
+}
+.gui-resizeable.gui-small.scale-2 {
+  scale: 0.8;
+}
+.gui-resizeable.gui-small.scale-3 {
+  scale: 1;
+}
+.gui-resizeable.gui-small.scale-4 {
+  scale: 1.2;
+}
+.gui-resizeable.gui-small.scale-5 {
+  scale: 1.5;
+}
+#game.mobile-view .gui-resizeable.gui-small.scale-1 {
+  scale: 0.4;
+}
+#game.mobile-view .gui-resizeable.gui-small.scale-2 {
+  scale: 0.6;
+}
+#game.mobile-view .gui-resizeable.gui-small.scale-3 {
+  scale: 0.8;
+}
+#game.mobile-view .gui-resizeable.gui-small.scale-4 {
+  scale: 1;
+}
+#game.mobile-view .gui-resizeable.gui-small.scale-5 {
+  scale: 1.2;
+}
+/* .gui.player.scale-1 > .inner-content {
+  transform: scale(0.8);
+}
+.gui.player.scale-2 > .inner-content {
+  transform: scale(1);
+}
+.gui.player.scale-3 > .inner-content {
+  transform: scale(1.5);
+}
+.gui.player.scale-4 > .inner-content {
+  transform: scale(2);
+}
+.gui.player.scale-5 > .inner-content {
+  transform: scale(2.5);
+} */
 
-.gui .deck > .card-event {
+.deck > .card-event {
   width: 60px;
   height: 90px;
   color: white;
@@ -401,18 +562,7 @@ export default {
   align-content: center;
 }
 
-.gui.game-decks {
-  top: 10px;
-  right: 10px;
-}
-#game.mobile-view .gui.game-decks {
-  transform: scale(0.5);
-  transform-origin: top right;
-}
-.gui.game-decks > .wrapper {
-}
-
-.gui .deck[code='Deck[domino]'] {
+.deck[code='Deck[domino]'] {
   position: absolute;
   top: 35px;
   right: 100px;
@@ -421,7 +571,7 @@ export default {
   padding: 20px;
   cursor: default;
 }
-.gui .deck[code='Deck[domino]'] > .hat {
+.deck[code='Deck[domino]'] > .hat {
   color: white;
   font-size: 36px;
   padding: 4px;
@@ -429,14 +579,14 @@ export default {
   box-shadow: inset 0px 0px 20px 0px black;
 }
 
-.gui .deck[code='Deck[card]'] {
+.deck[code='Deck[card]'] {
   position: absolute;
   top: 35px;
   right: 30px;
   cursor: default;
 }
 
-.gui .deck[code='Deck[card_drop]'] {
+.deck[code='Deck[card_drop]'] {
   position: absolute;
   filter: grayscale(1);
   transform: scale(0.5);
@@ -478,12 +628,26 @@ export default {
 
 .gui.players {
   height: auto;
-  transform: scale(0.5);
   display: flex;
   flex-direction: column;
   bottom: 10px;
   left: 10px;
   transform-origin: left bottom;
+}
+.gui.players.scale-1 {
+  transform: scale(0.4);
+}
+.gui.players.scale-2 {
+  transform: scale(0.6);
+}
+.gui.players.scale-3 {
+  transform: scale(0.8);
+}
+.gui.players.scale-4 {
+  transform: scale(1);
+}
+.gui.players.scale-5 {
+  transform: scale(1.2);
 }
 #game.mobile-view.portrait-view .gui.players {
   bottom: 120px;

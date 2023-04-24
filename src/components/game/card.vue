@@ -7,7 +7,7 @@
     v-on:click.stop="showInfo(card.name)"
   >
     <div
-      v-if="canPlay && currentPlayerIsActive && !actionsDisabled && !card.played"
+      v-if="canPlay && sessionPlayerIsActive && !actionsDisabled && !card.played"
       v-on:click.stop="playCard"
       class="play-btn"
     >
@@ -28,7 +28,7 @@ export default {
     ...mapGetters({
       getStore: 'getStore',
       actionsDisabled: 'actionsDisabled',
-      currentPlayerIsActive: 'currentPlayerIsActive',
+      sessionPlayerIsActive: 'sessionPlayerIsActive',
     }),
     card() {
       const card = this.getStore(this.cardId, 'card');

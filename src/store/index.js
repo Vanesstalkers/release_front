@@ -13,16 +13,17 @@ export default new Vuex.Store({
   },
   getters: {
     isMobile: state => state.isMobile,
+    guiScale: state => state.guiScale,
     isLandscape: state => state.isLandscape,
     currentUser: state => state.currentUser,
-    currentPlayer: state => state.currentPlayer,
-    currentPlayerIsActive: state =>
-      state.currentPlayer ===
+    sessionPlayerId: state => state.sessionPlayerId,
+    sessionPlayerIsActive: state =>
+      state.sessionPlayerId ===
       Object.keys((state.store.game?.[state.gameId] || {}).playerMap || {}).find(
         id => state.store.player?.[id]?.active,
       ),
     currentRound: state => (state.store.game?.[state.gameId] || {}).round,
-    actionsDisabled: state => state.store.player?.[state.currentPlayer]?.eventData?.actionsDisabled,
+    actionsDisabled: state => state.store.player?.[state.sessionPlayerId]?.eventData?.actionsDisabled,
     pickedDiceId: state => state.pickedDiceId,
     selectedDiceSideId: state => state.selectedDiceSideId,
     availablePorts: state => state.availablePorts,

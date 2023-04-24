@@ -13,8 +13,8 @@
       <!-- {{ link }} -->
     </div>
 
-    <div v-if="!menu" class="helper-guru helper-avatar" v-on:click.stop="initMenu" />
-    <div v-if="menu" class="helper-menu">
+    <div v-if="!menu" :class="['helper-guru', 'helper-avatar', `scale-${guiScale}`]" v-on:click.stop="initMenu" />
+    <div v-if="menu" :class="['helper-menu', `scale-${guiScale}`]">
       <div class="helper-avatar" />
       <div class="content">
         <div class="text">
@@ -46,7 +46,7 @@
         </div>
       </div>
     </div>
-    <div :class="['helper-dialog', ...dialogClass]" :style="dialogStyle">
+    <div :class="['helper-dialog', `scale-${guiScale}`, ...dialogClass]" :style="dialogStyle">
       <div class="helper-avatar" />
       <div class="content">
         <div v-if="helperData.img" class="img">
@@ -80,7 +80,7 @@ export default {
     return { menu: null, dialogActive: false, helperClassMap: {}, dialogStyle: {}, dialogClassMap: {} };
   },
   watch: {
-    helperData: function () {
+    helperData: function() {
       this.update();
     },
   },
@@ -88,6 +88,7 @@ export default {
     ...mapGetters({
       getStore: 'getStore',
       currentUser: 'currentUser',
+      guiScale: 'guiScale',
     }),
     helperData() {
       return this.getStore(this.currentUser, 'user').helper || {};
@@ -139,7 +140,7 @@ export default {
       }
       this.dialogStyle = dialogStyle;
 
-      document.querySelectorAll('.tutorial-active').forEach((el) => {
+      document.querySelectorAll('.tutorial-active').forEach(el => {
         el.classList.remove('tutorial-active');
       });
       if (active) {
@@ -207,7 +208,7 @@ export default {
           };
           break;
         case 'leaveGame':
-          api.lobby.leaveGame().catch((err) => {
+          api.lobby.leaveGame().catch(err => {
             console.log({ err });
             alert(err.message);
           });
@@ -242,9 +243,25 @@ export default {
   height: 64px;
   cursor: pointer;
   font-size: 14px;
+  transform-origin: left top;
+}
+.helper-guru.scale-1 {
+  scale: 0.8;
+}
+.helper-guru.scale-2 {
+  scale: 1;
+}
+.helper-guru.scale-3 {
+  scale: 1.5;
+}
+.helper-guru.scale-4 {
+  scale: 2;
+}
+.helper-guru.scale-5 {
+  scale: 2.5;
 }
 .mobile-view .helper-guru {
-  transform: scale(0.7);
+  scale: 0.6;
   transform-origin: left top;
 }
 #lobby.mobile-view .helper-guru {
@@ -268,9 +285,25 @@ export default {
   right: 20px;
   top: 20px;
   max-width: 100%;
+  transform-origin: left top;
 }
-.mobile-view .helper-guru {
-  transform: scale(0.7);
+.helper-menu.scale-1 {
+  scale: 0.8;
+}
+.helper-menu.scale-2 {
+  scale: 1;
+}
+.helper-menu.scale-3 {
+  scale: 1.5;
+}
+.helper-menu.scale-4 {
+  scale: 2;
+}
+.helper-menu.scale-5 {
+  scale: 2.5;
+}
+.mobile-view .helper-menu {
+  scale: 1;
   transform-origin: left top;
 }
 #lobby.mobile-view .helper-menu {
@@ -295,17 +328,24 @@ export default {
   max-width: 100%;
   max-height: 95%;
 }
+.helper-dialog.scale-1 {
+  scale: 0.8;
+}
+.helper-dialog.scale-2 {
+  scale: 1;
+}
+.helper-dialog.scale-3 {
+  scale: 1.5;
+}
+.helper-dialog.scale-4 {
+  scale: 2;
+}
+.helper-dialog.scale-5 {
+  scale: 2.5;
+}
 .mobile-view .helper-dialog {
-  transform: scale(0.7);
-  transform-origin: left top;
+  scale: 1;
 }
-/* .helper-dialog.fullscreen {
-  width: 100%;
-  height: 100%;
-}
-.helper-dialog.fullscreen > .content {
-  justify-content: center;
-} */
 .helper.dialog-active > .helper-dialog {
   display: flex;
 }

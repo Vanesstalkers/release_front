@@ -60,12 +60,23 @@ const init = async () => {
     userAgent.match(/iPod/i) ||
     userAgent.match(/BlackBerry/i) ||
     userAgent.match(/Windows Phone/i);
-  const isLandscape = () => window.innerHeight < window.innerWidth;
 
-  window.addEventListener('orientationchange', () => {
-    store.dispatch('setSimple', { isLandscape: isLandscape() });
-  });
-  store.dispatch('setSimple', { isMobile: isMobile() ? true : false, isLandscape: isLandscape() });
+  const checkDevice = () => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    store.dispatch('setSimple', {
+      isMobile: isMobile() ? true : false,
+      isLandscape: height < width,
+      guiScale: width < 1000 ? 1 : width < 1500 ? 2 : width < 2000 ? 3 : width < 3000 ? 4 : 5,
+    });
+  };
+
+  // window.addEventListener('orientationchange', async () => {
+  //   console.log("orientationchange");
+  //   store.dispatch('setSimple', { isLandscape: await isLandscape() });
+  // });
+  window.addEventListener('resize', checkDevice);
+  checkDevice();
 
   api.db.on('updated', data => {
     store.dispatch('setData', data);
@@ -76,7 +87,7 @@ const init = async () => {
 
   api.session.on('joinGame', data => {
     localStorage.setItem('currentGame', data.gameId);
-    store.dispatch('setSimple', { currentPlayer: data.playerId });
+    store.dispatch('setSimple', { sessionPlayerId: data.playerId });
     router.push({ path: `/game/${data.gameId}` });
   });
   api.session.on('leaveGame', () => {

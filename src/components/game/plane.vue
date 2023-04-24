@@ -55,7 +55,7 @@ export default {
   computed: {
     ...mapGetters({
       getStore: 'getStore',
-      currentPlayerIsActive: 'currentPlayerIsActive',
+      sessionPlayerIsActive: 'sessionPlayerIsActive',
     }),
     plane() {
       return this.getStore(this.planeId, 'plane');
@@ -83,7 +83,7 @@ export default {
       return Object.keys(this.plane.portMap || {});
     },
     activeEvent() {
-      return this.currentPlayerIsActive && this.plane.activeEvent;
+      return this.sessionPlayerIsActive && this.plane.activeEvent;
     },
   },
   methods: {
