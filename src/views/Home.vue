@@ -56,29 +56,29 @@
     </div>
     <div class="menu-item list">
       <label v-on:click="pinMenuItem">
-        ВИТРИНА ИГР <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
+        ПРАВИЛА ИГР <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
       <div>
         <ul>
           <li>
-            <label v-on:click.stop="showRules('release')">Релиз</label>
+            <label v-on:click.stop="showRules('release')">Игра "Релиз"</label>
             <div>Игра про ИТ-разработку</div>
           </li>
           <li class="disabled">
             <label>Автобизнес</label>
             <div>Колода для игр про продажи автомобилей</div>
             <ul>
-              <li class="white">
+              <li>
                 <label v-on:click.stop="showRules('auto-deck')">Описание колоды</label>
               </li>
               <li>
-                <label v-on:click.stop="showRules('auto-sale')">Авто-продажи</label>
+                <label v-on:click.stop="showRules('auto-sales')">Игра "Авто-продажи"</label>
               </li>
               <li>
-                <label v-on:click.stop="showRules('auto-auction')">Авто-аукцион</label>
+                <label v-on:click.stop="showRules('auto-auction')">Игра "Авто-аукцион"</label>
               </li>
               <li>
-                <label v-on:click.stop="showRules('auto-express')">Авто-экспресс</label>
+                <label v-on:click.stop="showRules('auto-express')">Игра "Авто-экспресс"</label>
               </li>
             </ul>
           </li>
@@ -86,14 +86,14 @@
             <label>Скорринг</label>
             <div>Колода для игр про работу в банках</div>
             <ul>
-              <li class="white">
+              <li>
                 <label v-on:click.stop="showRules('bank-deck')">Описание колоды</label>
               </li>
               <li>
-                <label v-on:click.stop="showRules('bank-sale')">Банк-продаж</label>
+                <label v-on:click.stop="showRules('bank-sales')">Игра "Банк-продаж"</label>
               </li>
               <li>
-                <label v-on:click.stop="showRules('bank-risk')">Банк-рисков</label>
+                <label v-on:click.stop="showRules('bank-risks')">Игра "Банк-рисков"</label>
               </li>
             </ul>
           </li>
@@ -792,12 +792,12 @@ export default {
 .menu-item.list ul > li > label > a {
   font-size: 16px;
 }
-.menu-item.list ul > li:not(.disabled):hover > label > a,
+.menu-item.list ul > li:not(.disabled):hover > label,
 .menu-item.list ul > li:not(.disabled):hover::marker {
   color: white;
 }
 
-.menu-item.list ul > li.disabled * {
+.menu-item.list ul > li.disabled > label {
   cursor: default !important;
 }
 .menu-item.list ul > li.disabled > label:after {
