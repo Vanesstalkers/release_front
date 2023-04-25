@@ -12,9 +12,9 @@
         </div>
         <div v-if="!hasPlaneInHand" class="hand-dices-list">
           <div v-for="deck in dominoDecks" :key="deck._id" class="hand-dices">
-            <card v-if="iam && deck.subtype === 'teamlead'" :card="{ name: 'teamlead' }" />
-            <card v-if="iam && deck.subtype === 'flowstate'" :card="{ name: 'flowstate' }" />
             <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :inHand="true" :iam="iam" />
+            <card v-if="iam && deck.subtype === 'teamlead'" :cardData="{ name: 'teamlead' }" />
+            <card v-if="iam && deck.subtype === 'flowstate'" :cardData="{ name: 'flowstate' }" />
           </div>
         </div>
       </div>
@@ -177,6 +177,10 @@ export default {
 .hand-dices .domino-dice {
   height: 140px;
   width: 70px;
+}
+.hand-dices .card-event {
+  scale: 0.7;
+	transform-origin: bottom;
 }
 
 .hand-planes {

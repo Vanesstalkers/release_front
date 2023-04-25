@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="card._id"
+    v-if="card._id || cardData"
     :name="card.name"
     :class="['card-event', card.played ? 'played' : '']"
     :style="customStyle"
@@ -23,6 +23,7 @@ export default {
   props: {
     cardId: String,
     canPlay: Boolean,
+    cardData: Object,
   },
   computed: {
     ...mapGetters({
@@ -31,11 +32,12 @@ export default {
       sessionPlayerIsActive: 'sessionPlayerIsActive',
     }),
     card() {
+      if(this.cardData) return this.cardData;
       const card = this.getStore(this.cardId, 'card');
       return card._id ? card : { _id: this.cardId };
     },
     customStyle() {
-      const style = { backgroundImage: `url(/img/cards/${this.card.name}.jpg)` };
+      const style = { backgroundImage: `url(/img/cards/release/${this.card.name}.jpg)` };
       return style;
     },
   },
@@ -48,8 +50,7 @@ export default {
       });
     },
     showInfo(name) {
-      api.helper.action({ tutorial: 'tutorialCardEvent', step: name });
-      return;
+      this.$store.commit('setShownCard', name);
     },
   },
   mounted() {},
@@ -70,7 +71,7 @@ export default {
   border-radius: 10px;
   margin: 0px 0px 0px 5px;
   box-shadow: inset 0px 20px 20px 0px black;
-  background-image: url(/img/cards/back-side.jpg);
+  background-image: url(/img/cards/release/back-side.jpg);
 }
 /* .card-event:hover:after {
   content: '?';

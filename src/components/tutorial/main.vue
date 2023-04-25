@@ -3,15 +3,13 @@
     <div
       v-for="link in helperLinks"
       :key="link.code"
-      class="helper-link helper-avatar"
+      :class="['helper-link', 'helper-avatar', link.customClass]"
       :style="{
-        left: `${link.clientRect.left + link.clientRect.width}px`,
-        top: `${link.clientRect.top}px`,
+        left: `${link.clientRect.left + (link.pos.left ? 0 : link.clientRect.width)}px`,
+        top: `${link.clientRect.top + (link.pos.top ? 0 : link.clientRect.height)}px`,
       }"
       v-on:click.stop="showTutorial(link)"
-    >
-      <!-- {{ link }} -->
-    </div>
+    />
 
     <div v-if="!menu" :class="['helper-guru', 'helper-avatar', `scale-${guiScale}`]" v-on:click.stop="initMenu" />
     <div v-if="menu" :class="['helper-menu', `scale-${guiScale}`]">
@@ -89,20 +87,21 @@ export default {
       getStore: 'getStore',
       currentUser: 'currentUser',
       guiScale: 'guiScale',
+      getHelperLinks: 'getHelperLinks',
+      helperLinksBounds: 'helperLinksBounds',
     }),
     helperData() {
       return this.getStore(this.currentUser, 'user').helper || {};
     },
     helperLinks() {
-      const links = this.getStore(this.currentUser, 'user').helperLinks || {};
-      const currentGame = localStorage.getItem('currentGame');
-      return Object.entries(links)
-        .filter(([code, link]) => link.used !== true && link.type === (currentGame ? 'game' : 'lobby'))
+      return Object.entries(this.getHelperLinks)
         .map(([code, link]) => ({
           code,
+          pos: {},
           ...link,
-          clientRect: this.$root.$el.querySelector(link.selector)?.getBoundingClientRect() || {},
-        }));
+          clientRect: this.helperLinksBounds[code],
+        }))
+        .filter(({ clientRect }) => clientRect);
     },
     helperClass() {
       return Object.entries(this.helperClassMap)
@@ -144,11 +143,23 @@ export default {
         el.classList.remove('tutorial-active');
       });
       if (active) {
-        document.getElementById('app').setAttribute('tutorial-active', true);
-        const el = document.querySelector(active);
-        if (el) el.classList.add('tutorial-active');
+        if (typeof active === 'string') active = { selector: active };
+        let { selector, update, customClass } = active;
+
+        // document.getElementById('app').setAttribute('tutorial-active', true);
+        document.querySelectorAll(selector).forEach(el => {
+          if (el) {
+            el.classList.add('tutorial-active');
+            if(customClass) el.classList.add(customClass);
+            if (update) {
+              el.addEventListener('click', () => {
+                this.action(update);
+              });
+            }
+          }
+        });
       } else {
-        document.getElementById('app').removeAttribute('tutorial-active');
+        // document.getElementById('app').removeAttribute('tutorial-active');
       }
     },
     async action({ action, step, tutorial, link }) {
@@ -436,7 +447,11 @@ export default {
 .tutorial-active {
   z-index: 10000 !important;
   position: relative;
-  box-shadow: 0 0 10px 20px #ffffff;
+  box-shadow: 0 0 100px 10px #f4e205;
+}
+.tutorial-active.rounded {
+  box-shadow: 0 0 20px 20px #f4e205;
+  border-radius: 50%;
 }
 
 .helper.fullscreen {
@@ -456,6 +471,7 @@ export default {
   margin-top: -25px;
   z-index: 2;
   cursor: pointer;
+  box-shadow: 0 0 10px 10px #f4e205;
 }
 .helper-link:hover {
   opacity: 0.7;

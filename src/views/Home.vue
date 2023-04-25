@@ -60,9 +60,16 @@
       </label>
       <div>
         <ul>
-          <li>
-            <label v-on:click.stop="showRules('release')">Игра "Релиз"</label>
+          <li class="disabled">
+            <label class="not-disabled">Игра "Релиз"</label>
             <div>Игра про ИТ-разработку</div>
+            <ul>
+              <li>
+                <label v-on:click.stop="showRules('release')">Правила игры</label>
+                <hr />
+                <span v-on:click="showGallery('release')">Список карт</span>
+              </li>
+            </ul>
           </li>
           <li class="disabled">
             <label>Автобизнес</label>
@@ -70,6 +77,11 @@
             <ul>
               <li>
                 <label v-on:click.stop="showRules('auto-deck')">Описание колоды</label>
+                <hr />
+                <span v-on:click="showGallery('auto', 'car')">Карты авто</span><br />
+                <span v-on:click="showGallery('auto', 'service')">Карты сервисов</span><br />
+                <span v-on:click="showGallery('auto', 'client')">Карты клиентов</span><br />
+                <span v-on:click="showGallery('auto', 'spec')">Карты особенностей</span><br />
               </li>
               <li>
                 <label v-on:click.stop="showRules('auto-sales')">Игра "Авто-продажи"</label>
@@ -88,6 +100,12 @@
             <ul>
               <li>
                 <label v-on:click.stop="showRules('bank-deck')">Описание колоды</label>
+                <hr />
+                <span v-on:click="showGallery('bank', 'product')">Карты продуктов</span><br />
+                <span v-on:click="showGallery('bank', 'service')">Карты сервисов</span><br />
+                <span v-on:click="showGallery('bank', 'scoring')">Карты скоринга</span><br />
+                <span v-on:click="showGallery('bank', 'client')">Карты клиентов</span><br />
+                <span v-on:click="showGallery('bank', 'spec')">Карты особенностей</span><br />
               </li>
               <li>
                 <label v-on:click.stop="showRules('bank-sales')">Игра "Банк-продаж"</label>
@@ -284,6 +302,8 @@
 
 <script>
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
+import { Fancybox } from '@fancyapps/ui';
+import '@fancyapps/ui/dist/fancybox/fancybox.css';
 
 import tutorial from '../components/tutorial/main.vue';
 
@@ -390,6 +410,81 @@ export default {
         setTimeout(this.restoreMsgBtn, 1000);
       }
     },
+    showGallery(deck, type) {
+      let images = [];
+      switch (deck) {
+        case 'release':
+          images = [
+            { name: 'audit' },
+            { name: 'claim' },
+            { name: 'coffee' },
+            { name: 'crutch' },
+            { name: 'crutch' },
+            { name: 'crutch' },
+            { name: 'disease' },
+            { name: 'dream' },
+            { name: 'emergency' },
+            { name: 'flowstate' },
+            { name: 'give_project' },
+            { name: 'insight' },
+            { name: 'lib' },
+            { name: 'pilot' },
+            { name: 'refactoring' },
+            { name: 'req_legal' },
+            { name: 'req_tax' },
+            { name: 'security' },
+            { name: 'showoff' },
+            { name: 'superman' },
+            { name: 'take_project' },
+            { name: 'teamlead' },
+            { name: 'transfer' },
+            { name: 'weekend' },
+            { name: 'water' },
+          ]
+            .map(({ name }) => `release/${name}.jpg`)
+            .filter((value, index, array) => {
+              return array.indexOf(value) === index;
+            });
+          break;
+        case 'auto':
+          switch (type) {
+            case 'car':
+              for (let i = 1; i <= 32; i++) images.push(`auto/car/car (${i}).png`);
+              break;
+            case 'service':
+              for (let i = 1; i <= 32; i++) images.push(`auto/service/service (${i}).png`);
+              break;
+            case 'client':
+              for (let i = 1; i <= 24; i++) images.push(`auto/client/client (${i}).png`);
+              break;
+            case 'spec':
+              for (let i = 1; i <= 24; i++) images.push(`auto/spec/spec (${i}).png`);
+              break;
+          }
+          break;
+        case 'bank':
+          switch (type) {
+            case 'product':
+              for (let i = 1; i <= 32; i++) images.push(`bank/product/product (${i}).png`);
+              break;
+            case 'service':
+              for (let i = 1; i <= 32; i++) images.push(`bank/service/service (${i}).png`);
+              break;
+            case 'client':
+              for (let i = 1; i <= 24; i++) images.push(`bank/client/client (${i}).png`);
+              break;
+            case 'spec':
+              for (let i = 1; i <= 24; i++) images.push(`bank/spec/spec (${i}).png`);
+              break;
+            case 'scoring':
+              for (let i = 1; i <= 38; i++) images.push(`bank/scoring/scoring (${i}).png`);
+              break;
+          }
+          break;
+      }
+
+      new Fancybox(images.map(path => ({ src: `/img/cards/${path}`, type: 'image' })));
+    },
   },
   async created() {
     this.$store.commit('setSimple', { store: {} });
@@ -408,43 +503,7 @@ export default {
     resize();
     window.addEventListener('resize', resize);
 
-    api.lobby.on('event', ({ event, data }) => {
-      console.log('event', event, data);
-      // switch (event) {
-      // case "userJoin": {
-      //   const lobby = this.$store.getters.getClone("lobby");
-      //   lobby.__user[data._id] = data;
-      //   this.$store.dispatch("setSimple", { lobby });
-      //   break;
-      // }
-      // case "userLeave": {
-      //   const lobby = this.$store.getters.getClone("lobby");
-      //   delete lobby.__user[data._id];
-      //   this.$store.dispatch("setSimple", { lobby });
-      //   break;
-      // }
-      // case "userUpdate": {
-      //   const lobby = this.$store.getters.getClone("lobby");
-      //   lobby.__user[data._id] = data;
-      //   this.$store.dispatch("setSimple", { lobby });
-      //   break;
-      // }
-      // case "gameAdd":
-      //   this.games.push(data);
-      //   break;
-
-      // case "gameDelete":
-      //   this.games = this.games.filter((game) => game._id !== data._id);
-      //   break;
-
-      // case 'gameUpdate':
-      //   this.$store.dispatch('setData', { game: {[data._id]: data} });
-      //   break;
-      // }
-    });
-
-    const lobbyData = await api.lobby.enter();
-    //this.$store.dispatch("setSimple", { lobby: lobbyData });
+    await api.lobby.enter();
   },
   async beforeDestroy() {},
 };
@@ -778,6 +837,11 @@ export default {
   font-size: 24px;
   color: #f4e205;
 }
+.menu-item.list ul > li > span {
+  cursor: pointer;
+  color: #f4e205;
+}
+
 .menu-item ul > li.white > label,
 .menu-item ul > li.white > label > a,
 .menu-item ul > li.white::marker {
@@ -792,7 +856,8 @@ export default {
 .menu-item.list ul > li > label > a {
   font-size: 16px;
 }
-.menu-item.list ul > li:not(.disabled):hover > label,
+.menu-item.list ul > li:not(.disabled) > label:hover,
+.menu-item.list ul > li > span:hover,
 .menu-item.list ul > li:not(.disabled):hover::marker {
   color: white;
 }
@@ -800,11 +865,16 @@ export default {
 .menu-item.list ul > li.disabled > label {
   cursor: default !important;
 }
-.menu-item.list ul > li.disabled > label:after {
+.menu-item.list ul > li.disabled > label:not(.not-disabled):after {
   content: '(в разработке)';
   color: grey;
   font-size: 20px;
   padding-left: 10px;
+}
+
+.menu-item.list ul > li > hr {
+  width: 80%;
+  margin: 6px 0px;
 }
 
 .new-game-btn-list {

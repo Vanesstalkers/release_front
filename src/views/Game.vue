@@ -6,6 +6,10 @@
     @wheel.prevent="zoomGamePlane"
   >
     <tutorial :inGame="true" />
+    <div v-if="shownCard" class="shown-card">
+      <div class="close" v-on:click.stop="closeCardInfo" />
+      <div class="img" :style="{ backgroundImage: `url(/img/cards/release/${shownCard}.jpg)` }" />
+    </div>
 
     <div
       id="gamePlane"
@@ -52,7 +56,6 @@
           <div class="game-status-label">{{ statusLabel }}</div>
           <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
             <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat" v-on:click="takeDice">
-              <!-- !!! не забыть убрать takeDice -->
               {{ Object.keys(deck.itemMap).length }}
             </div>
             <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event" v-on:click="takeCard">
@@ -93,7 +96,7 @@
       >
         <player
           :playerId="sessionPlayerId"
-          :customClass="['gui', `scale-${guiScale}`]"
+          :customClass="[`scale-${guiScale}`]"
           :iam="true"
           :showControls="showPlayerControls"
         />
@@ -198,6 +201,7 @@ export default {
       sessionPlayerIsActive: 'sessionPlayerIsActive',
       gamePlaneCustomStyleData: 'gamePlaneCustomStyleData',
       availablePorts: 'availablePorts',
+      shownCard: 'shownCard',
     }),
     gamePlaneControlStyle() {
       const transform = [];
@@ -289,12 +293,14 @@ export default {
         .map(card => card._id);
     },
     async takeDice() {
+      return;
       await api.game.action({ name: 'takeDice', data: { count: 3 } }).catch(err => {
         console.log({ err });
         alert(err.message);
       });
     },
     async takeCard() {
+      return;
       await api.game.action({ name: 'takeCard', data: { count: 5 } }).catch(err => {
         console.log({ err });
         alert(err.message);
@@ -323,6 +329,9 @@ export default {
       if (this.gamePlaneScale < 0.3) this.gamePlaneScale = 0.3;
       if (this.gamePlaneScale > 1) this.gamePlaneScale = 1;
     },
+    closeCardInfo() {
+      this.$store.commit('setShownCard', null);
+    },
   },
   async created() {
     // console.log('async created() {');
@@ -338,7 +347,7 @@ export default {
         console.log('api.game.enter', data);
       })
       .catch(err => {
-        console.log({err});
+        console.log({ err });
         localStorage.setItem('currentGame', '');
         this.$router.push({ path: `/` });
       });
@@ -535,21 +544,6 @@ export default {
 #game.mobile-view .gui-resizeable.gui-small.scale-5 {
   scale: 1.2;
 }
-/* .gui.player.scale-1 > .inner-content {
-  transform: scale(0.8);
-}
-.gui.player.scale-2 > .inner-content {
-  transform: scale(1);
-}
-.gui.player.scale-3 > .inner-content {
-  transform: scale(1.5);
-}
-.gui.player.scale-4 > .inner-content {
-  transform: scale(2);
-}
-.gui.player.scale-5 > .inner-content {
-  transform: scale(2.5);
-} */
 
 .deck > .card-event {
   width: 60px;
@@ -664,10 +658,10 @@ export default {
   display: block;
 }
 .plane.card-event.card-event-req_legal {
-  background-image: url(/img/cards/req_legal.jpg);
+  background-image: url(/img/cards/release/req_legal.jpg);
 }
 .plane.card-event.card-event-req_tax {
-  background-image: url(/img/cards/req_tax.jpg);
+  background-image: url(/img/cards/release/req_tax.jpg);
 }
 .fake-plane {
   position: absolute;
@@ -678,5 +672,35 @@ export default {
 .fake-plane:hover {
   opacity: 0.8;
   z-index: 1;
+}
+.shown-card {
+  position: fixed !important;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
+  top: 0px;
+  left: 0px;
+  background-image: url(../assets/clear-grey-back.png);
+}
+.shown-card > .img {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 100%;
+  height: 100%;
+}
+.shown-card > .close {
+  background-image: url(../assets/close.png);
+  background-color: black;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+}
+.shown-card > .close:hover {
+  opacity: 0.7;
 }
 </style>

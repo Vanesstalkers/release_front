@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@babel/plugin-proposal-optional-chaining": "^7.14.5",
+    "@fancyapps/ui": "^5.0.16",
     "@fortawesome/fontawesome-svg-core": "^6.3.0",
     "@fortawesome/free-brands-svg-icons": "^6.3.0",
     "@fortawesome/free-regular-svg-icons": "^6.3.0",

@@ -10,6 +10,8 @@ export default new Vuex.Store({
     pickedDiceId: null,
     selectedDiceSideId: null,
     availablePorts: [],
+    helperLinksBounds: {},
+    shownCard: null,
   },
   getters: {
     isMobile: state => state.isMobile,
@@ -27,6 +29,8 @@ export default new Vuex.Store({
     pickedDiceId: state => state.pickedDiceId,
     selectedDiceSideId: state => state.selectedDiceSideId,
     availablePorts: state => state.availablePorts,
+    helperLinksBounds: state => state.helperLinksBounds,
+    shownCard: state => state.shownCard,
 
     getSimple: state => (id, col) => {
       return (col ? state[col]?.[id] : state[id]) || {};
@@ -41,6 +45,15 @@ export default new Vuex.Store({
       return state;
     },
     gamePlaneCustomStyleData: state => state.gamePlaneCustomStyleData || {},
+    getHelperLinks: (state, getters) => {
+      const links = getters.getStore(getters.currentUser, 'user').helperLinks || {};
+      const currentGame = localStorage.getItem('currentGame');
+      return Object.fromEntries(
+        Object.entries(links).filter(
+          ([code, link]) => link.used !== true && link.type === (currentGame ? 'game' : 'lobby'),
+        ),
+      );
+    },
   },
   mutations: {
     setPickedDiceId: (state, value) => {
@@ -56,6 +69,9 @@ export default new Vuex.Store({
     },
     setAvailablePorts: (state, value) => {
       state.availablePorts = value;
+    },
+    setShownCard: (state, value) => {
+      state.shownCard = value;
     },
 
     clearData: state => {

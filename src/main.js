@@ -43,7 +43,7 @@ const init = async () => {
     return next();
   });
 
-  new Vue({
+  window.app = new Vue({
     router,
     store,
     render: function(h) {
@@ -102,6 +102,36 @@ const init = async () => {
         data: { eventData: { targetId: event.target.attributes.id?.value } },
       });
     }
+  });
+
+  new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'childList') {
+      } else if (mutation.type === 'attributes') {
+        if (mutation.attributeName === 'markup-code') {
+          // console.log('mutation', { code: mutation.target.getAttribute('markup-code'), mutation });
+        }
+        if (mutation.attributeName === 'markup-onload') {
+          const funcName = mutation.target.getAttribute('markup-onload');
+          if (window[funcName]) window[funcName](mutation.target);
+        }
+      }
+    }
+
+    store.dispatch('setSimple', {
+      helperLinksBounds: Object.fromEntries(
+        Object.entries(store.getters.getHelperLinks).map(([code, link]) => [
+          code,
+          window.app.$el.querySelector(link.selector)?.getBoundingClientRect() || null,
+        ]),
+      ),
+    });
+  }).observe(document.querySelector('body'), {
+    attributes: true,
+    // attributeFilter: [/* 'markup-code',  */ 'markup-onload'],
+    childList: true,
+    subtree: true,
+    attributeOldValue: true,
   });
 };
 
