@@ -6,6 +6,30 @@
     @wheel.prevent="zoomGamePlane"
   >
     <tutorial :inGame="true" />
+
+    <GUIWrapper
+      :pos="['top', 'left']"
+      :offset="{ left: isMobile ? 50 : 150 }"
+      :contentClass="['gui-small']"
+      :wrapperStyle="{ zIndex: 1 }"
+    >
+      <div class="gameplane-controls">
+        <div class="zoom-plus" v-on:click="zoomGamePlane({ deltaY: -1 })" />
+        <div class="rotate-right" v-on:click="gamePlaneRotation += 15" />
+        <div
+          class="reset"
+          v-on:click="
+            gamePlaneRotation = 0;
+            gamePlaneTranslateX = 0;
+            gamePlaneTranslateY = 0;
+            updatePlaneScale();
+          "
+        />
+        <div class="rotate-left" v-on:click="gamePlaneRotation -= 15" />
+        <div class="zoom-minus" v-on:click="zoomGamePlane({ deltaY: 1 })" />
+      </div>
+    </GUIWrapper>
+
     <div v-if="shownCard" class="shown-card">
       <div class="close" v-on:click.stop="closeCardInfo" />
       <div class="img" :style="{ backgroundImage: `url(/img/cards/release/${shownCard}.jpg)` }" />
@@ -13,9 +37,9 @@
 
     <div
       id="gamePlane"
-      :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'top', ...gamePlaneControlStyle }"
+      :style="{ ...gamePlaneCustomStyleData, opacity: 1, transformOrigin: 'left top', ...gamePlaneControlStyle }"
     >
-      <plane v-for="id in Object.keys(this.game.planeMap)" :key="id" :planeId="id" />
+      <plane v-for="id in Object.keys(this.game.planeMap)" :key="id" :planeId="id" :gamePlaneScale="gamePlaneScale" />
       <bridge v-for="id in Object.keys(this.game.bridgeMap)" :key="id" :bridgeId="id" />
 
       <div
@@ -31,118 +55,49 @@
       />
     </div>
 
-    <div
-      class="game-info"
-      :style="{
-        position: 'absolute',
-        right: '0px',
-        top: '0px',
-        height: '0px',
-        width: '100%',
-      }"
-    >
-      <div
-        :class="['gui-resizeable', `scale-${guiScale}`]"
-        :style="{
-          position: 'absolute',
-          right: '10px',
-          top: '10px',
-          height: 'auto',
-          width: 'auto',
-          transformOrigin: 'right top',
-        }"
-      >
-        <div class="wrapper">
-          <div class="game-status-label">{{ statusLabel }}</div>
-          <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
-            <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat" v-on:click="takeDice">
-              {{ Object.keys(deck.itemMap).length }}
-            </div>
-            <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event" v-on:click="takeCard">
-              {{ Object.keys(deck.itemMap).length }}
-            </div>
-            <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
-              {{ Object.keys(deck.itemMap).length }}
-            </div>
-            <div v-if="deck._id && deck.code === 'Deck[card_active]'" class="deck-active">
-              <!-- активная карта всегда первая - для верстки она должна стать последней -->
-              <card v-for="id in sortActiveCards(Object.keys(deck.itemMap))" :key="id" :cardId="id" :canPlay="true" />
-            </div>
+    <GUIWrapper :pos="['top', 'right']" :wrapperClass="['game-info']">
+      <div class="wrapper">
+        <div class="game-status-label">{{ statusLabel }}</div>
+        <div v-for="deck in deckList" :key="deck._id" class="deck" :code="deck.code">
+          <div v-if="deck._id && deck.code === 'Deck[domino]'" class="hat" v-on:click="takeDice">
+            {{ Object.keys(deck.itemMap).length }}
+          </div>
+          <div v-if="deck._id && deck.code === 'Deck[card]'" class="card-event" v-on:click="takeCard">
+            {{ Object.keys(deck.itemMap).length }}
+          </div>
+          <div v-if="deck._id && deck.code === 'Deck[card_drop]'" class="card-event">
+            {{ Object.keys(deck.itemMap).length }}
+          </div>
+          <div v-if="deck._id && deck.code === 'Deck[card_active]'" class="deck-active">
+            <!-- активная карта всегда первая - для верстки она должна стать последней -->
+            <card v-for="id in sortActiveCards(Object.keys(deck.itemMap))" :key="id" :cardId="id" :canPlay="true" />
           </div>
         </div>
       </div>
-    </div>
+    </GUIWrapper>
 
-    <div
-      class="session-player"
-      :style="{
-        position: 'absolute',
-        right: '0px',
-        bottom: '0px',
-        height: '0px',
-        width: '100%',
-      }"
+    <GUIWrapper :pos="['bottom', 'right']" :wrapperClass="['session-player']">
+      <player
+        :playerId="sessionPlayerId"
+        :customClass="[`scale-${guiScale}`]"
+        :iam="true"
+        :showControls="showPlayerControls"
+      />
+    </GUIWrapper>
+    <GUIWrapper
+      :pos="isMobile && isPortrait ? ['bottom', 'right'] : ['bottom', 'left']"
+      :offset="isMobile && isPortrait ? { bottom: 10 + 10 + 180 * 0.6 } : {}"
+      :wrapperClass="['players']"
+      :contentClass="['gui-small']"
     >
-      <div
-        :class="['gui-resizeable', `scale-${guiScale}`]"
-        :style="{
-          position: 'absolute',
-          right: '10px',
-          bottom: '10px',
-          height: 'auto',
-          width: 'auto',
-          transformOrigin: 'right bottom',
-        }"
-      >
-        <player
-          :playerId="sessionPlayerId"
-          :customClass="[`scale-${guiScale}`]"
-          :iam="true"
-          :showControls="showPlayerControls"
-        />
-      </div>
-    </div>
-    <div
-      class="players"
-      :style="{
-        position: 'absolute',
-        left: '0px',
-        bottom: '0px',
-        height: '0px',
-        width: '100%',
-      }"
-    >
-      <div
-        :class="['gui-resizeable', 'gui-small', `scale-${guiScale}`]"
-        :style="
-          isMobile && !isLandscape
-            ? {
-                position: 'absolute',
-                right: '10px',
-                bottom: 10 + 10 + 180 * 0.6 + `px`,
-                height: 'auto',
-                width: 'auto',
-                transformOrigin: 'right bottom',
-              }
-            : {
-                position: 'absolute',
-                left: '10px',
-                bottom: '10px',
-                height: 'auto',
-                width: 'auto',
-                transformOrigin: 'left bottom',
-              }
-        "
-      >
-        <player
-          v-for="(id, index) in playerIds"
-          :key="id"
-          :playerId="id"
-          :customClass="[`idx-${index}`]"
-          :showControls="false"
-        />
-      </div>
-    </div>
+      <player
+        v-for="(id, index) in playerIds"
+        :key="id"
+        :playerId="id"
+        :customClass="[`idx-${index}`]"
+        :showControls="false"
+      />
+    </GUIWrapper>
   </div>
 </template>
 
@@ -150,6 +105,7 @@
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex';
 import {} from '../components/game/utils';
 
+import GUIWrapper from '../components/gui-wrapper.vue';
 import tutorial from '../components/tutorial/main.vue';
 import player from '../components/game/player.vue';
 import plane from '../components/game/plane.vue';
@@ -158,6 +114,7 @@ import card from '../components/game/card.vue';
 
 export default {
   components: {
+    GUIWrapper,
     tutorial,
     player,
     plane,
@@ -167,6 +124,8 @@ export default {
   data() {
     return {
       gamePlaneScale: 1,
+      gamePlaneScaleMin: 0.3,
+      gamePlaneScaleMax: 1,
       gamePlaneTranslateX: 0,
       gamePlaneTranslateY: 0,
       gamePlaneRotation: 0,
@@ -197,6 +156,7 @@ export default {
       guiScale: 'guiScale',
       isMobile: 'isMobile',
       isLandscape: 'isLandscape',
+      isPortrait: 'isPortrait',
       sessionPlayerId: 'sessionPlayerId',
       sessionPlayerIsActive: 'sessionPlayerIsActive',
       gamePlaneCustomStyleData: 'gamePlaneCustomStyleData',
@@ -206,9 +166,8 @@ export default {
     gamePlaneControlStyle() {
       const transform = [];
       transform.push('translate(' + this.gamePlaneTranslateX + 'px, ' + this.gamePlaneTranslateY + 'px)');
-      transform.push(`scale(${this.gamePlaneScale * (this.guiScale / 2)})`);
       transform.push(`rotate(${this.gamePlaneRotation}deg)`);
-      return { transform: transform.join(' ') };
+      return { transform: transform.join(' '), scale: this.gamePlaneScale };
     },
     game() {
       return this.getStore(this.gameId, 'game');
@@ -283,6 +242,9 @@ export default {
         this.$router.push({ path: `/` });
       }
     },
+    isLandscape: function() {
+      this.updatePlaneScale();
+    },
   },
   methods: {
     sortActiveCards(arr) {
@@ -293,14 +255,14 @@ export default {
         .map(card => card._id);
     },
     async takeDice() {
-      return;
+      // return;
       await api.game.action({ name: 'takeDice', data: { count: 3 } }).catch(err => {
         console.log({ err });
         alert(err.message);
       });
     },
     async takeCard() {
-      return;
+      // return;
       await api.game.action({ name: 'takeCard', data: { count: 5 } }).catch(err => {
         console.log({ err });
         alert(err.message);
@@ -324,10 +286,54 @@ export default {
         });
       this.$store.commit('setAvailablePorts', []);
     },
+    updatePlaneScale(preventRepeat) {
+      const { innerWidth, innerHeight } = window;
+      let { width, height } = this.$el.querySelector('#gamePlane').getBoundingClientRect();
+      width = width / this.gamePlaneScale;
+      height = height / this.gamePlaneScale;
+      const value = Math.min(innerWidth / width, innerHeight / height);
+      if (value > 0) {
+        this.gamePlaneScale = value * 0.75;
+        if (this.gamePlaneScaleMin > value) this.gamePlaneScaleMin = value;
+        if (this.gamePlaneScaleMax < value) this.gamePlaneScaleMax = value;
+        this.$nextTick(() => {
+          const p = {},
+            gamePlane = document.getElementById('gamePlane');
+          const gamePlaneRect = gamePlane.getBoundingClientRect();
+
+          gamePlane.querySelectorAll('.plane').forEach(plane => {
+            const rect = plane.getBoundingClientRect();
+            const offsetTop = rect.top - gamePlaneRect.top;
+            const offsetLeft = rect.left - gamePlaneRect.left;
+
+            if (p.t == undefined || rect.top < p.t) p.t = rect.top;
+            if (p.b == undefined || rect.bottom > p.b) p.b = rect.bottom;
+            if (p.l == undefined || rect.left < p.l) p.l = rect.left;
+            if (p.r == undefined || rect.right > p.r) p.r = rect.right;
+
+            if (p.ot == undefined || offsetTop < p.ot) p.ot = offsetTop;
+            if (p.ol == undefined || offsetLeft < p.ol) p.ol = offsetLeft;
+          });
+
+          const gamePlaneCustomStyleData = {
+            height: (p.b - p.t) / this.gamePlaneScale + 'px',
+            width: (p.r - p.l) / this.gamePlaneScale + 'px',
+            top: 'calc(50% - ' + ((p.b - p.t) / 2 + p.ot * 1) + 'px)',
+            left: 'calc(50% - ' + ((p.r - p.l) / 2 + p.ol * 1) + 'px)',
+          };
+          this.$store.dispatch('setSimple', { gamePlaneCustomStyleData });
+          if (!preventRepeat)
+            setTimeout(() => {
+              this.updatePlaneScale(true);
+            }, 100);
+        });
+      }
+    },
+
     zoomGamePlane(event) {
       this.gamePlaneScale += event.deltaY > 0 ? -0.1 : 0.1;
-      if (this.gamePlaneScale < 0.3) this.gamePlaneScale = 0.3;
-      if (this.gamePlaneScale > 1) this.gamePlaneScale = 1;
+      if (this.gamePlaneScale < this.gamePlaneScaleMin) this.gamePlaneScale = this.gamePlaneScaleMin;
+      if (this.gamePlaneScale > this.gamePlaneScaleMax) this.gamePlaneScale = this.gamePlaneScaleMax;
     },
     closeCardInfo() {
       this.$store.commit('setShownCard', null);
@@ -339,8 +345,6 @@ export default {
     this.$store.commit('setSimple', { store: {} });
   },
   mounted() {
-    this.gamePlaneScale = this.isMobile ? 0.5 : 1;
-
     api.game
       .enter({ gameId: this.gameId })
       .then(data => {
@@ -702,5 +706,55 @@ export default {
 }
 .shown-card > .close:hover {
   opacity: 0.7;
+}
+
+.gameplane-controls {
+  height: 200px;
+  width: 200px;
+  margin: 20px;
+  padding: 5px;
+  border: 8px solid #f4e205;
+  border-radius: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+}
+.gameplane-controls > div {
+  width: 30%;
+  height: 30%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 70%;
+  background-color: #f4e205;
+  box-shadow: 5px 5px 5px 0px #a69900;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.gameplane-controls > div:hover {
+  opacity: 0.5;
+}
+.gameplane-controls > .zoom-plus {
+  width: 30%;
+  margin-left: 35%;
+  margin-right: 35%;
+  background-image: url(../assets/zoom+.png);
+}
+.gameplane-controls > .zoom-minus {
+  width: 30%;
+  margin-left: 35%;
+  margin-right: 35%;
+  background-image: url(../assets/zoom-.png);
+}
+.gameplane-controls > .rotate-left {
+  background-image: url(../assets/rotate-left.png);
+}
+.gameplane-controls > .rotate-right {
+  background-image: url(../assets/rotate-right.png);
+}
+.gameplane-controls > .reset {
+  background-color: grey;
+  box-shadow: 5px 5px 5px 0px darkgrey;
+  background-image: url(../assets/reset.png);
 }
 </style>

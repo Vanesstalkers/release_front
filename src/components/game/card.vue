@@ -2,10 +2,11 @@
   <div
     v-if="card._id || cardData"
     :name="card.name"
-    :class="['card-event', card.played ? 'played' : '']"
+    :class="['card-event', card.played ? 'played' : '', this.selected ? 'selected' : '']"
     :style="customStyle"
-    v-on:click.stop="showInfo(card.name)"
+    v-on:click.stop="toggleSelect"
   >
+    <div class="card-info-btn" v-on:click.stop="showInfo(card.name)" />
     <div
       v-if="canPlay && sessionPlayerIsActive && !actionsDisabled && !card.played"
       v-on:click.stop="playCard"
@@ -25,6 +26,9 @@ export default {
     canPlay: Boolean,
     cardData: Object,
   },
+  data() {
+    return { selected: false };
+  },
   computed: {
     ...mapGetters({
       getStore: 'getStore',
@@ -32,7 +36,7 @@ export default {
       sessionPlayerIsActive: 'sessionPlayerIsActive',
     }),
     card() {
-      if(this.cardData) return this.cardData;
+      if (this.cardData) return this.cardData;
       const card = this.getStore(this.cardId, 'card');
       return card._id ? card : { _id: this.cardId };
     },
@@ -44,10 +48,13 @@ export default {
   methods: {
     async playCard() {
       if (this.card.played) return;
-      await api.game.action({ name: 'playCard', data: { cardId: this.cardId } }).catch((err) => {
+      await api.game.action({ name: 'playCard', data: { cardId: this.cardId } }).catch(err => {
         console.log({ err });
         alert(err.message);
       });
+    },
+    toggleSelect() {
+      this.selected = !this.selected;
     },
     showInfo(name) {
       this.$store.commit('setShownCard', name);
@@ -60,7 +67,6 @@ export default {
 <style>
 .card-event {
   position: relative;
-  cursor: help;
   border: 1px solid;
   width: 120px;
   height: 180px;
@@ -72,6 +78,28 @@ export default {
   margin: 0px 0px 0px 5px;
   box-shadow: inset 0px 20px 20px 0px black;
   background-image: url(/img/cards/release/back-side.jpg);
+}
+.card-event.selected {
+  z-index: 1;
+	box-shadow: 0px 100px 100px 0px black;
+}
+.card-info-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 30px;
+  height: 30px;
+  background-image: url(../../assets/info.png);
+  background-size: contain;
+  cursor: pointer;
+  visibility: hidden;
+}
+.card-info-btn:hover {
+  opacity: 0.7;
+}
+.card-event:hover > .card-info-btn,
+#game.mobile-view .card-event.selected > .card-info-btn {
+  visibility: visible;
 }
 /* .card-event:hover:after {
   content: '?';

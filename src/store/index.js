@@ -17,6 +17,7 @@ export default new Vuex.Store({
     isMobile: state => state.isMobile,
     guiScale: state => state.guiScale,
     isLandscape: state => state.isLandscape,
+    isPortrait: state => !state.isLandscape,
     currentUser: state => state.currentUser,
     sessionPlayerId: state => state.sessionPlayerId,
     sessionPlayerIsActive: state =>

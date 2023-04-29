@@ -14,6 +14,9 @@
       Закончить раунд
     </div>
     <div v-if="player.active && player.timerEndTime" class="end-round-timer">{{ this.localTimer }}</div>
+    <div v-if="!iam" class="domino-dice">
+      {{ dominoDeckCount }}
+    </div>
     <div v-if="!iam" class="card-event">
       {{ cardDeckCount }}
     </div>
@@ -66,19 +69,28 @@ export default {
     choiceEnabled() {
       return this.sessionPlayerIsActive && this.player.activeEvent?.choiceEnabled;
     },
+    dominoDeckCount() {
+      return (
+        Object.keys(
+          Object.keys(this.player.deckMap || {})
+            .map(id => this.getStore(id, 'deck'))
+            .filter(deck => deck.type === 'domino' && !deck.subtype)[0]?.itemMap || {},
+        ).length || 0
+      );
+    },
     cardDeckCount() {
       return (
         Object.keys(
           Object.keys(this.player.deckMap || {})
-            .map((id) => this.getStore(id, 'deck'))
-            .filter((deck) => deck.type === 'card' && !deck.subtype)[0]?.itemMap || {},
+            .map(id => this.getStore(id, 'deck'))
+            .filter(deck => deck.type === 'card' && !deck.subtype)[0]?.itemMap || {},
         ).length || 0
       );
     },
   },
   methods: {
     async endRound() {
-      await api.game.action({ name: 'endRound' }).catch((err) => {
+      await api.game.action({ name: 'endRound' }).catch(err => {
         console.log({ err });
         alert(err.message);
       });
@@ -139,6 +151,28 @@ export default {
 #game.mobile-view.portrait-view .card-worker .card-event {
   left: auto;
   right: 0px;
+}
+.card-worker .domino-dice {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 40px;
+  height: 70px;
+  color: white;
+  border: none;
+  font-size: 36px;
+  line-height: 70px;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  background-image: url(../../assets/dice.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  visibility: hidden;
+}
+#game.mobile-view.portrait-view .card-worker .domino-dice {
+  visibility: visible;
 }
 
 .card-worker.active-event .end-round-btn,

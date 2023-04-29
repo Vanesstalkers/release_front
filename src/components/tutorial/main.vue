@@ -21,6 +21,9 @@
 
         <ul v-if="menu.showTutorials && inGame" class="tutorials">
           <li v-on:click.stop="action({ tutorial: 'tutorialGameStart' })">Стартовое приветствие игры</li>
+          <li v-on:click.stop="action({ tutorial: 'tutorialGameLinks', step: 'planeControls' })">
+            Контроллеры игрового поля
+          </li>
         </ul>
         <ul v-if="menu.showTutorials && !inGame" class="tutorials">
           <li v-on:click.stop="action({ tutorial: 'tutorialLobbyStart' })">Стартовое приветствие</li>
@@ -46,7 +49,7 @@
     </div>
     <div :class="['helper-dialog', `scale-${guiScale}`, ...dialogClass]" :style="dialogStyle">
       <div class="helper-avatar" />
-      <div class="content">
+      <div :class="['content', helperData.img && helperData.text ? 'nowrap' : '']">
         <div v-if="helperData.img" class="img">
           <img :src="helperData.img" />
         </div>
@@ -150,7 +153,7 @@ export default {
         document.querySelectorAll(selector).forEach(el => {
           if (el) {
             el.classList.add('tutorial-active');
-            if(customClass) el.classList.add(customClass);
+            if (customClass) el.classList.add(customClass);
             if (update) {
               el.addEventListener('click', () => {
                 this.action(update);
@@ -254,7 +257,7 @@ export default {
   height: 64px;
   cursor: pointer;
   font-size: 14px;
-  transform-origin: left top;
+  transform-origin: left bottom;
 }
 .helper-guru.scale-1 {
   scale: 0.8;
@@ -273,16 +276,18 @@ export default {
 }
 .mobile-view .helper-guru {
   scale: 0.6;
-  transform-origin: left top;
+  transform-origin: left bottom;
 }
 #lobby.mobile-view .helper-guru {
   top: 20px;
   right: 20px;
   left: auto;
+  transform-origin: right top;
 }
 .helper.in-game .helper-guru {
   top: 20px;
   bottom: auto;
+  transform-origin: left top;
 }
 .helper.dialog-active > .helper-guru {
   display: none;
@@ -296,6 +301,11 @@ export default {
   right: 20px;
   top: 20px;
   max-width: 100%;
+}
+#lobby .helper-menu {
+  transform-origin: right top;
+}
+#game .helper-menu {
   transform-origin: left top;
 }
 .helper-menu.scale-1 {
@@ -329,6 +339,9 @@ export default {
 .helper-menu > .content > .tutorials > * {
   cursor: pointer;
   padding: 0px 20px;
+}
+.helper-menu > .content > .tutorials > *:hover {
+  opacity: 0.7;
 }
 
 .helper-dialog {
@@ -374,6 +387,10 @@ export default {
   overflow: auto;
   display: flex;
   flex-wrap: wrap;
+}
+.helper-dialog > .content.nowrap,
+.helper-menu > .content.nowrap {
+  flex-wrap: nowrap;
 }
 .helper-menu > .content {
   min-height: 50px;

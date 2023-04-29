@@ -1,9 +1,10 @@
 <template>
   <div
     v-if="plane._id"
+    :id="plane._id"
     :class="['plane', activeEvent ? 'active-event' : '', ...plane.customClass, ...Object.values(customClass)]"
     :style="customStyle"
-    v-on:click.stop="(e) => (activeEvent ? choosePlane() : selectPlane(e))"
+    v-on:click.stop="e => (activeEvent ? choosePlane() : selectPlane(e))"
   >
     <div class="zone-wraper">
       <plane-zone v-for="id in zoneIds" :key="id" v-bind:zoneId="id" :linkLines="linkLines" />
@@ -51,6 +52,7 @@ export default {
   props: {
     planeId: String,
     inHand: Boolean,
+    gamePlaneScale: Number,
   },
   computed: {
     ...mapGetters({
@@ -91,16 +93,14 @@ export default {
       const $plane = event.target.closest('.plane');
       if ($plane.closest('.player.iam')) {
         this.$store.commit('setAvailablePorts', []);
-        await api.game
-          .action({ name: 'getPlanePortsAvailability', data: { joinPlaneId: this.planeId } })
-          .catch((err) => {
-            console.log({ err });
-            alert(err.message);
-          });
+        await api.game.action({ name: 'getPlanePortsAvailability', data: { joinPlaneId: this.planeId } }).catch(err => {
+          console.log({ err });
+          alert(err.message);
+        });
       }
     },
     async choosePlane() {
-      await api.game.action({ name: 'eventTrigger', data: { eventData: { targetId: this.planeId } } }).catch((err) => {
+      await api.game.action({ name: 'eventTrigger', data: { eventData: { targetId: this.planeId } } }).catch(err => {
         console.log({ err });
         alert(err.message);
       });
@@ -129,44 +129,14 @@ export default {
 
       return fillData;
     },
-    centerPlaneBackground() {
-      const p = {},
-        gamePlane = document.getElementById('gamePlane');
-      const gamePlaneRect = gamePlane.getBoundingClientRect();
-
-      gamePlane.querySelectorAll('.plane').forEach((plane) => {
-        const _id = plane.getAttribute('_id');
-        const rect = plane.getBoundingClientRect();
-        const offsetTop = rect.top - gamePlaneRect.top;
-        const offsetLeft = rect.left - gamePlaneRect.left;
-
-        if (p.t == undefined || rect.top < p.t) p.t = rect.top;
-        if (p.b == undefined || rect.bottom > p.b) p.b = rect.bottom;
-        if (p.l == undefined || rect.left < p.l) p.l = rect.left;
-        if (p.r == undefined || rect.right > p.r) p.r = rect.right;
-
-        if (p.ot == undefined || offsetTop < p.ot) p.ot = offsetTop;
-        if (p.ol == undefined || offsetLeft < p.ol) p.ol = offsetLeft;
-      });
-
-      const gamePlaneCustomStyleData = {
-        height: p.b - p.t + 'px',
-        width: p.r - p.l + 'px',
-        top: 'calc(50% - ' + ((p.b - p.t) / 2 + p.ot * 1) + 'px)',
-        left: 'calc(50% - ' + ((p.r - p.l) / 2 + p.ol * 1) + 'px)',
-      };
-      this.$store.dispatch('setSimple', { gamePlaneCustomStyleData });
-    },
   },
   mounted() {
     // $nextTick не всегда помогает при запуске новой игры
     setTimeout(() => {
-      // this.$nextTick(() => {
       if (this.inHand) {
         this.customClass = { ...this.customClass, inHand: `in-hand` };
       } else this.inHandStyle = {};
-      this.centerPlaneBackground();
-      // });
+      if (this.$parent.updatePlaneScale) this.$parent.updatePlaneScale();
     }, 100);
   },
 };
