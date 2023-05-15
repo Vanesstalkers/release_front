@@ -2,7 +2,7 @@
   <div id="lobby" :class="[isMobile ? 'mobile-view' : '', isLandscape ? 'landscape-view' : 'portrait-view']">
     <tutorial />
 
-    <div :class="['menu-item', 'info', !isMobile ? 'pinned' : '']">
+    <div :class="['menu-item', 'info', !isMobile ? 'preview' : '']">
       <label v-on:click="pinMenuItem">
         УСЛУГИ СТУДИИ <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
@@ -602,6 +602,9 @@ export default {
   transform: translate(-50%, -50%);
   transition: top 0.7s;
 }
+.menu-item.pinned, .menu-item.preview {
+  z-index: 2;
+}
 .menu-item > label {
   cursor: pointer;
   color: crimson;
@@ -659,6 +662,7 @@ export default {
 }
 #lobby:not(.mobile-view) .menu-item:hover > div,
 .menu-item.pinned > div,
+.menu-item.preview > div,
 .menu-item.tutorial-active > div {
   visibility: visible;
   opacity: 1;
@@ -680,11 +684,17 @@ export default {
 .menu-item.info > label > svg {
   color: crimson;
 }
-.menu-item.info > div {
+.menu-item.info.preview:not(.pinned) > div {
+  height: 180px;
+  overflow: hidden;
+}
+.menu-item.info > div,
+.menu-item.info.preview:hover > div {
   height: 270px;
   width: 400px;
   border-color: crimson;
 }
+
 .menu-item.game {
   top: 70%;
   left: 45%;

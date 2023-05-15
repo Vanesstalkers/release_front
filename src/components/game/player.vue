@@ -171,7 +171,6 @@ export default {
 }
 #game.mobile-view.portrait-view .player-hands {
   justify-content: flex-start;
-  flex-direction: row-reverse;
 }
 
 .hand-cards-list {

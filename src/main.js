@@ -17,7 +17,8 @@ window.vuex = store;
 
 const init = async () => {
   const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-  const url = location.hostname === 'localhost' ? 'localhost:8800' : `${location.hostname}/api`;
+  const port = new URLSearchParams(location.search).get('port') || 8800;
+  const url = location.hostname === 'localhost' ? `localhost:${port}` : `${location.hostname}/api`;
   const metacom = Metacom.create(`${protocol}://${url}`);
   const { api } = metacom;
   window.api = api;
@@ -83,6 +84,10 @@ const init = async () => {
   });
   api.db.on('smartUpdated', data => {
     store.dispatch('setStore', data);
+  });
+  api.db.on('logsUpdated', data => {
+    console.log("logsUpdated=", data);
+    // store.dispatch('setStore', data);
   });
 
   api.session.on('joinGame', data => {

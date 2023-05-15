@@ -9,13 +9,20 @@
 
     <GUIWrapper
       :pos="['top', 'left']"
-      :offset="{ left: isMobile ? 50 : 150 }"
+      :offset="{ left: isMobile ? 60 : [60, 80, 110, 130, 160, 190][guiScale] }"
       :contentClass="['gui-small']"
       :wrapperStyle="{ zIndex: 1 }"
     >
-      <div class="gameplane-controls">
+      <div style="display: flex;">
+        <div class="chat gui-btn" />
+        <div class="log gui-btn" />
+        <div class="move gui-btn" v-on:click="showControls = !showControls" />
+      </div>
+      <div v-if="showControls" class="gameplane-controls">
+        <div class="zoom-minus" v-on:click="zoomGamePlane({ deltaY: 1 })" />
+        <div class="move-top" v-on:click="gamePlaneTranslateY -= 100" />
         <div class="zoom-plus" v-on:click="zoomGamePlane({ deltaY: -1 })" />
-        <div class="rotate-right" v-on:click="gamePlaneRotation += 15" />
+        <div class="move-left" v-on:click="gamePlaneTranslateX -= 100" />
         <div
           class="reset"
           v-on:click="
@@ -25,8 +32,10 @@
             updatePlaneScale();
           "
         />
+        <div class="move-right" v-on:click="gamePlaneTranslateX += 100" />
+        <div class="rotate-right" v-on:click="gamePlaneRotation += 15" />
+        <div class="move-bottom" v-on:click="gamePlaneTranslateY += 100" />
         <div class="rotate-left" v-on:click="gamePlaneRotation -= 15" />
-        <div class="zoom-minus" v-on:click="zoomGamePlane({ deltaY: 1 })" />
       </div>
     </GUIWrapper>
 
@@ -147,6 +156,7 @@ export default {
         rotation: 0,
         rotationLast: 0,
       },
+      showControls: false,
       gameId: this.$route.params.id,
     };
   },
@@ -607,11 +617,6 @@ export default {
   flex-direction: column;
 }
 
-#game.mobile-view.landscape-view .deck[code='Deck[card_active]'] {
-  /* top: 150px;
-  left: 0px; */
-}
-
 .game-status-label {
   text-align: right;
   color: white;
@@ -734,16 +739,22 @@ export default {
 .gameplane-controls > div:hover {
   opacity: 0.5;
 }
+.gameplane-controls > .move-top {
+  background-image: url(../assets/arrow-top.png);
+}
+.gameplane-controls > .move-bottom {
+  background-image: url(../assets/arrow-bottom.png);
+}
+.gameplane-controls > .move-right {
+  background-image: url(../assets/arrow-right.png);
+}
+.gameplane-controls > .move-left {
+  background-image: url(../assets/arrow-left.png);
+}
 .gameplane-controls > .zoom-plus {
-  width: 30%;
-  margin-left: 35%;
-  margin-right: 35%;
   background-image: url(../assets/zoom+.png);
 }
 .gameplane-controls > .zoom-minus {
-  width: 30%;
-  margin-left: 35%;
-  margin-right: 35%;
   background-image: url(../assets/zoom-.png);
 }
 .gameplane-controls > .rotate-left {
@@ -756,5 +767,30 @@ export default {
   background-color: grey;
   box-shadow: 5px 5px 5px 0px darkgrey;
   background-image: url(../assets/reset.png);
+}
+
+.gui-btn {
+  width: 64px;
+  height: 64px;
+  border: 4px solid #f4e205;
+  border-radius: 50%;
+  background-color: #f4e205;
+  background-size: 50px;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 10px;
+  cursor: pointer;
+}
+.gui-btn:hover {
+  opacity: 0.7;
+}
+.gui-btn.chat {
+  background-image: url(../assets/chat.png);
+}
+.gui-btn.log {
+  background-image: url(../assets/log.png);
+}
+.gui-btn.move {
+  background-image: url(../assets/move.png);
 }
 </style>
