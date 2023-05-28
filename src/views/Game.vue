@@ -15,7 +15,7 @@
     >
       <div style="display: flex;">
         <div class="chat gui-btn" />
-        <div class="log gui-btn" />
+        <div class="log gui-btn" v-on:click="showLog = !showLog" />
         <div class="move gui-btn" v-on:click="showControls = !showControls" />
       </div>
       <div v-if="showControls" class="gameplane-controls">
@@ -38,6 +38,13 @@
         <div class="rotate-left" v-on:click="gamePlaneRotation -= 15" />
       </div>
     </GUIWrapper>
+
+    <div v-if="showLog" class="log-content">
+      <div v-for="[id, logItem] in Object.entries(logs).reverse()" :key="id" class="log-item">
+        [ {{ new Date(logItem.time).toTimeString().split(' ')[0] }} ]:
+        {{ logItem.msg }}
+      </div>
+    </div>
 
     <div v-if="shownCard" class="shown-card">
       <div class="close" v-on:click.stop="closeCardInfo" />
@@ -156,6 +163,7 @@ export default {
         rotation: 0,
         rotationLast: 0,
       },
+      showLog: false,
       showControls: false,
       gameId: this.$route.params.id,
     };
@@ -181,6 +189,10 @@ export default {
     },
     game() {
       return this.getStore(this.gameId, 'game');
+    },
+    logs() {
+      const data = this.getStore('logs');
+      return data;
     },
     statusLabel() {
       switch (this.game.status) {
@@ -792,5 +804,23 @@ export default {
 }
 .gui-btn.move {
   background-image: url(../assets/move.png);
+}
+
+.log-content {
+  position: fixed;
+  left: 40px;
+  top: 60px;
+  z-index: 1;
+  width: calc(100% - 100px);
+  height: calc(100% - 100px);
+  margin: 30px;
+  box-shadow: inset 0px 0px 2px 2px #f4e205;
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAACFklEQVR4nO3TMREAIRDAwAP/0l7UG2DSQrGrIE3WzHwDHO3bAfAyg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAgEg0AwCASDQDAIBINAMAiEHzg6AlzqD8bjAAAAAElFTkSuQmCCCg==);
+  color: #f4e205;
+  overflow: auto;
+  text-align: left;
+}
+.log-item {
+  padding: 10px;
 }
 </style>

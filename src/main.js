@@ -85,10 +85,6 @@ const init = async () => {
   api.db.on('smartUpdated', data => {
     store.dispatch('setStore', data);
   });
-  api.db.on('logsUpdated', data => {
-    console.log("logsUpdated=", data);
-    // store.dispatch('setStore', data);
-  });
 
   api.session.on('joinGame', data => {
     localStorage.setItem('currentGame', data.gameId);
