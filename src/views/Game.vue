@@ -267,6 +267,9 @@ export default {
     isLandscape: function() {
       this.updatePlaneScale();
     },
+    'game.availablePorts': function(newValue, oldValue) {
+      if (newValue.length > 0 || oldValue?.length > 0) this.updatePlaneScale();
+    },
   },
   methods: {
     sortActiveCards(arr) {
@@ -309,46 +312,51 @@ export default {
       this.$store.commit('setAvailablePorts', []);
     },
     updatePlaneScale(preventRepeat) {
-      const { innerWidth, innerHeight } = window;
-      let { width, height } = this.$el.querySelector('#gamePlane').getBoundingClientRect();
-      width = width / this.gamePlaneScale;
-      height = height / this.gamePlaneScale;
-      const value = Math.min(innerWidth / width, innerHeight / height);
-      if (value > 0) {
-        this.gamePlaneScale = value * 0.75;
-        if (this.gamePlaneScaleMin > value) this.gamePlaneScaleMin = value;
-        if (this.gamePlaneScaleMax < value) this.gamePlaneScaleMax = value;
-        this.$nextTick(() => {
-          const p = {},
-            gamePlane = document.getElementById('gamePlane');
-          const gamePlaneRect = gamePlane.getBoundingClientRect();
+      if (this.$el instanceof HTMLElement) {
+        const { innerWidth, innerHeight } = window;
+        let { width, height } = this.$el.querySelector('#gamePlane').getBoundingClientRect();
+        width = width / this.gamePlaneScale;
+        height = height / this.gamePlaneScale;
+        const value = Math.min(innerWidth / width, innerHeight / height);
+        if (value > 0) {
+          this.gamePlaneScale = value * 0.75;
+          if (this.gamePlaneScaleMin > value) this.gamePlaneScaleMin = value;
+          if (this.gamePlaneScaleMax < value) this.gamePlaneScaleMax = value;
+          this.$nextTick(() => {
+            const p = {};
+            const gamePlane = document.getElementById('gamePlane');
+            if (gamePlane instanceof HTMLElement) {
+              const gamePlaneRect = gamePlane.getBoundingClientRect();
 
-          gamePlane.querySelectorAll('.plane').forEach(plane => {
-            const rect = plane.getBoundingClientRect();
-            const offsetTop = rect.top - gamePlaneRect.top;
-            const offsetLeft = rect.left - gamePlaneRect.left;
+              gamePlane.querySelectorAll('.plane, .fake-plane').forEach(plane => {
+                const rect = plane.getBoundingClientRect();
+                const offsetTop = rect.top - gamePlaneRect.top;
+                const offsetLeft = rect.left - gamePlaneRect.left;
 
-            if (p.t == undefined || rect.top < p.t) p.t = rect.top;
-            if (p.b == undefined || rect.bottom > p.b) p.b = rect.bottom;
-            if (p.l == undefined || rect.left < p.l) p.l = rect.left;
-            if (p.r == undefined || rect.right > p.r) p.r = rect.right;
+                if (p.t == undefined || rect.top < p.t) p.t = rect.top;
+                if (p.b == undefined || rect.bottom > p.b) p.b = rect.bottom;
+                if (p.l == undefined || rect.left < p.l) p.l = rect.left;
+                if (p.r == undefined || rect.right > p.r) p.r = rect.right;
 
-            if (p.ot == undefined || offsetTop < p.ot) p.ot = offsetTop;
-            if (p.ol == undefined || offsetLeft < p.ol) p.ol = offsetLeft;
+                if (p.ot == undefined || offsetTop < p.ot) p.ot = offsetTop;
+                if (p.ol == undefined || offsetLeft < p.ol) p.ol = offsetLeft;
+              });
+
+              const planePadding = 300;
+              const gamePlaneCustomStyleData = {
+                height: planePadding + (p.b - p.t) / this.gamePlaneScale + 'px',
+                width: planePadding + (p.r - p.l) / this.gamePlaneScale + 'px',
+                top: 'calc(50% - ' + ((p.b - p.t) / 2 + p.ot * 1) + 'px)',
+                left: `calc(${this.isMobile ? '65%' : '50%'} - ${(p.r - p.l) / 2 + p.ol * 1}px)`,
+              };
+              this.$store.dispatch('setSimple', { gamePlaneCustomStyleData });
+              if (!preventRepeat)
+                setTimeout(() => {
+                  this.updatePlaneScale(true);
+                }, 100);
+            }
           });
-
-          const gamePlaneCustomStyleData = {
-            height: (p.b - p.t) / this.gamePlaneScale + 'px',
-            width: (p.r - p.l) / this.gamePlaneScale + 'px',
-            top: 'calc(50% - ' + ((p.b - p.t) / 2 + p.ot * 1) + 'px)',
-            left: 'calc(50% - ' + ((p.r - p.l) / 2 + p.ol * 1) + 'px)',
-          };
-          this.$store.dispatch('setSimple', { gamePlaneCustomStyleData });
-          if (!preventRepeat)
-            setTimeout(() => {
-              this.updatePlaneScale(true);
-            }, 100);
-        });
+        }
       }
     },
 
