@@ -50,7 +50,6 @@
         <div v-for="game in gameList" :key="game._id">
           Раунд: ( {{ game.round }} ) Набрано игроков: ( {{ game.joinedPlayers }} )
           <button class="lobby-btn" v-on:click="joinGame({ gameId: game._id })">Присоединиться к игре</button>
-          <!-- <button v-on:click="deleteGame({ gameId: game._id })">Удалить игру</button> -->
         </div>
       </div>
     </div>
@@ -377,9 +376,6 @@ export default {
     },
     async joinGame({ gameId }) {
       await api.lobby.joinGame({ gameId: gameId });
-    },
-    async deleteGame({ gameId }) {
-      await api.lobby.deleteGame({ gameId: gameId });
     },
     showInfo(name) {
       api.helper.action({ tutorial: 'tutorialSales', step: name });

@@ -49,8 +49,7 @@ export default {
     async playCard() {
       if (this.card.played) return;
       await api.game.action({ name: 'playCard', data: { cardId: this.cardId } }).catch(err => {
-        console.log({ err });
-        alert(err.message);
+        prettyAlert(err.message);
       });
     },
     toggleSelect() {
@@ -82,7 +81,7 @@ export default {
 }
 .card-event.selected {
   z-index: 1;
-	box-shadow: 0px 100px 100px 0px black;
+  box-shadow: 0px 100px 100px 0px black;
 }
 .card-info-btn {
   position: absolute;

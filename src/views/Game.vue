@@ -282,15 +282,13 @@ export default {
     async takeDice() {
       // return;
       await api.game.action({ name: 'takeDice', data: { count: 3 } }).catch(err => {
-        console.log({ err });
-        alert(err.message);
+        prettyAlert(err.message);
       });
     },
     async takeCard() {
       // return;
       await api.game.action({ name: 'takeCard', data: { count: 5 } }).catch(err => {
-        console.log({ err });
-        alert(err.message);
+        prettyAlert(err.message);
       });
     },
     async addPlane(event) {
@@ -306,8 +304,7 @@ export default {
           },
         })
         .catch(err => {
-          console.log({ err });
-          alert(err.message);
+          prettyAlert(err.message);
         });
       this.$store.commit('setAvailablePorts', []);
     },

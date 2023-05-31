@@ -94,15 +94,13 @@ export default {
       if ($plane.closest('.player.iam')) {
         this.$store.commit('setAvailablePorts', []);
         await api.game.action({ name: 'getPlanePortsAvailability', data: { joinPlaneId: this.planeId } }).catch(err => {
-          console.log({ err });
-          alert(err.message);
+          prettyAlert(err.message);
         });
       }
     },
     async choosePlane() {
       await api.game.action({ name: 'eventTrigger', data: { eventData: { targetId: this.planeId } } }).catch(err => {
-        console.log({ err });
-        alert(err.message);
+        prettyAlert(err.message);
       });
     },
     customBG(pid) {
@@ -215,7 +213,13 @@ export default {
 
 .plane.in-hand:not(.card-plane) {
   transform: scale(0.5);
+  transform-origin: center left;
   margin: 125px -250px 0px 0px;
+}
+#game.mobile-view.portrait-view .plane.in-hand:not(.card-plane) {
+  transform: scale(0.7);
+  transform-origin: top right;
+  margin: 25px 0px -75px 0px;
 }
 
 .plane.card-plane {

@@ -49,16 +49,15 @@ export default {
       if (this.pickedDiceId) {
         await api.game
           .action({ name: 'replaceDice', data: { diceId: this.pickedDiceId, zoneId: this.zoneId } })
-          .then((res) => {
+          .then(res => {
             if (!res.gameFinished) {
               // иначе может отработать уже после выхода в лобби, где нет игрового store
               this.$store.commit('setPickedDiceId', null);
               this.$store.commit('hideZonesAvailability');
             }
           })
-          .catch((err) => {
-            console.log({ err });
-            alert(err.message);
+          .catch(err => {
+            prettyAlert(err.message);
           });
       }
     },

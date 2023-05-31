@@ -9,7 +9,7 @@
       activeEvent ? 'active-event' : '',
       hide ? 'hide' : '',
     ]"
-    v-on:click="(e) => (activeEvent ? chooseDice() : pickDice())"
+    v-on:click="e => (activeEvent ? chooseDice() : pickDice())"
   >
     <div v-if="!locked" class="controls">
       <div :class="['scroll-off', 'control rotate', dice.deleted ? 'hidden' : '']" v-on:click.stop="rotateDice">
@@ -40,7 +40,7 @@
         :key="side._id"
         :value="side.value"
         :class="['el', side.activeEvent ? 'active-event' : '', side.eventData.fakeValue ? 'fake-value' : '']"
-        v-on:click="(e) => (side.activeEvent ? (e.stopPropagation(), openDiceSideValueSelect(side._id)) : null)"
+        v-on:click="e => (side.activeEvent ? (e.stopPropagation(), openDiceSideValueSelect(side._id)) : null)"
       >
         <dice-side-value-select v-if="selectedDiceSideId === side._id" v-on:select="pickActiveEventDiceSide" />
       </div>
@@ -100,9 +100,8 @@ export default {
           name: 'eventTrigger',
           data: { eventData: { targetId: this.diceId, targetPlayerId: this.$parent.playerId } },
         })
-        .catch((err) => {
-          console.log({ err });
-          alert(err.message);
+        .catch(err => {
+          prettyAlert(err.message);
         });
     },
     openDiceSideValueSelect(targetId) {
@@ -111,9 +110,8 @@ export default {
     async pickActiveEventDiceSide(fakeValue) {
       await api.game
         .action({ name: 'eventTrigger', data: { eventData: { targetId: this.selectedDiceSideId, fakeValue } } })
-        .catch((err) => {
-          console.log({ err });
-          alert(err.message);
+        .catch(err => {
+          prettyAlert(err.message);
         });
       this.$store.commit('setSelectedDiceSideId', null);
     },
@@ -122,27 +120,23 @@ export default {
       if (this.locked) return;
       this.$store.commit('setPickedDiceId', this.diceId);
       this.$store.commit('hideZonesAvailability');
-      await api.game.action({ name: 'getZonesAvailability', data: { diceId: this.diceId } }).catch((err) => {
-        console.log({ err });
-        alert(err.message);
+      await api.game.action({ name: 'getZonesAvailability', data: { diceId: this.diceId } }).catch(err => {
+        prettyAlert(err.message);
       });
     },
     async rotateDice() {
-      await api.game.action({ name: 'rotateDice', data: { diceId: this.diceId } }).catch((err) => {
-        console.log({ err });
-        alert(err.message);
+      await api.game.action({ name: 'rotateDice', data: { diceId: this.diceId } }).catch(err => {
+        prettyAlert(err.message);
       });
     },
     async deleteDice() {
-      await api.game.action({ name: 'deleteDice', data: { diceId: this.diceId } }).catch((err) => {
-        console.log({ err });
-        alert(err.message);
+      await api.game.action({ name: 'deleteDice', data: { diceId: this.diceId } }).catch(err => {
+        prettyAlert(err.message);
       });
     },
     async restoreDice() {
-      await api.game.action({ name: 'restoreDice', data: { diceId: this.diceId } }).catch((err) => {
-        console.log({ err });
-        alert(err.message);
+      await api.game.action({ name: 'restoreDice', data: { diceId: this.diceId } }).catch(err => {
+        prettyAlert(err.message);
       });
     },
   },

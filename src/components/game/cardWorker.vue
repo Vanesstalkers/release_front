@@ -90,9 +90,10 @@ export default {
   },
   methods: {
     async endRound() {
+      this.$store.commit('hideZonesAvailability');
+      this.$store.commit('setPickedDiceId', null);
       await api.game.action({ name: 'endRound' }).catch(err => {
-        console.log({ err });
-        alert(err.message);
+        prettyAlert(err.message);
       });
     },
   },

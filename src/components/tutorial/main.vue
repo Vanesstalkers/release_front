@@ -11,7 +11,12 @@
       v-on:click.stop="showTutorial(link)"
     />
 
-    <div v-if="!menu" :class="['helper-guru', 'helper-avatar', `scale-${guiScale}`]" v-on:click.stop="initMenu" />
+    <div v-if="!menu" :class="['helper-guru', 'helper-avatar', `scale-${guiScale}`]" v-on:click.stop="initMenu">
+      <div v-if="alert" class="alert" v-on:click.stop="">
+        {{ alert }}
+        <div class="close" v-on:click.stop="alert = null" />
+      </div>
+    </div>
     <div v-if="menu" :class="['helper-menu', `scale-${guiScale}`]">
       <div class="helper-avatar" />
       <div class="content">
@@ -78,7 +83,7 @@ export default {
     inGame: Boolean,
   },
   data() {
-    return { menu: null, dialogActive: false, helperClassMap: {}, dialogStyle: {}, dialogClassMap: {} };
+    return { alert: null, menu: null, dialogActive: false, helperClassMap: {}, dialogStyle: {}, dialogClassMap: {} };
   },
   watch: {
     helperData: function() {
@@ -223,8 +228,7 @@ export default {
           break;
         case 'leaveGame':
           api.lobby.leaveGame().catch(err => {
-            console.log({ err });
-            alert(err.message);
+            prettyAlert(err.message);
           });
           break;
       }
@@ -237,6 +241,13 @@ export default {
   mounted() {
     // watch не всегда ловит обновление helperData на старте
     this.$nextTick(this.update);
+
+    const self = this;
+    window.prettyAlert = data => {
+      console.log({ alertData: data });
+      const message = data.message || data;
+      self.alert = message;
+    };
   },
 };
 </script>
@@ -258,6 +269,42 @@ export default {
   cursor: pointer;
   font-size: 14px;
   transform-origin: left bottom;
+}
+.helper-guru > .alert {
+  position: absolute;
+  top: 110%;
+  border: 4px solid #f4e205;
+  background-image: url(../../assets/clear-black-back.png);
+  color: white;
+  font-size: 24px;
+  padding: 20px 60px 20px 80px;
+  min-width: 300px;
+  text-align: center;
+  cursor: default;
+}
+.helper-guru > .alert:before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: 30px;
+  height: 30px;
+  background-image: url(../../assets/alert.png);
+  background-size: 30px;
+}
+.helper-guru > .alert > .close {
+  position: absolute;
+  right: -10px;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  background-image: url(../../assets/close.png);
+  background-size: 20px;
+  background-color: black;
+  cursor: pointer;
+}
+.helper-guru > .alert > .close:hover {
+  opacity: 0.7;
 }
 .helper-guru.scale-1 {
   scale: 0.8;

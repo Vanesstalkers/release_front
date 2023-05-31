@@ -210,12 +210,18 @@ export default {
   scale: 0.7;
   transform-origin: bottom;
 }
+#game.mobile-view.portrait-view .hand-dices .card-event {
+  display: none;
+}
 
 .hand-planes {
-  height: 220px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+#game.mobile-view.portrait-view .hand-planes {
+  flex-wrap: wrap;
+	align-items: flex-end;
 }
 .player.iam .hand-planes {
   width: 100%;

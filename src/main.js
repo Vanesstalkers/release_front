@@ -23,7 +23,7 @@ const init = async () => {
   const { api } = metacom;
   window.api = api;
 
-  await metacom.load('auth', 'example', 'db', 'chat', 'session', 'lobby', 'game', 'helper', 'subscribe');
+  await metacom.load('auth', 'lobby', 'game', 'helper', 'db', 'session');
 
   localStorage.removeItem('currentGame');
   const token = localStorage.getItem('metarhia.session.token');
