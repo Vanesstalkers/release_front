@@ -230,9 +230,14 @@
       <label v-on:click="pinMenuItem">
         ЗАЛ СЛАВЫ <font-awesome-icon icon="fa-solid fa-thumbtack" class="fa-xs" />
       </label>
-      <div>
+      <div :style="{ display: 'flex' }">
         <!-- {{ getTopPlayers }} -->
-        раздел в разработке
+        <div :style="{ width: '200px' }">
+          {{ rankingsList }}
+        </div>
+        <div :style="{ width: 'calc(100% - 200px)' }">
+          {{ currentRanking }}
+        </div>
       </div>
     </div>
 
@@ -249,53 +254,6 @@
         filter: 'grayscale(1)',
       }"
     />
-    <!-- <map
-      name="image-map"
-      :style="{
-        position: 'absolute',
-        left: `${bg.left || 0}px`,
-        top: `${bg.top || 0}px`,
-        scale: bg.scale || 1,
-        transformOrigin: 'center',
-      }"
-    >
-      <area
-        coords="350,702,352,1021,1401,1023,1394,786,861,640,585,676"
-        shape="poly"
-        v-on:click="show('table')"
-        v-on:mouseover="show('table')"
-        v-on:mouseleave="show('')"
-      />
-      <area
-        coords="525,282,521,517,628,545,628,664,866,633,958,659,961,228"
-        shape="poly"
-        v-on:click="show('leaderboard')"
-        v-on:mouseover="show('leaderboard')"
-        v-on:mouseleave="show('')"
-      />
-    </map>
-    <img
-      src="../assets/lobby-table.png"
-      usemap="#image-map"
-      :style="{
-        position: 'absolute',
-        left: `${bg.left || 0}px`,
-        top: `${bg.top || 0}px`,
-        scale: bg.scale || 1,
-        display: bg.showMask === 'table' ? 'block' : 'none',
-      }"
-    />
-    <img
-      src="../assets/lobby-leaderboard.png"
-      usemap="#image-map"
-      :style="{
-        position: 'absolute',
-        left: `${bg.left || 0}px`,
-        top: `${bg.top || 0}px`,
-        scale: bg.scale || 1,
-        display: bg.showMask === 'leaderboard' ? 'block' : 'none',
-      }"
-    /> -->
   </div>
 </template>
 
@@ -342,6 +300,15 @@ export default {
     lobby() {
       return this.getStore('main', 'lobby') || {};
     },
+    rankings() {
+      return this.getStore('ranking') || {};
+    },
+    rankingsList() {
+      return Object.values(this.rankings).map(r => ({ title: r.title, active: r.active }));
+    },
+    currentRanking() {
+      return Object.values(this.rankings).find(r => r.active)?.list || [];
+    },
     gameList() {
       const list = Object.keys(this.lobby.gameMap || {}).map(id => this.getStore(id, 'game')) || [];
       return list.map(game => {
@@ -370,9 +337,14 @@ export default {
       e.target.closest('.menu-item').classList.toggle('pinned');
     },
     async addGame(type) {
-      await api.lobby.newGame({ type }).then(({ gameId }) => {
-        if (gameId) this.joinGame({ gameId });
-      });
+      await api.lobby
+        .newGame({ type })
+        .then(({ gameId }) => {
+          if (gameId) this.joinGame({ gameId });
+        })
+        .catch(err => {
+          prettyAlert(err.message);
+        });
     },
     async joinGame({ gameId }) {
       await api.lobby.joinGame({ gameId: gameId });
@@ -598,7 +570,8 @@ export default {
   transform: translate(-50%, -50%);
   transition: top 0.7s;
 }
-.menu-item.pinned, .menu-item.preview {
+.menu-item.pinned,
+.menu-item.preview {
   z-index: 2;
 }
 .menu-item > label {

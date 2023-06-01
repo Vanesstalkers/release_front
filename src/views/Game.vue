@@ -268,7 +268,7 @@ export default {
       this.updatePlaneScale();
     },
     'game.availablePorts': function(newValue, oldValue) {
-      if (newValue.length > 0 || oldValue?.length > 0) this.updatePlaneScale();
+      if (newValue?.length > 0 || oldValue?.length > 0) this.updatePlaneScale();
     },
   },
   methods: {
@@ -308,9 +308,22 @@ export default {
         });
       this.$store.commit('setAvailablePorts', []);
     },
-    updatePlaneScale(preventRepeat) {
+    updatePlaneScale() {
       if (this.$el instanceof HTMLElement) {
         const { innerWidth, innerHeight } = window;
+
+        const gamePlaneRotation = this.gamePlaneRotation;
+        const gamePlaneTranslateX = this.gamePlaneTranslateX;
+        const gamePlaneTranslateY = this.gamePlaneTranslateY;
+        this.gamePlaneRotation = 0;
+        this.gamePlaneTranslateX = 0;
+        this.gamePlaneTranslateY = 0;
+        const restoreGamePlaneSettings = () => {
+          this.gamePlaneRotation = gamePlaneRotation;
+          this.gamePlaneTranslateX = gamePlaneTranslateX;
+          this.gamePlaneTranslateY = gamePlaneTranslateY;
+        };
+
         let { width, height } = this.$el.querySelector('#gamePlane').getBoundingClientRect();
         width = width / this.gamePlaneScale;
         height = height / this.gamePlaneScale;
@@ -347,10 +360,8 @@ export default {
                 left: `calc(${this.isMobile ? '65%' : '50%'} - ${(p.r - p.l) / 2 + p.ol * 1}px)`,
               };
               this.$store.dispatch('setSimple', { gamePlaneCustomStyleData });
-              if (!preventRepeat)
-                setTimeout(() => {
-                  this.updatePlaneScale(true);
-                }, 100);
+
+              restoreGamePlaneSettings();
             }
           });
         }

@@ -6,25 +6,33 @@
           <plane v-for="id in planeInHandIds" :key="id" :planeId="id" :inHand="true" />
         </div>
         <div v-if="!hasPlaneInHand" class="hand-dices-list">
-          <div v-for="deck in dominoDecks" :key="deck._id" :style="{width: '0px', height: '150px', position: 'relative'}">
+          <div
+            v-for="deck in dominoDecks"
+            :key="deck._id"
+            :style="{ width: '0px', height: '150px', position: 'relative' }"
+          >
             <div
               v-if="!isPortrait || iam"
               class="hand-dices"
-              :style="iam || (isMobile && isPortrait) ? {
-                position: 'absolute',
-                right: '0px',
-                bottom: '0px',
-                height: 'auto',
-                width: 'auto',
-                transformOrigin: 'right bottom',
-              } : {
-                position: 'absolute',
-                left: '0px',
-                bottom: '0px',
-                height: 'auto',
-                width: 'auto',
-                transformOrigin: 'left bottom',
-              }"
+              :style="
+                iam || (isMobile && isPortrait)
+                  ? {
+                      position: 'absolute',
+                      right: '0px',
+                      bottom: '0px',
+                      height: 'auto',
+                      width: 'auto',
+                      transformOrigin: 'right bottom',
+                    }
+                  : {
+                      position: 'absolute',
+                      left: '0px',
+                      bottom: '0px',
+                      height: 'auto',
+                      width: 'auto',
+                      transformOrigin: 'left bottom',
+                    }
+              "
             >
               <dice v-for="id in Object.keys(deck.itemMap)" :key="id" :diceId="id" :inHand="true" :iam="iam" />
               <card v-if="iam && deck.subtype === 'teamlead'" :cardData="{ name: 'teamlead' }" />
@@ -34,7 +42,13 @@
         </div>
         <div v-if="iam && !hasPlaneInHand" class="hand-cards-list">
           <div v-for="deck in cardDecks" :key="deck._id" class="hand-cards">
-            <card v-for="id in Object.keys(deck.itemMap)" :key="id" :cardId="id" :canPlay="iam" />
+            <card
+              v-for="id in Object.keys(deck.itemMap)"
+              :key="id"
+              :cardId="id"
+              :canPlay="iam"
+              :isSelected="id === selectedCard"
+            />
           </div>
         </div>
       </div>
@@ -76,6 +90,7 @@ export default {
       getStore: 'getStore',
       sessionPlayerId: 'sessionPlayerId',
       sessionPlayerIsActive: 'sessionPlayerIsActive',
+      selectedCard: 'selectedCard',
     }),
     player() {
       return this.getStore(this.playerId, 'player');
@@ -221,7 +236,7 @@ export default {
 }
 #game.mobile-view.portrait-view .hand-planes {
   flex-wrap: wrap;
-	align-items: flex-end;
+  align-items: flex-end;
 }
 .player.iam .hand-planes {
   width: 100%;

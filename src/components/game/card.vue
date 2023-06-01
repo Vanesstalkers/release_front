@@ -2,7 +2,7 @@
   <div
     v-if="card._id || cardData"
     :name="card.name"
-    :class="['card-event', card.played ? 'played' : '', this.selected ? 'selected' : '']"
+    :class="['card-event', card.played ? 'played' : '', this.isSelected ? 'selected' : '']"
     :style="customStyle"
     v-on:click.stop="toggleSelect"
   >
@@ -25,9 +25,10 @@ export default {
     cardId: String,
     canPlay: Boolean,
     cardData: Object,
+    isSelected: Boolean,
   },
   data() {
-    return { selected: false };
+    return {};
   },
   computed: {
     ...mapGetters({
@@ -53,7 +54,7 @@ export default {
       });
     },
     toggleSelect() {
-      this.selected = !this.selected;
+      this.$store.commit('setSelectedCard', this.isSelected ? null : this.cardId);
     },
     showInfo(name) {
       this.$store.commit('setShownCard', name);

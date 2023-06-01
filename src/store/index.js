@@ -12,6 +12,7 @@ export default new Vuex.Store({
     availablePorts: [],
     helperLinksBounds: {},
     shownCard: null,
+    selectedCard: null,
   },
   getters: {
     isMobile: state => state.isMobile,
@@ -32,6 +33,7 @@ export default new Vuex.Store({
     availablePorts: state => state.availablePorts,
     helperLinksBounds: state => state.helperLinksBounds,
     shownCard: state => state.shownCard,
+    selectedCard: state => state.selectedCard,
 
     getSimple: state => (id, col) => {
       return (col ? state[col]?.[id] : state[id]) || {};
@@ -73,6 +75,9 @@ export default new Vuex.Store({
     },
     setShownCard: (state, value) => {
       state.shownCard = value;
+    },
+    setSelectedCard: (state, value) => {
+      state.selectedCard = value;
     },
 
     clearData: state => {

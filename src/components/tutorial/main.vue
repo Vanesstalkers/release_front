@@ -272,7 +272,7 @@ export default {
 }
 .helper-guru > .alert {
   position: absolute;
-  top: 110%;
+  bottom: 110%;
   border: 4px solid #f4e205;
   background-image: url(../../assets/clear-black-back.png);
   color: white;
@@ -331,10 +331,19 @@ export default {
   left: auto;
   transform-origin: right top;
 }
+#lobby.mobile-view .helper-guru > .alert {
+  top: 110%;
+  bottom: auto;
+  right: 0%;
+}
 .helper.in-game .helper-guru {
   top: 20px;
   bottom: auto;
   transform-origin: left top;
+}
+.helper.in-game .helper-guru > .alert {
+  top: 110%;
+  bottom: auto;
 }
 .helper.dialog-active > .helper-guru {
   display: none;
