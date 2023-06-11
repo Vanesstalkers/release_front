@@ -133,8 +133,9 @@
         >
           <label class="user-list-label" :style="{ width: '100%' }">Игроки онлайн ({{ userList.length }})</label>
           <div class="user-list">
-            <span v-for="user in userList" :key="user._id">
-              {{ user.name || 'Гость' }}
+            <span v-if="userGuestsCount">Гость ({{ userGuestsCount }})</span>
+            <span v-for="user in userList" :key="user.id">
+              {{ user.name }}
             </span>
           </div>
         </div>
@@ -292,10 +293,12 @@ export default {
       return this.getStore(this.currentUser, 'user') || {};
     },
     userList() {
-      const list = Object.keys(this.lobby.userMap || {}).map(id => this.getStore(id, 'user')) || [];
-      return list.map(user => {
-        return user;
-      });
+      return Object.entries(this.lobby?.users || {})
+        .filter(([id, user]) => user && user.name)
+        .map(([id, user]) => Object.assign(user, { id }));
+    },
+    userGuestsCount() {
+      return Object.values(this.lobby?.users || {}).filter(user => user && !user.name).length;
     },
     lobby() {
       return this.getStore('main', 'lobby') || {};
@@ -358,7 +361,7 @@ export default {
       return;
     },
     saveName() {
-      api.lobby.updateUser({ userName: this.userName });
+      api.user.update({ name: this.userName });
     },
     sendChatMsg() {
       this.disableSendMsgBtn = 5;
@@ -456,6 +459,7 @@ export default {
   },
   async created() {
     this.$store.commit('setSimple', { store: {} });
+    api.user.load({ self: true });
   },
   async mounted() {
     // console.log('mounted');

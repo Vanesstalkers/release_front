@@ -16,24 +16,6 @@ Vue.config.productionTip = false;
 window.vuex = store;
 
 const init = async () => {
-  const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
-  const port = new URLSearchParams(location.search).get('port') || 8800;
-  const url = location.hostname === 'localhost' ? `localhost:${port}` : `${location.hostname}/api`;
-  const metacom = Metacom.create(`${protocol}://${url}`);
-  const { api } = metacom;
-  window.api = api;
-
-  await metacom.load('auth', 'lobby', 'game', 'helper', 'db', 'session');
-
-  localStorage.removeItem('currentGame');
-  const token = localStorage.getItem('metarhia.session.token');
-  const session = await api.auth.initSession({ token, demo: true });
-  const { token: sessionToken, userId } = session;
-  if (token !== sessionToken) localStorage.setItem('metarhia.session.token', sessionToken);
-  if (userId) {
-    store.dispatch('setSimple', { currentUser: userId });
-  }
-
   router.beforeEach((to, from, next) => {
     const currentGame = localStorage.getItem('currentGame');
     if (to.name === 'Game') {
@@ -50,7 +32,44 @@ const init = async () => {
     render: function(h) {
       return h(App);
     },
-  }).$mount('#app');
+  });
+
+  const protocol = location.protocol === 'http:' ? 'ws' : 'wss';
+  const port = new URLSearchParams(location.search).get('port') || 8800;
+  const url = location.hostname === 'localhost' ? `localhost:${port}` : `${location.hostname}/api`;
+  const metacom = Metacom.create(`${protocol}://${url}`);
+  const { api } = metacom;
+  window.api = api;
+
+  await metacom.load('auth', 'lobby', 'game', 'helper', 'db', 'session', 'user');
+
+  api.db.on('updated', data => {
+    store.dispatch('setData', data);
+  });
+  api.db.on('smartUpdated', data => {
+    store.dispatch('setStore', data);
+  });
+
+  api.session.on('joinGame', data => {
+    localStorage.setItem('currentGame', data.gameId);
+    store.dispatch('setSimple', { sessionPlayerId: data.playerId });
+    router.push({ path: `/game/${data.gameId}` });
+  });
+  api.session.on('leaveGame', () => {
+    localStorage.removeItem('currentGame');
+    router.push({ path: `/` });
+  });
+
+  localStorage.removeItem('currentGame');
+  const token = localStorage.getItem('metarhia.session.token');
+  const session = await api.auth.initSession({ token, demo: true });
+  const { token: sessionToken, userId } = session;
+  if (token !== sessionToken) localStorage.setItem('metarhia.session.token', sessionToken);
+  if (userId) {
+    store.dispatch('setSimple', { currentUser: userId });
+  }
+
+  window.app.$mount('#app');
 
   const { userAgent } = navigator;
   const isMobile = () =>
@@ -78,23 +97,6 @@ const init = async () => {
   // });
   window.addEventListener('resize', checkDevice);
   checkDevice();
-
-  api.db.on('updated', data => {
-    store.dispatch('setData', data);
-  });
-  api.db.on('smartUpdated', data => {
-    store.dispatch('setStore', data);
-  });
-
-  api.session.on('joinGame', data => {
-    localStorage.setItem('currentGame', data.gameId);
-    store.dispatch('setSimple', { sessionPlayerId: data.playerId });
-    router.push({ path: `/game/${data.gameId}` });
-  });
-  api.session.on('leaveGame', () => {
-    localStorage.removeItem('currentGame');
-    router.push({ path: `/` });
-  });
 
   document.addEventListener('click', async event => {
     if (event.target.classList.contains('active-event')) {

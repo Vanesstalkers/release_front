@@ -380,7 +380,7 @@ export default {
   async created() {
     // console.log('async created() {');
     this.$store.commit('setSimple', { gameId: this.gameId });
-    this.$store.commit('setSimple', { store: {} });
+    // this.$store.commit('setSimple', { store: {} });
   },
   mounted() {
     api.game
