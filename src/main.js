@@ -16,8 +16,11 @@ Vue.config.productionTip = false;
 window.vuex = store;
 
 const init = async () => {
+  if (!window.name) window.name = Date.now() + Math.random();
+
   router.beforeEach((to, from, next) => {
     const currentGame = localStorage.getItem('currentGame');
+    store.commit('setSimple', { store: {} });
     if (to.name === 'Game') {
       if (!currentGame) return next({ name: 'Home' });
     } else {
@@ -62,7 +65,7 @@ const init = async () => {
 
   localStorage.removeItem('currentGame');
   const token = localStorage.getItem('metarhia.session.token');
-  const session = await api.auth.initSession({ token, demo: true });
+  const session = await api.auth.initSession({ token, windowTabId: window.name, demo: true });
   const { token: sessionToken, userId } = session;
   if (token !== sessionToken) localStorage.setItem('metarhia.session.token', sessionToken);
   if (userId) {

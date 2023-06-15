@@ -127,7 +127,8 @@ export default {
   },
   methods: {
     update() {
-      let { text, img, active, pos = 'bottom-right', fullscreen = false } = this.helperData;
+      let { text, img, active, pos, fullscreen = false } = this.helperData;
+      if(!pos) pos = 'bottom-right'; // тут может быть null
 
       this.$set(this.helperClassMap, 'dialog-active', text || img ? true : false);
       this.$set(this.helperClassMap, 'fullscreen', fullscreen);
@@ -166,8 +167,6 @@ export default {
             }
           }
         });
-      } else {
-        // document.getElementById('app').removeAttribute('tutorial-active');
       }
     },
     async action({ action, step, tutorial, link }) {

@@ -131,7 +131,9 @@
             padding: '10px',
           }"
         >
-          <label class="user-list-label" :style="{ width: '100%' }">Игроки онлайн ({{ userList.length }})</label>
+          <label class="user-list-label" :style="{ width: '100%' }"
+            >Игроки онлайн ({{ userGuestsCount + userList.length }})</label
+          >
           <div class="user-list">
             <span v-if="userGuestsCount">Гость ({{ userGuestsCount }})</span>
             <span v-for="user in userList" :key="user.id">
@@ -457,10 +459,7 @@ export default {
       new Fancybox(images.map(path => ({ src: `/img/cards/${path}`, type: 'image' })));
     },
   },
-  async created() {
-    this.$store.commit('setSimple', { store: {} });
-    api.user.load({ self: true });
-  },
+  async created() {},
   async mounted() {
     // console.log('mounted');
 
