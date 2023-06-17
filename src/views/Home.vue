@@ -363,7 +363,10 @@ export default {
       return;
     },
     saveName() {
-      api.user.update({ name: this.userName });
+      api.action.call({
+        path: 'lib.user.api.update',
+        args: [{ name: this.userName }],
+      });
     },
     sendChatMsg() {
       this.disableSendMsgBtn = 5;
@@ -474,7 +477,7 @@ export default {
     resize();
     window.addEventListener('resize', resize);
 
-    await api.lobby.enter();
+    await api.action.call({ path: 'domain.lobby.api.enter' });
   },
   async beforeDestroy() {},
 };

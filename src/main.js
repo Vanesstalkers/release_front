@@ -43,9 +43,7 @@ const init = async () => {
   const metacom = Metacom.create(`${protocol}://${url}`);
   const { api } = metacom;
   window.api = api;
-
-  await metacom.load('auth', 'lobby', 'game', 'helper', 'db', 'session', 'user');
-
+  await metacom.load('auth', 'lobby', 'game', 'helper', 'db', 'session', 'user', 'action');
   api.db.on('updated', data => {
     store.dispatch('setData', data);
   });
@@ -67,6 +65,7 @@ const init = async () => {
   const token = localStorage.getItem('metarhia.session.token');
   const session = await api.auth.initSession({ token, windowTabId: window.name, demo: true });
   const { token: sessionToken, userId } = session;
+  if (!sessionToken) throw new Error('Ошибка инициализации сессии');
   if (token !== sessionToken) localStorage.setItem('metarhia.session.token', sessionToken);
   if (userId) {
     store.dispatch('setSimple', { currentUser: userId });
